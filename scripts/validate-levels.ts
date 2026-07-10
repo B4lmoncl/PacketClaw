@@ -18,6 +18,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   evaluate,
+  findRedundantPolicies,
   findShadowedPolicies,
   matchesExpectation,
   isValidIPv4,
@@ -291,6 +292,16 @@ function validateLevel(file: string) {
       if (level.task === 'find-shadowed') {
         if (findShadowedPolicies(level.network).length === 0) {
           fail(id, 'audit find-shadowed: keine shadowed Policy vorhanden');
+        }
+      } else if (level.task === 'remove-redundant') {
+        // Grüne Suite ist hier erlaubt — dann muss es aber beweisbar
+        // redundante Policies geben (sonst gäbe es nichts zu löschen).
+        const redundant = findRedundantPolicies(
+          level.network,
+          level.suite.map((t) => t.packet),
+        );
+        if (green && redundant.length === 0) {
+          fail(id, 'audit remove-redundant: keine redundante Policy gegen die Suite');
         }
       } else if (green) {
         fail(id, `${level.mode}: Suite ist schon grün — es gibt nichts zu reparieren`);

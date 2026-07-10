@@ -1,0 +1,360 @@
+{
+  "id": "ch8-l05",
+  "chapter": 8,
+  "index": 5,
+  "mode": "verdict",
+  "title": {
+    "de": "Lesen im Gestrüpp",
+    "en": "Reading the Thicket"
+  },
+  "briefing": {
+    "de": "Zwölf Regeln, gewachsen über Jahre. Keine Tricks außer dem einen: Du musst wirklich von oben nach unten lesen. Wie die Firewall.",
+    "en": "Twelve rules, grown over years. No tricks except the one: you really have to read top-down. Like the firewall."
+  },
+  "difficulty": 2,
+  "concepts": ["rule-reading"],
+  "targetSeconds": 90,
+  "timerSeconds": 60,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-in",
+        "name": "inside",
+        "members": ["if-p1", "if-v20"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      },
+      {
+        "id": "PARTNER_NET",
+        "name": "PARTNER_NET",
+        "type": "subnet",
+        "subnet": "203.0.113.0/28"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "INTERNAL",
+        "name": "INTERNAL",
+        "members": ["LAN_NET", "GUEST_NET"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "HTTP",
+        "name": "HTTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 80,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "id": "RDP",
+        "name": "RDP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 3389,
+            "to": 3389
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "publish-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["SRV_WEB01"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "partner-ssh",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["PARTNER_NET"],
+        "dstaddr": ["DMZ_NET"],
+        "service": ["SSH"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "alte-testregel",
+        "enabled": false,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTP"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "gast-web",
+        "enabled": true,
+        "srcintf": ["vlan20"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 5,
+        "name": "gast-dns",
+        "enabled": true,
+        "srcintf": ["vlan20"],
+        "dstintf": ["port2"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["SRV_DNS01"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 6,
+        "name": "lan-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS", "HTTP"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 7,
+        "name": "lan-dns",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["SRV_DNS01"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 8,
+        "name": "lan-dmz-admin",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["DMZ_NET"],
+        "service": ["SSH"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 9,
+        "name": "dmz-updates",
+        "enabled": true,
+        "srcintf": ["port2"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["DMZ_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 10,
+        "name": "gast-lan-block",
+        "enabled": true,
+        "srcintf": ["vlan20"],
+        "dstintf": ["port1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 11,
+        "name": "noc-rdp",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 12,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "vlan20",
+      "srcIp": "10.0.20.8",
+      "dstIp": "172.16.0.53",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.9",
+      "dstIp": "203.0.113.99",
+      "protocol": "tcp",
+      "dstPort": 3389
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "203.0.113.5",
+      "dstIp": "172.16.0.20",
+      "protocol": "tcp",
+      "dstPort": 22
+    }
+  ]
+}

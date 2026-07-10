@@ -1,0 +1,249 @@
+{
+  "id": "ch8-l04",
+  "chapter": 8,
+  "index": 4,
+  "mode": "audit",
+  "title": {
+    "de": "Unten blockt es sich schlecht",
+    "en": "Blocking From Below Doesn't Work"
+  },
+  "briefing": {
+    "de": "Die Gäste-Sperre existiert — nur eben UNTER der Zonen-Erlaubnis, die vlan20 mit abdeckt. Reihenfolge reparieren, nichts löschen.",
+    "en": "The guest block exists — just BELOW the zone allowance that also covers vlan20. Fix the order, delete nothing."
+  },
+  "ticket": {
+    "de": "'Gäste kommen trotz Sperre auf RDP nach draußen.' Die Sperre ist da. Sie steht nur… strategisch ungünstig. Schieb sie an die richtige Stelle.",
+    "en": "'Guests still reach external RDP despite the block.' The block is there. It just sits… strategically unfortunate. Move it to the right place."
+  },
+  "difficulty": 2,
+  "concepts": ["rule-order", "shadowing"],
+  "task": "fix-order",
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-in",
+        "name": "inside",
+        "members": ["if-p1", "if-v20"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      },
+      {
+        "id": "PARTNER_NET",
+        "name": "PARTNER_NET",
+        "type": "subnet",
+        "subnet": "203.0.113.0/28"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "INTERNAL",
+        "name": "INTERNAL",
+        "members": ["LAN_NET", "GUEST_NET"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "HTTP",
+        "name": "HTTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 80,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "id": "RDP",
+        "name": "RDP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 3389,
+            "to": 3389
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "inside-out",
+        "enabled": true,
+        "srcintf": ["inside"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["INTERNAL"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS", "DNS", "RDP"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "gast-rdp-sperre",
+        "enabled": true,
+        "srcintf": ["vlan20"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.99",
+        "protocol": "tcp",
+        "dstPort": 3389
+      },
+      "expect": "accept",
+      "note": "LAN darf RDP"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.5",
+        "dstIp": "203.0.113.99",
+        "protocol": "tcp",
+        "dstPort": 3389
+      },
+      "expect": "deny",
+      "note": "Gaeste nicht"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.5",
+        "dstIp": "203.0.113.99",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "id": "ch8-l06",
+  "chapter": 8,
+  "index": 6,
+  "mode": "audit",
+  "title": {
+    "de": "Die Gruppe schluckt das Mitglied",
+    "en": "The Group Swallows the Member"
+  },
+  "briefing": {
+    "de": "Subtiler als der Klassiker: Die frühere Regel nutzt die GRUPPE (INTERNAL), die spätere das Mitglied (GUEST_NET). Die Gruppe deckt das Mitglied vollständig ab.",
+    "en": "Subtler than the classic: the earlier rule uses the GROUP (INTERNAL), the later one the member (GUEST_NET). The group fully covers the member."
+  },
+  "ticket": {
+    "de": "'Die Gäste-DNS-Regel hat null Treffer im Log — seit Monaten.' Kein Wunder. Finde die Regel, die von einer Gruppen-Regel weiter oben komplett abgedeckt wird.",
+    "en": "'The guest DNS rule has zero hits in the log — for months.' No wonder. Find the rule fully covered by a group rule higher up."
+  },
+  "difficulty": 2,
+  "concepts": ["shadowing", "address-groups"],
+  "task": "find-shadowed",
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-in",
+        "name": "inside",
+        "members": ["if-p1", "if-v20"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      },
+      {
+        "id": "PARTNER_NET",
+        "name": "PARTNER_NET",
+        "type": "subnet",
+        "subnet": "203.0.113.0/28"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "INTERNAL",
+        "name": "INTERNAL",
+        "members": ["LAN_NET", "GUEST_NET"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "HTTP",
+        "name": "HTTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 80,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "id": "RDP",
+        "name": "RDP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 3389,
+            "to": 3389
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "publish-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["SRV_WEB01"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "internal-dns",
+        "enabled": true,
+        "srcintf": ["inside"],
+        "dstintf": ["port2"],
+        "srcaddr": ["INTERNAL"],
+        "dstaddr": ["SRV_DNS01"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "lan-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "gast-dns",
+        "enabled": true,
+        "srcintf": ["vlan20"],
+        "dstintf": ["port2"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["SRV_DNS01"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 5,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.5",
+        "dstIp": "172.16.0.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.9",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny"
+    }
+  ]
+}

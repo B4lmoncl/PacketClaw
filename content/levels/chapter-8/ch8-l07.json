@@ -1,0 +1,259 @@
+{
+  "id": "ch8-l07",
+  "chapter": 8,
+  "index": 7,
+  "mode": "audit",
+  "title": {
+    "de": "Quelle: irgendwer",
+    "en": "Source: Whoever"
+  },
+  "briefing": {
+    "de": "Diesmal ist die QUELLE zu breit: 'all' im srcaddr einer DMZ-Admin-Regel. Nur das LAN administriert die DMZ — sagt die Suite. Alles andere ist Angriffsfläche.",
+    "en": "This time the SOURCE is too broad: 'all' in the srcaddr of a DMZ admin rule. Only the LAN administers the DMZ — says the suite. Everything else is attack surface."
+  },
+  "ticket": {
+    "de": "Pentest: 'SSH in die DMZ ist aus JEDEM Netz möglich, inklusive Gast-WLAN.' Die Regel meint das LAN. Sag es ihr.",
+    "en": "Pentest: 'SSH into the DMZ is possible from ANY network, including guest Wi-Fi.' The rule means the LAN. Tell it so."
+  },
+  "difficulty": 3,
+  "concepts": ["harden-any", "least-privilege"],
+  "task": "harden-any",
+  "maxEdits": 2,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-in",
+        "name": "inside",
+        "members": ["if-p1", "if-v20"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      },
+      {
+        "id": "PARTNER_NET",
+        "name": "PARTNER_NET",
+        "type": "subnet",
+        "subnet": "203.0.113.0/28"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "INTERNAL",
+        "name": "INTERNAL",
+        "members": ["LAN_NET", "GUEST_NET"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "HTTP",
+        "name": "HTTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 80,
+            "to": 80
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "id": "RDP",
+        "name": "RDP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 3389,
+            "to": 3389
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "dmz-admin",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["DMZ_NET"],
+        "service": ["SSH"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "accept",
+      "note": "LAN-Admin bleibt"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.5",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny",
+      "note": "Gast-WLAN? Nein."
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.9",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.99",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    }
+  ]
+}
