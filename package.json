@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint . && prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "validate:levels": "tsx scripts/validate-levels.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
