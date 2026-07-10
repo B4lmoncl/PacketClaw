@@ -1,0 +1,165 @@
+{
+  "id": "ch5-l02",
+  "chapter": 5,
+  "index": 2,
+  "mode": "verdict",
+  "title": {
+    "de": "Die Rückregel ist ein Loch",
+    "en": "The Return Rule Is a Hole"
+  },
+  "briefing": {
+    "de": "Jemand hat eine 'Antwort-Regel' gebaut: wan1 → LAN, High Ports, ACCEPT. Aber Regeln matchen INITIATOREN — diese Regel erlaubt neue Verbindungen von draußen. Das Paket hier ist genau so ein Angriff.",
+    "en": "Someone built a 'reply rule': wan1 → LAN, high ports, ACCEPT. But rules match INITIATORS — this rule allows new connections from outside. This packet is exactly such an attack."
+  },
+  "difficulty": 1,
+  "concepts": ["return-rule-trap"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "PARTNER_GW",
+        "name": "PARTNER_GW",
+        "type": "host",
+        "host": "203.0.113.7"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "antworten-rein",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["LAN_NET"],
+        "service": ["HIGH_PORTS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.66",
+      "dstIp": "10.0.1.5",
+      "protocol": "tcp",
+      "dstPort": 4444
+    }
+  ]
+}

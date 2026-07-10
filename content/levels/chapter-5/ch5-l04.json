@@ -1,0 +1,208 @@
+{
+  "id": "ch5-l04",
+  "chapter": 5,
+  "index": 4,
+  "mode": "audit",
+  "title": {
+    "de": "Weg mit der Rückregel",
+    "en": "Kill the Return Rule"
+  },
+  "briefing": {
+    "de": "Stateless-ACL-Denke in einer stateful Firewall: Die 'Antwort-Regel' ist nicht nur überflüssig — sie ist ein Loch. Lösche sie, der Rest bleibt.",
+    "en": "Stateless ACL thinking in a stateful firewall: the 'reply rule' isn't just unnecessary — it's a hole. Delete it, keep the rest."
+  },
+  "ticket": {
+    "de": "Pentest-Finding P-03: 'Von extern sind beliebige High-Port-Verbindungen ins LAN möglich.' Der Kollege, der 2019 von Router-ACLs migriert ist, versteht die Aufregung nicht. Räum auf.",
+    "en": "Pentest finding P-03: 'Arbitrary high-port connections into the LAN are possible from outside.' The colleague who migrated from router ACLs in 2019 doesn't get the fuss. Clean up."
+  },
+  "difficulty": 2,
+  "concepts": ["return-rule-trap", "redundancy"],
+  "task": "remove-redundant",
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "PARTNER_GW",
+        "name": "PARTNER_GW",
+        "type": "host",
+        "host": "203.0.113.7"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-dns-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "antworten-rein",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["LAN_NET"],
+        "service": ["HIGH_PORTS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.66",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 4444
+      },
+      "expect": "deny",
+      "note": "kein Inbound"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "id": "ch5-l03",
+  "chapter": 5,
+  "index": 3,
+  "mode": "verdict",
+  "title": {
+    "de": "Von draußen ist von draußen",
+    "en": "Outside Is Outside"
+  },
+  "briefing": {
+    "de": "Sauberes Regelwerk, keine Rückregel. Der Client surft raus (Session!), aber ein NEUER Verbindungsaufbau von draußen findet keine Regel — Implicit Deny. Genau so soll es sein.",
+    "en": "Clean ruleset, no return rule. The client surfs out (session!), but a NEW connection attempt from outside finds no rule — implicit deny. Exactly as it should be."
+  },
+  "difficulty": 2,
+  "concepts": ["stateful-basics", "implicit-deny"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "PARTNER_GW",
+        "name": "PARTNER_GW",
+        "type": "host",
+        "host": "203.0.113.7"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "wan1",
+      "srcIp": "203.0.113.50",
+      "dstIp": "10.0.1.5",
+      "protocol": "tcp",
+      "dstPort": 50123
+    }
+  ]
+}

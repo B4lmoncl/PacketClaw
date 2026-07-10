@@ -1,0 +1,159 @@
+{
+  "id": "ch5-l06",
+  "chapter": 5,
+  "index": 6,
+  "mode": "verdict",
+  "title": {
+    "de": "Der Server ruft nach Hause",
+    "en": "The Server Phones Home"
+  },
+  "briefing": {
+    "de": "Auch Server sind mal Initiator: Updates ziehen heißt DMZ → Internet. Die Gegenrichtung (Internet → DMZ) ist eine ANDERE Verbindung und braucht ihre eigene Entscheidung.",
+    "en": "Servers initiate too: pulling updates means DMZ → internet. The reverse direction (internet → DMZ) is a DIFFERENT connection and needs its own decision."
+  },
+  "difficulty": 2,
+  "concepts": ["initiator-direction"],
+  "targetSeconds": 55,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "PARTNER_GW",
+        "name": "PARTNER_GW",
+        "type": "host",
+        "host": "203.0.113.7"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "dmz-updates-out",
+        "enabled": true,
+        "srcintf": ["port2"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["DMZ_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port2",
+      "srcIp": "172.16.0.10",
+      "dstIp": "203.0.113.50",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.66",
+      "dstIp": "172.16.0.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "timerSeconds": 35
+}

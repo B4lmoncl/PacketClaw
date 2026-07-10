@@ -1,0 +1,171 @@
+{
+  "id": "ch5-l05",
+  "chapter": 5,
+  "index": 5,
+  "mode": "architect",
+  "title": {
+    "de": "Eine Richtung reicht",
+    "en": "One Direction Is Enough"
+  },
+  "briefing": {
+    "de": "Bau das Ticket — und widersteh dem Reflex, eine Rückregel zu ergänzen. Die Suite testet auch, ob du von draußen dichtgemacht hast.",
+    "en": "Build the ticket — and resist the reflex to add a return rule. The suite also tests whether you're closed from outside."
+  },
+  "ticket": {
+    "de": "LAN-Clients brauchen HTTPS und DNS ins Internet. Eingehend bleibt ALLES zu. Wer eine 'Antwort-Regel' baut, schuldet dem Team Kuchen. — Security-Team",
+    "en": "LAN clients need HTTPS and DNS to the internet. Inbound EVERYTHING stays closed. Anyone building a 'reply rule' owes the team cake. — Security team"
+  },
+  "difficulty": 2,
+  "concepts": ["stateful-basics", "least-privilege"],
+  "referencePolicyCount": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "PARTNER_GW",
+        "name": "PARTNER_GW",
+        "type": "host",
+        "host": "203.0.113.7"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.66",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 50000
+      },
+      "expect": "deny",
+      "note": "Rueckregel? Kuchen."
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.66",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 80
+      },
+      "expect": "deny",
+      "note": "nur HTTPS+DNS"
+    }
+  ]
+}
