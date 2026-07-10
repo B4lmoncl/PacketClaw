@@ -1,0 +1,93 @@
+{
+  "app": {
+    "title": "PacketClaw",
+    "tagline": "Firewall policy puzzles for network people"
+  },
+  "nav": {
+    "campaign": "Campaign",
+    "daily": "Daily Run",
+    "sandbox": "Sandbox",
+    "back": "Back",
+    "chapter": "Chapter {{number}}",
+    "comingSoon": "soon"
+  },
+  "level": {
+    "boss": "Boss",
+    "locked": "Locked",
+    "level": "Level {{index}}",
+    "targetTime": "Target time {{seconds}} s",
+    "packetOf": "Packet {{current}} / {{total}}",
+    "start": "Start"
+  },
+  "verdict": {
+    "question1": "What happens to this packet?",
+    "question2": "Which policy matches?",
+    "accept": "ACCEPT",
+    "deny": "DENY",
+    "pickPolicy": "Tap the row of the matching policy — row 0 is the implicit deny.",
+    "confirm": "Check answer",
+    "correct": "Correct!",
+    "wrong": "Not quite.",
+    "retry": "Try again",
+    "next": "Next",
+    "skipReplay": "Skip replay",
+    "replay": "View trace",
+    "yourAnswer": "Your answer",
+    "engineSays": "Engine result"
+  },
+  "packet": {
+    "title": "Incoming packet",
+    "from": "from",
+    "to": "to",
+    "via": "Ingress",
+    "time": "Time"
+  },
+  "policyTable": {
+    "id": "ID",
+    "name": "Name",
+    "srcintf": "Src intf",
+    "dstintf": "Dst intf",
+    "srcaddr": "Source",
+    "dstaddr": "Destination",
+    "service": "Service",
+    "schedule": "Schedule",
+    "action": "Action",
+    "nat": "NAT",
+    "implicitDeny": "Implicit Deny",
+    "disabled": "disabled"
+  },
+  "debrief": {
+    "title": "Debrief",
+    "matched": "Policy {{id}} matches — {{action}}.",
+    "implicitDeny": "No policy matches — implicit deny (row 0).",
+    "noRoute": "No route to destination — the packet is dropped (policy 0).",
+    "skippedDisabled": "Policy {{id}}: disabled — skipped.",
+    "failedAt": "Policy {{id}}: fails on {{field}}.",
+    "dnat": "DNAT via {{vip}} → {{target}}",
+    "snat": "SNAT to egress interface IP",
+    "fields": {
+      "srcintf": "src interface",
+      "dstintf": "dst interface (routing!)",
+      "srcaddr": "source address",
+      "dstaddr": "destination address",
+      "service": "service",
+      "schedule": "schedule"
+    }
+  },
+  "score": {
+    "score": "Score",
+    "combo": "Combo",
+    "xp": "XP",
+    "stars": "Stars",
+    "levelDone": "Level complete!",
+    "points": "{{points}} points",
+    "noMistakes": "no failed attempts",
+    "underTarget": "under target time",
+    "toChapter": "Back to level select",
+    "again": "Play again"
+  },
+  "network": {
+    "diagram": "Network overview",
+    "zone": "Zone"
+  }
+}

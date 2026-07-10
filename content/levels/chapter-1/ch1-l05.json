@@ -1,0 +1,78 @@
+{
+  "id": "ch1-l05",
+  "chapter": 1,
+  "index": 5,
+  "mode": "verdict",
+  "title": { "de": "Der stille Schalter", "en": "The Silent Switch" },
+  "briefing": {
+    "de": "Ausgegraute Regeln sind Möbel, keine Firewall-Logik. Eine deaktivierte Policy wird übersprungen, als gäbe es sie nicht — egal wie dringend sie aussieht.",
+    "en": "Greyed-out rules are furniture, not firewall logic. A disabled policy is skipped as if it didn't exist — no matter how urgent it looks."
+  },
+  "difficulty": 2,
+  "concepts": ["disabled-policy"],
+  "targetSeconds": 40,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 4,
+        "name": "emergency-block-web",
+        "enabled": false,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 5,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.30",
+      "dstIp": "198.51.100.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

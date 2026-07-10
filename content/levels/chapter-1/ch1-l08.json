@@ -1,0 +1,79 @@
+{
+  "id": "ch1-l08",
+  "chapter": 1,
+  "index": 8,
+  "mode": "verdict",
+  "title": { "de": "Abgeschaltet und vergessen", "en": "Disabled and Forgotten" },
+  "briefing": {
+    "de": "Ein Klassiker aus gewachsenen Regelwerken: Die Regel, auf die alle zeigen, ist deaktiviert. Und was dann? Richtig — Zeile 0 wartet schon.",
+    "en": "A classic from grown rulesets: the rule everyone points at is disabled. And then what? Right — row 0 is already waiting."
+  },
+  "difficulty": 3,
+  "concepts": ["disabled-policy", "implicit-deny"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      },
+      { "id": "DNS", "name": "DNS", "protocol": "udp", "dstPorts": [{ "from": 53, "to": 53 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 31,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 32,
+        "name": "lan-dns-out",
+        "enabled": false,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.60",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "id": "ch1-l06",
+  "chapter": 1,
+  "index": 6,
+  "mode": "verdict",
+  "title": { "de": "Fünf Regeln, ein Gewinner", "en": "Five Rules, One Winner" },
+  "briefing": {
+    "de": "Die Tabelle wächst. Nicht jede Regel, die nach Treffer aussieht, ist einer — prüfe Feld für Feld: Interface, Adresse, Service. Erst wenn ALLES passt, matcht die Regel.",
+    "en": "The table grows. Not every rule that looks like a hit is one — check field by field: interface, address, service. Only when EVERYTHING fits does the rule match."
+  },
+  "difficulty": 2,
+  "concepts": ["first-match", "distractors"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" },
+      { "id": "MKT_NET", "name": "MKT_NET", "type": "subnet", "subnet": "10.0.2.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      },
+      { "id": "DNS", "name": "DNS", "protocol": "udp", "dstPorts": [{ "from": 53, "to": 53 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "10.0.2.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 11,
+        "name": "mkt-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["MKT_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 12,
+        "name": "lan-dns-block",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 13,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 14,
+        "name": "catch-all-deny",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.7",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

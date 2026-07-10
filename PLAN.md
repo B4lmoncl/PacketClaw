@@ -90,8 +90,18 @@ Sound: selbstgenerierte Web-Audio-Blips, Mute prominent, kein Autoplay. Touch-fi
 ## 7. Phasen & Status
 
 - [x] Phase 0 — Plan (dieses Dokument, REJECTED.md, Scaffold)
-- [ ] Phase 1 — Engine + Analysefunktionen + Tests (Gate: grün, >95 % Branch-Coverage)
-- [ ] Phase 2 — Verdict spielbar (Kapitel 1, Packet Descent, Debrief, Save; Gate: Desktop + 390px, Screenshot-Selbstkritik)
+- [x] Phase 1 — Engine + Analysefunktionen + Tests (133 Tests grün, 96,6 % Branch-Coverage)
+- [x] Phase 2 — Verdict spielbar (Kapitel 1 komplett, Packet Descent, Debrief, Save; Desktop + 390px verifiziert)
+
+### Screenshot-Selbstkritik Phase 2 (2026-07-10)
+
+Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, Policy-Auswahl, Debrief.
+
+- ✅ Tokens sitzen: Nachtblau/Koralle/Trace-Grün, Mono-Daten mit tabular-nums, 1-px-Linien, Chips statt Schatten.
+- ✅ 390px einhändig spielbar: große ACCEPT/DENY-Buttons unten (safe-area), Policy-Wahl per Zeilen-Tap.
+- ✅ Debrief generiert aus Trace (Match-Begründung + SNAT-Hinweis); Chip sitzt sichtbar in der gematchten Zeile.
+- 🔧 Behoben: Emoji im Netzdiagramm (🦞) renderte im Headless-Container nicht → ersetzt durch SVG-Zangen + „FW"-Label (font-unabhängig). ⚔ beim Boss ebenso → ★.
+- 📝 Offen für Phase 4: Claw-Snip-Animation beim DENY ist aktuell nur Row-Highlight (Partikel/Konfetti + Screen-Shake folgen mit Sound zusammen); Descent-Chip könnte beim ACCEPT durchs Egress „geschleudert" werden (Partikelspur).
 - [ ] Phase 3 — Volle Breite (alle Modi, Kapitel 2–8, Daily, Sandbox, Validator in CI)
 - [ ] Phase 4 — Gamification & Polish (XP/Sterne/Ränge/Achievements/Streak, Sound, PWA, i18n en, Onboarding, Settings)
 - [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)

@@ -1,0 +1,85 @@
+{
+  "id": "ch1-l09",
+  "chapter": 1,
+  "index": 9,
+  "mode": "verdict",
+  "title": { "de": "Off-by-One", "en": "Off by One" },
+  "briefing": {
+    "de": "LAN_NET ist hier ein /25 — also 10.0.1.0 bis 10.0.1.127. Zwei Pakete, beide sehen harmlos aus. Eines liegt drin, eines knapp daneben. Subnetzgrenzen verzeihen nichts.",
+    "en": "LAN_NET here is a /25 — that's 10.0.1.0 through 10.0.1.127. Two packets, both look harmless. One is inside, one just barely out. Subnet boundaries forgive nothing."
+  },
+  "difficulty": 3,
+  "concepts": ["subnet-boundaries", "first-match"],
+  "targetSeconds": 60,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/25" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 41,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 42,
+        "name": "default-deny-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.127",
+      "dstIp": "203.0.113.5",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.130",
+      "dstIp": "203.0.113.5",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

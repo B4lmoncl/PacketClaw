@@ -11,7 +11,51 @@ body {
   color: #e6edf7;
 }
 
+/* QuestHall-Anleihe: dezenter, langsam wandernder violetter Gradient */
+.pc-bg-gradient {
+  background: linear-gradient(180deg, #0b1220 0%, #151228 50%, #0b1220 100%);
+  background-size: 100% 200%;
+  animation: pc-gradient-shift 24s ease infinite;
+}
+
+@keyframes pc-gradient-shift {
+  0%,
+  100% {
+    background-position: 50% 0%;
+  }
+  50% {
+    background-position: 50% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-bg-gradient {
+    animation: none;
+  }
+}
+
 /* Datenzellen: Zahlen immer tabular */
 .font-mono {
   font-variant-numeric: tabular-nums;
+}
+
+/* Offscreen-Karten erst beim Scrollen rendern (QuestHall-Idiom) */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 110px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 90, 60, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 90, 60, 0.35);
 }

@@ -1,0 +1,73 @@
+{
+  "id": "ch1-l04",
+  "chapter": 1,
+  "index": 4,
+  "mode": "verdict",
+  "title": { "de": "Der Riegel davor", "en": "The Bolt Up Front" },
+  "briefing": {
+    "de": "Diesmal richtig herum: Deny zuerst, Erlaubnis danach. Genau so baut man Ausnahmen — die spezifische Sperre muss VOR der breiten Erlaubnis stehen.",
+    "en": "This time the right way around: deny first, allow after. That's how you build exceptions — the specific block must sit BEFORE the broad allow."
+  },
+  "difficulty": 2,
+  "concepts": ["rule-order", "deny-before-accept"],
+  "targetSeconds": 40,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      { "id": "RDP", "name": "RDP", "protocol": "tcp", "dstPorts": [{ "from": 3389, "to": 3389 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 3,
+        "name": "block-rdp-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 7,
+        "name": "lan-allow-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.13",
+      "dstIp": "203.0.113.77",
+      "protocol": "tcp",
+      "dstPort": 3389
+    }
+  ]
+}

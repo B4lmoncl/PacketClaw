@@ -1,0 +1,166 @@
+{
+  "id": "ch1-l10",
+  "chapter": 1,
+  "index": 10,
+  "mode": "verdict",
+  "title": { "de": "Boss: Feierabend? Nicht heute.", "en": "Boss: Quitting Time? Not Today." },
+  "briefing": {
+    "de": "17:58 Uhr. Der Praktikant hat 'nur kurz was getestet' und die Policy-Tabelle sieht entsprechend aus. Fünf Pakete stehen in der Queue. Arbeite sie ab — von oben nach unten, wie die Firewall.",
+    "en": "5:58 pm. The intern 'just quickly tested something' and the policy table looks accordingly. Five packets sit in the queue. Work through them — top-down, like the firewall."
+  },
+  "difficulty": 3,
+  "concepts": ["first-match", "implicit-deny", "disabled-policy", "rule-order"],
+  "targetSeconds": 60,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" },
+      { "id": "ADMIN_PC", "name": "ADMIN_PC", "type": "host", "host": "10.0.1.10" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      },
+      { "id": "HTTP", "name": "HTTP", "protocol": "tcp", "dstPorts": [{ "from": 80, "to": 80 }] },
+      { "id": "DNS", "name": "DNS", "protocol": "udp", "dstPorts": [{ "from": 53, "to": 53 }] },
+      { "id": "RDP", "name": "RDP", "protocol": "tcp", "dstPorts": [{ "from": 3389, "to": 3389 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "admin-all-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["ADMIN_PC"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "block-rdp-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 3,
+        "name": "lan-https-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "lan-dns-out",
+        "enabled": false,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 5,
+        "name": "lan-http-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTP"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 6,
+        "name": "lan-default-deny",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.10",
+      "dstIp": "203.0.113.40",
+      "protocol": "tcp",
+      "dstPort": 3389
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.50",
+      "dstIp": "203.0.113.40",
+      "protocol": "tcp",
+      "dstPort": 3389
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.50",
+      "dstIp": "198.51.100.3",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.50",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.9",
+      "dstIp": "10.0.1.50",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

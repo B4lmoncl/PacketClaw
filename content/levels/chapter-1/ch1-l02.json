@@ -1,0 +1,80 @@
+{
+  "id": "ch1-l02",
+  "chapter": 1,
+  "index": 2,
+  "mode": "verdict",
+  "title": { "de": "Das unsichtbare Netz", "en": "The Invisible Net" },
+  "briefing": {
+    "de": "Ganz unten in jeder Policy-Tabelle wartet Zeile 0: das Implicit Deny. Was keine Regel explizit erlaubt, fällt durch — und ist weg. Kein Fehler, kein Bug. Design.",
+    "en": "At the very bottom of every policy table sits row 0: the implicit deny. Anything no rule explicitly allows falls through — and is gone. Not an error, not a bug. Design."
+  },
+  "difficulty": 1,
+  "concepts": ["implicit-deny"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      },
+      { "id": "DNS", "name": "DNS", "protocol": "udp", "dstPorts": [{ "from": 53, "to": 53 }] },
+      { "id": "SMTP", "name": "SMTP", "protocol": "tcp", "dstPorts": [{ "from": 25, "to": 25 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-dns-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.42",
+      "dstIp": "198.51.100.25",
+      "protocol": "tcp",
+      "dstPort": 25
+    }
+  ]
+}

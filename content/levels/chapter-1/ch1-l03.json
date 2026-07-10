@@ -1,0 +1,73 @@
+{
+  "id": "ch1-l03",
+  "chapter": 1,
+  "index": 3,
+  "mode": "verdict",
+  "title": { "de": "Reihenfolge schlägt Spezifität", "en": "Order Beats Specificity" },
+  "briefing": {
+    "de": "Jemand hat eine Deny-Regel für RDP gebaut. Sauber. Nur leider steht darüber eine Regel, die alles erlaubt. Die Firewall liest von oben — nicht nach Wichtigkeit.",
+    "en": "Someone built a deny rule for RDP. Clean work. Unfortunately there's a rule above it that allows everything. The firewall reads top-down — not by importance."
+  },
+  "difficulty": 1,
+  "concepts": ["first-match", "rule-order"],
+  "targetSeconds": 40,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" }
+    ],
+    "addressGroups": [],
+    "services": [
+      { "id": "RDP", "name": "RDP", "protocol": "tcp", "dstPorts": [{ "from": 3389, "to": 3389 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 7,
+        "name": "temp-allow-all",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "block-rdp-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.13",
+      "dstIp": "203.0.113.77",
+      "protocol": "tcp",
+      "dstPort": 3389
+    }
+  ]
+}

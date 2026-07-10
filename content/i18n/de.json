@@ -1,0 +1,93 @@
+{
+  "app": {
+    "title": "PacketClaw",
+    "tagline": "Firewall-Policy-Puzzles für Netzwerk-Menschen"
+  },
+  "nav": {
+    "campaign": "Kampagne",
+    "daily": "Daily Run",
+    "sandbox": "Sandbox",
+    "back": "Zurück",
+    "chapter": "Kapitel {{number}}",
+    "comingSoon": "bald"
+  },
+  "level": {
+    "boss": "Boss",
+    "locked": "Gesperrt",
+    "level": "Level {{index}}",
+    "targetTime": "Zielzeit {{seconds}} s",
+    "packetOf": "Paket {{current}} / {{total}}",
+    "start": "Start"
+  },
+  "verdict": {
+    "question1": "Was passiert mit diesem Paket?",
+    "question2": "Welche Policy matcht?",
+    "accept": "ACCEPT",
+    "deny": "DENY",
+    "pickPolicy": "Tippe die Zeile der matchenden Policy an — Zeile 0 ist das Implicit Deny.",
+    "confirm": "Antwort prüfen",
+    "correct": "Richtig!",
+    "wrong": "Daneben.",
+    "retry": "Nochmal versuchen",
+    "next": "Weiter",
+    "skipReplay": "Replay überspringen",
+    "replay": "Trace ansehen",
+    "yourAnswer": "Deine Antwort",
+    "engineSays": "Engine-Ergebnis"
+  },
+  "packet": {
+    "title": "Eingehendes Paket",
+    "from": "von",
+    "to": "nach",
+    "via": "Ingress",
+    "time": "Zeit"
+  },
+  "policyTable": {
+    "id": "ID",
+    "name": "Name",
+    "srcintf": "Src-Intf",
+    "dstintf": "Dst-Intf",
+    "srcaddr": "Source",
+    "dstaddr": "Destination",
+    "service": "Service",
+    "schedule": "Schedule",
+    "action": "Aktion",
+    "nat": "NAT",
+    "implicitDeny": "Implicit Deny",
+    "disabled": "deaktiviert"
+  },
+  "debrief": {
+    "title": "Debrief",
+    "matched": "Policy {{id}} matcht — {{action}}.",
+    "implicitDeny": "Keine Policy matcht — Implicit Deny (Zeile 0).",
+    "noRoute": "Keine Route zum Ziel — das Paket wird verworfen (Policy 0).",
+    "skippedDisabled": "Policy {{id}}: deaktiviert — übersprungen.",
+    "failedAt": "Policy {{id}}: scheitert an {{field}}.",
+    "dnat": "DNAT via {{vip}} → {{target}}",
+    "snat": "SNAT auf Egress-Interface-IP",
+    "fields": {
+      "srcintf": "Src-Interface",
+      "dstintf": "Dst-Interface (Routing!)",
+      "srcaddr": "Source-Adresse",
+      "dstaddr": "Destination-Adresse",
+      "service": "Service",
+      "schedule": "Schedule"
+    }
+  },
+  "score": {
+    "score": "Score",
+    "combo": "Combo",
+    "xp": "XP",
+    "stars": "Sterne",
+    "levelDone": "Level geschafft!",
+    "points": "{{points}} Punkte",
+    "noMistakes": "ohne Fehlversuch",
+    "underTarget": "unter Zielzeit",
+    "toChapter": "Zur Levelauswahl",
+    "again": "Nochmal spielen"
+  },
+  "network": {
+    "diagram": "Netzübersicht",
+    "zone": "Zone"
+  }
+}

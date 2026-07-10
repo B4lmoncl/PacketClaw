@@ -1,0 +1,74 @@
+{
+  "id": "ch1-l07",
+  "chapter": 1,
+  "index": 7,
+  "mode": "verdict",
+  "title": { "de": "Fast Zwillinge", "en": "Almost Twins" },
+  "briefing": {
+    "de": "Zwei Regeln, die sich zum Verwechseln ähnlich sehen. Der Unterschied steckt in der Source-Adresse: ein einzelner Host gegen ein ganzes Subnetz. Genau hinsehen.",
+    "en": "Two rules that look confusingly similar. The difference hides in the source address: a single host versus a whole subnet. Look closely."
+  },
+  "difficulty": 3,
+  "concepts": ["distractors", "host-vs-subnet"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" },
+      { "id": "ADMIN_PC", "name": "ADMIN_PC", "type": "host", "host": "10.0.1.10" }
+    ],
+    "addressGroups": [],
+    "services": [
+      { "id": "SSH", "name": "SSH", "protocol": "tcp", "dstPorts": [{ "from": 22, "to": 22 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": [
+      {
+        "id": 21,
+        "name": "admin-ssh-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["ADMIN_PC"],
+        "dstaddr": ["all"],
+        "service": ["SSH"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 22,
+        "name": "lan-ssh-block",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["SSH"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.11",
+      "dstIp": "203.0.113.99",
+      "protocol": "tcp",
+      "dstPort": 22
+    }
+  ]
+}
