@@ -1,0 +1,136 @@
+{
+  "id": "ch3-l09",
+  "chapter": 3,
+  "index": 9,
+  "mode": "verdict",
+  "title": {
+    "de": "Der portlose Türsteher",
+    "en": "The Portless Doorman"
+  },
+  "briefing": {
+    "de": "Gemein: TCP_ANY hat KEINE dstPorts — ein tcp-Service ohne Portliste matcht jeden Port. Und der PING-Service matcht nur Typ 8, nicht die Antwort (Typ 0).",
+    "en": "Nasty: TCP_ANY has NO dstPorts — a tcp service without a port list matches every port. And the PING service matches only type 8, not the reply (type 0)."
+  },
+  "difficulty": 3,
+  "concepts": ["portless-service", "icmp"],
+  "targetSeconds": 55,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "TCP_ANY",
+        "name": "TCP_ANY",
+        "protocol": "tcp"
+      },
+      {
+        "id": "PING",
+        "name": "PING",
+        "protocol": "icmp",
+        "icmpType": 8
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "ping-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["PING"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "tcp-any-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["TCP_ANY"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 31337
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "icmp",
+      "icmpType": 0
+    }
+  ],
+  "timerSeconds": 25
+}

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { evaluate, type PolicyAction } from '../../engine';
 import type { VerdictLevel } from '../../game/levels';
@@ -34,6 +34,8 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
   const [lastCorrect, setLastCorrect] = useState(false);
   const [allUnderTarget, setAllUnderTarget] = useState(true);
   const [finalStars, setFinalStars] = useState<0 | 1 | 2 | 3>(0);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(level.timerSeconds ?? null);
+  const [timedOut, setTimedOut] = useState(false);
   const questionStartedAt = useRef(Date.now());
 
   const packet = level.packets[packetIndex];
@@ -44,6 +46,31 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
 
   const onDescentDone = useCallback(() => setPhase('debrief'), []);
   const descent = useDescent(verdict, reducedMotion, onDescentDone);
+
+  // Countdown (ab Kapitel 3): Ablauf zaehlt als Fehlversuch
+  useEffect(() => {
+    if (!level.timerSeconds || phase !== 'answer') return;
+    const timer = window.setInterval(() => {
+      const remaining = Math.max(
+        0,
+        level.timerSeconds! - Math.floor((Date.now() - questionStartedAt.current) / 1000),
+      );
+      setSecondsLeft(remaining);
+      if (remaining === 0) {
+        window.clearInterval(timer);
+        setWrongAttempts((w) => w + 1);
+        setCombo(0);
+        setAllUnderTarget(false);
+        setTimedOut(true);
+        setUserAction(null);
+        setUserPolicyId(null);
+        questionStartedAt.current = Date.now();
+        setSecondsLeft(level.timerSeconds ?? null);
+      }
+    }, 250);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, packetIndex, level.timerSeconds]);
 
   if (!packet || !verdict) return null;
 
@@ -56,8 +83,14 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
     const elapsedSeconds = (Date.now() - questionStartedAt.current) / 1000;
     if (elapsedSeconds > level.targetSeconds) setAllUnderTarget(false);
 
+    setTimedOut(false);
     if (correct) {
-      const { points } = scoreVerdictAnswer({ correct, streakBefore: combo });
+      const { points } = scoreVerdictAnswer({
+        correct,
+        streakBefore: combo,
+        secondsLeft: level.timerSeconds ? Math.max(0, secondsLeft ?? 0) : undefined,
+        timerSeconds: level.timerSeconds,
+      });
       setTotalScore((s) => s + points);
       setCombo(combo + 1);
     } else {
@@ -95,6 +128,7 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
     setUserPolicyId(null);
     setPhase('answer');
     questionStartedAt.current = Date.now();
+    setSecondsLeft(level.timerSeconds ?? null);
   }
 
   return (
@@ -133,6 +167,22 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
             onSelect={(id) => submit(id)}
           />
 
+          {level.timerSeconds && phase === 'answer' && secondsLeft !== null && (
+            <div
+              className={`self-center rounded-panel border px-4 py-1 font-mono text-lg font-bold tabular-nums ${
+                secondsLeft <= 5 ? 'border-deny text-deny' : 'border-warn/50 text-warn'
+              }`}
+              role="timer"
+              aria-live="off"
+            >
+              {secondsLeft}s
+            </div>
+          )}
+          {timedOut && phase === 'answer' && (
+            <p className="text-center text-sm text-deny" aria-live="polite">
+              {t('verdict.timeout')}
+            </p>
+          )}
           {phase === 'answer' && userAction === null && (
             <p className="text-center text-sm text-dim">{t('verdict.question1')}</p>
           )}

@@ -1,0 +1,135 @@
+{
+  "id": "ch3-l05",
+  "chapter": 3,
+  "index": 5,
+  "mode": "architect",
+  "title": {
+    "de": "Nur Mail darf raus",
+    "en": "Only Mail Gets Out"
+  },
+  "briefing": {
+    "de": "Bau die Services exakt: Submission ist tcp/587, IMAPS tcp/993. Wer hier ALL schreibt, bekommt den Auditor.",
+    "en": "Build the services precisely: submission is tcp/587, IMAPS tcp/993. Write ALL here and you get the auditor."
+  },
+  "ticket": {
+    "de": "Der neue Mail-Client braucht Submission (tcp/587) und IMAPS (tcp/993) ins Internet — für alle LAN-Clients. Web bleibt weiterhin ZU, das macht der Proxy. — IT-Leitung",
+    "en": "The new mail client needs submission (tcp/587) and IMAPS (tcp/993) to the internet — for all LAN clients. Web stays CLOSED, the proxy handles that. — IT management"
+  },
+  "difficulty": 2,
+  "concepts": ["services", "least-privilege"],
+  "referencePolicyCount": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "SUBMISSION",
+        "name": "SUBMISSION",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 587,
+            "to": 587
+          }
+        ]
+      },
+      {
+        "id": "IMAPS",
+        "name": "IMAPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 993,
+            "to": 993
+          }
+        ]
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 587
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 993
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny",
+      "note": "Web macht der Proxy"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 25
+      },
+      "expect": "deny",
+      "note": "SMTP/25 direkt? Niemals."
+    }
+  ]
+}

@@ -33,7 +33,8 @@
     "skipReplay": "Skip replay",
     "replay": "View trace",
     "yourAnswer": "Your answer",
-    "engineSays": "Engine result"
+    "engineSays": "Engine result",
+    "timeout": "Time ran out — counts as a failed attempt. Again!"
   },
   "packet": {
     "title": "Incoming packet",

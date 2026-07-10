@@ -1,0 +1,126 @@
+{
+  "id": "ch3-l07",
+  "chapter": 3,
+  "index": 7,
+  "mode": "verdict",
+  "title": {
+    "de": "Zwei Ranges, ein Service",
+    "en": "Two Ranges, One Service"
+  },
+  "briefing": {
+    "de": "SIP_RTP bündelt udp/5060 UND udp/10000–20000 in einem Objekt. Innerhalb eines Service gilt ODER über die Ranges — 9999 liegt in keiner.",
+    "en": "SIP_RTP bundles udp/5060 AND udp/10000–20000 in one object. Ranges within a service are OR'd — 9999 sits in neither."
+  },
+  "difficulty": 3,
+  "concepts": ["multi-ranges"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "SIP_RTP",
+        "name": "SIP_RTP",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 5060,
+            "to": 5060
+          },
+          {
+            "from": 10000,
+            "to": 20000
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "voip-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["SIP_RTP"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "udp",
+      "dstPort": 9999
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "udp",
+      "dstPort": 10000
+    }
+  ],
+  "timerSeconds": 25
+}

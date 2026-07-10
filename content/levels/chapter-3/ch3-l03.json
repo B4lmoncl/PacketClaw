@@ -1,0 +1,121 @@
+{
+  "id": "ch3-l03",
+  "chapter": 3,
+  "index": 3,
+  "mode": "verdict",
+  "title": {
+    "de": "Ping hat keinen Port",
+    "en": "Ping Has No Port"
+  },
+  "briefing": {
+    "de": "ICMP kennt keine Ports, nur Typen. Echo Request ist Typ 8. Ein Service mit icmpType 8 matcht genau das — und sonst nichts.",
+    "en": "ICMP has no ports, only types. Echo request is type 8. A service with icmpType 8 matches exactly that — and nothing else."
+  },
+  "difficulty": 1,
+  "concepts": ["icmp"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "PING",
+        "name": "PING",
+        "protocol": "icmp",
+        "icmpType": 8
+      },
+      {
+        "id": "ICMP_ANY",
+        "name": "ICMP_ANY",
+        "protocol": "icmp"
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-ping-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["PING"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "icmp",
+      "icmpType": 8
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "icmp",
+      "icmpType": 3
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "id": "ch3-l02",
+  "chapter": 3,
+  "index": 2,
+  "mode": "verdict",
+  "title": {
+    "de": "Die Grenze bei 1024",
+    "en": "The 1024 Boundary"
+  },
+  "briefing": {
+    "de": "Portranges sind inklusiv: 1024–65535 beginnt exakt bei 1024. Port 1023 steht draußen vor der Tür.",
+    "en": "Port ranges are inclusive: 1024–65535 starts exactly at 1024. Port 1023 waits outside."
+  },
+  "difficulty": 1,
+  "concepts": ["port-ranges"],
+  "targetSeconds": 50,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-high-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HIGH_PORTS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 1023
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 1024
+    }
+  ]
+}

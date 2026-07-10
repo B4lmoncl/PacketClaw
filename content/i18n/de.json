@@ -33,7 +33,8 @@
     "skipReplay": "Replay überspringen",
     "replay": "Trace ansehen",
     "yourAnswer": "Deine Antwort",
-    "engineSays": "Engine-Ergebnis"
+    "engineSays": "Engine-Ergebnis",
+    "timeout": "Zeit abgelaufen — zählt als Fehlversuch. Nochmal!"
   },
   "packet": {
     "title": "Eingehendes Paket",

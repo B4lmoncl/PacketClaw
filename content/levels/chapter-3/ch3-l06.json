@@ -1,0 +1,115 @@
+{
+  "id": "ch3-l06",
+  "chapter": 3,
+  "index": 6,
+  "mode": "verdict",
+  "title": {
+    "de": "ALL frisst alles",
+    "en": "ALL Eats Everything"
+  },
+  "briefing": {
+    "de": "Die ALL-Falle: Eine frühe Accept-Regel mit Service ALL macht jede spätere Service-Sperre zur Deko. First Match, du erinnerst dich.",
+    "en": "The ALL trap: an early accept rule with service ALL turns every later service block into decoration. First match, remember?"
+  },
+  "difficulty": 2,
+  "concepts": ["all-trap", "rule-order"],
+  "targetSeconds": 40,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "HIGH_PORTS",
+        "name": "HIGH_PORTS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 1024,
+            "to": 65535
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-out-all",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "block-highports",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HIGH_PORTS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 6667
+    }
+  ],
+  "timerSeconds": 30
+}

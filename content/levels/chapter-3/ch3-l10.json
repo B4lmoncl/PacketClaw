@@ -1,0 +1,214 @@
+{
+  "id": "ch3-l10",
+  "chapter": 3,
+  "index": 10,
+  "mode": "incident",
+  "title": {
+    "de": "Boss: DNS geht. Meistens.",
+    "en": "Boss: DNS Works. Mostly."
+  },
+  "briefing": {
+    "de": "Boss-Incident: Der Log zeigt beide Gesichter des DNS. Finde heraus, warum 'manche' Auflösungen sterben, und repariere es minimal-invasiv.",
+    "en": "Boss incident: the log shows both faces of DNS. Figure out why 'some' lookups die and fix it minimally."
+  },
+  "ticket": {
+    "de": "Ticket #4711, Prio 1: 'Seit dem Firewall-Cleanup schlagen manche DNS-Auflösungen fehl — vor allem große Antworten und der Sekundär-DNS-Sync. Kleine Anfragen gehen.' Der Praktikant schwört, er hat 'nur ungenutzte Regeln aufgeräumt'.",
+    "en": "Ticket #4711, prio 1: 'Since the firewall cleanup some DNS lookups fail — especially large answers and the secondary DNS sync. Small queries work.' The intern swears he 'only cleaned up unused rules'."
+  },
+  "difficulty": 3,
+  "concepts": ["tcp-vs-udp", "dns", "log-reading"],
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "DNS_TCP",
+        "name": "DNS_TCP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-dns-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "logPackets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.53",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.53",
+      "dstIp": "9.9.9.9",
+      "protocol": "tcp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.21",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.53",
+      "dstIp": "198.51.100.53",
+      "protocol": "tcp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.40",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.53",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.53",
+        "dstIp": "9.9.9.9",
+        "protocol": "tcp",
+        "dstPort": 53
+      },
+      "expect": "accept",
+      "note": "tcp/53 muss wieder gehen"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.40",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.40",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 25
+      },
+      "expect": "deny"
+    }
+  ]
+}
