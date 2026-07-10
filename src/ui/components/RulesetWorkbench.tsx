@@ -36,7 +36,7 @@ export function RulesetWorkbench({
   readonly = false,
 }: RulesetWorkbenchProps) {
   const { t } = useTranslation();
-  const [editing, setEditing] = useState<Policy | null>(null);
+  const [editing, setEditing] = useState<Policy | 'new' | null>(null);
   const config: NetworkConfig = { ...network, policies };
   const suggestedId = policies.reduce((max, p) => Math.max(max, p.id), 0) + 1;
 
@@ -116,20 +116,33 @@ export function RulesetWorkbench({
         </div>
       )}
 
-      {editing && (
+      {editing !== null ? (
         <PolicyEditor
           network={network}
-          initial={editing}
+          initial={editing === 'new' ? undefined : editing}
           suggestedId={suggestedId}
           onSave={(policy) => {
+            const exists = policies.some((p) => p.id === policy.id);
             onChange(
-              policies.map((p) => (p.id === policy.id ? policy : p)),
+              exists
+                ? policies.map((p) => (p.id === policy.id ? policy : p))
+                : [...policies, policy],
               1,
             );
             setEditing(null);
           }}
           onCancel={() => setEditing(null)}
         />
+      ) : (
+        !readonly &&
+        !selectMode && (
+          <button
+            onClick={() => setEditing('new')}
+            className="rounded-panel border border-dashed border-claw/60 px-4 py-2.5 font-display text-sm font-bold text-claw hover:bg-claw/10"
+          >
+            + {t('architect.addPolicy')}
+          </button>
+        )
       )}
     </div>
   );

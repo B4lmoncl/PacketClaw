@@ -1,0 +1,132 @@
+{
+  "id": "ch2-l03",
+  "chapter": 2,
+  "index": 3,
+  "mode": "verdict",
+  "title": {
+    "de": "Die Gruppe zieht",
+    "en": "The Group Delivers"
+  },
+  "briefing": {
+    "de": "Adressgruppen bündeln Objekte. Eine Policy auf die Gruppe matcht jedes Mitglied — auch das, an das niemand mehr denkt.",
+    "en": "Address groups bundle objects. A policy on the group matches every member — including the one everyone forgot about."
+  },
+  "difficulty": 1,
+  "concepts": ["address-groups"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "WEB01",
+        "name": "WEB01",
+        "type": "host",
+        "host": "10.0.1.80"
+      },
+      {
+        "id": "DB01",
+        "name": "DB01",
+        "type": "host",
+        "host": "10.0.1.81"
+      },
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "SERVERS",
+        "name": "SERVERS",
+        "members": ["WEB01", "DB01"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "servers-updates",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["SERVERS"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-deny-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.81",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

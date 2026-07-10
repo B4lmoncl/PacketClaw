@@ -1,0 +1,121 @@
+{
+  "id": "ch2-l07",
+  "chapter": 2,
+  "index": 7,
+  "mode": "verdict",
+  "title": {
+    "de": "Das /23 sieht harmlos aus",
+    "en": "The /23 Looks Harmless"
+  },
+  "briefing": {
+    "de": "10.0.2.0/23 endet nicht bei .2.255 — es umfasst 10.0.2.0 bis 10.0.3.255. Wer CIDR nur bis /24 liest, verschätzt sich hier.",
+    "en": "10.0.2.0/23 doesn't end at .2.255 — it spans 10.0.2.0 through 10.0.3.255. If you only ever read /24s, you'll misjudge this one."
+  },
+  "difficulty": 3,
+  "concepts": ["cidr-23"],
+  "targetSeconds": 60,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.2.0/23"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.3.7",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.4.1",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

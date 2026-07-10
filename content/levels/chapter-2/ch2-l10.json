@@ -1,0 +1,193 @@
+{
+  "id": "ch2-l10",
+  "chapter": 2,
+  "index": 10,
+  "mode": "audit",
+  "title": {
+    "de": "Boss: Der all-Nachlass",
+    "en": "Boss: The all Inheritance"
+  },
+  "briefing": {
+    "de": "Dein Vorgänger hat 'all' geschrieben, wo Objekte hingehört hätten. Härte die Regel, ohne den erlaubten Traffic zu brechen — die Objektbibliothek hat alles, was du brauchst.",
+    "en": "Your predecessor wrote 'all' where objects belonged. Harden the rule without breaking allowed traffic — the object library has everything you need."
+  },
+  "ticket": {
+    "de": "Audit-Finding A-17: 'Policy 2 erlaubt jeder Quelle jeden Service ins Internet.' Gefordert: Least Privilege. Erlaubt bleiben muss: LAN-Clients HTTPS, Management-Range SSH. Sonst nichts.",
+    "en": "Audit finding A-17: 'Policy 2 allows any source any service to the internet.' Required: least privilege. Must keep working: LAN clients HTTPS, management range SSH. Nothing else."
+  },
+  "difficulty": 3,
+  "concepts": ["harden-any", "least-privilege", "address-objects"],
+  "task": "harden-any",
+  "maxEdits": 3,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "MGMT_RANGE",
+        "name": "MGMT_RANGE",
+        "type": "range",
+        "range": {
+          "from": "10.0.1.10",
+          "to": "10.0.1.19"
+        }
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "guest-block",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "legacy-alles",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.55",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "note": "LAN HTTPS bleibt"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.12",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "accept",
+      "note": "MGMT SSH bleibt"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.20.5",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny",
+      "note": "Gaeste bleiben zu"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.55",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny",
+      "note": "SSH nur fuer MGMT"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.55",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "DNS war nie gefordert"
+    }
+  ]
+}

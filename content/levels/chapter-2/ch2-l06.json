@@ -1,0 +1,148 @@
+{
+  "id": "ch2-l06",
+  "chapter": 2,
+  "index": 6,
+  "mode": "architect",
+  "title": {
+    "de": "Update-Fenster für Webserver",
+    "en": "Update Window for Web Servers"
+  },
+  "briefing": {
+    "de": "Nutze die Gruppe statt Einzelobjekten — dann überlebt dein Regelwerk den nächsten Server.",
+    "en": "Use the group instead of single objects — then your ruleset survives the next server."
+  },
+  "ticket": {
+    "de": "Die Webserver (Gruppe WEB_SERVERS) brauchen HTTPS ins Internet für Updates. Der Datenbankserver DB01 bekommt GAR NICHTS nach draußen. — Ops, freundlich, aber bestimmt.",
+    "en": "The web servers (group WEB_SERVERS) need HTTPS to the internet for updates. Database server DB01 gets NOTHING outbound. — Ops, friendly but firm."
+  },
+  "difficulty": 2,
+  "concepts": ["address-groups", "least-privilege"],
+  "referencePolicyCount": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "WEB01",
+        "name": "WEB01",
+        "type": "host",
+        "host": "10.0.1.80"
+      },
+      {
+        "id": "WEB02",
+        "name": "WEB02",
+        "type": "host",
+        "host": "10.0.1.82"
+      },
+      {
+        "id": "DB01",
+        "name": "DB01",
+        "type": "host",
+        "host": "10.0.1.81"
+      },
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "WEB_SERVERS",
+        "name": "WEB_SERVERS",
+        "members": ["WEB01", "WEB02"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.80",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.82",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.81",
+        "dstIp": "203.0.113.7",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny",
+      "note": "DB01 bleibt drin"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.80",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "nur HTTPS"
+    }
+  ]
+}

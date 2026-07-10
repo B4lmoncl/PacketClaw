@@ -1,0 +1,120 @@
+{
+  "id": "ch2-l05",
+  "chapter": 2,
+  "index": 5,
+  "mode": "verdict",
+  "title": {
+    "de": "all vergisst niemanden",
+    "en": "all Forgets No One"
+  },
+  "briefing": {
+    "de": "'all' matcht JEDE Quell-IP — auch das Testnetz, das offiziell gar nicht existiert. Wer 'all' schreibt, erlaubt auch, was er vergessen hat.",
+    "en": "'all' matches EVERY source IP — including the test network that officially doesn't exist. Writing 'all' also allows what you forgot."
+  },
+  "difficulty": 2,
+  "concepts": ["all-trap"],
+  "targetSeconds": 40,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "guest-deny-ssh",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["all"],
+        "service": ["SSH"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "alles-raus",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.77.7",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 22
+    }
+  ]
+}

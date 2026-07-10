@@ -1,0 +1,151 @@
+{
+  "id": "ch2-l08",
+  "chapter": 2,
+  "index": 8,
+  "mode": "verdict",
+  "title": {
+    "de": "Gruppen in Gruppen",
+    "en": "Groups in Groups"
+  },
+  "briefing": {
+    "de": "ALL_PRIVATE enthält INTERNAL, INTERNAL enthält GUEST_NET. Die Auflösung ist rekursiv — und die deaktivierte Regel dazwischen ist nur Deko.",
+    "en": "ALL_PRIVATE contains INTERNAL, INTERNAL contains GUEST_NET. Resolution is recursive — and the disabled rule in between is just decoration."
+  },
+  "difficulty": 3,
+  "concepts": ["nested-groups", "disabled-policy"],
+  "targetSeconds": 55,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "10.0.30.0/24"
+      }
+    ],
+    "addressGroups": [
+      {
+        "id": "INTERNAL",
+        "name": "INTERNAL",
+        "members": ["LAN_NET", "GUEST_NET"]
+      },
+      {
+        "id": "ALL_PRIVATE",
+        "name": "ALL_PRIVATE",
+        "members": ["INTERNAL", "DMZ_NET"]
+      }
+    ],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "block-guests",
+        "enabled": false,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["GUEST_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "private-dns-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["ALL_PRIVATE"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.20.9",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    }
+  ]
+}

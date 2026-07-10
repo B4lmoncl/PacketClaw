@@ -1,0 +1,145 @@
+{
+  "id": "ch2-l01",
+  "chapter": 2,
+  "index": 1,
+  "mode": "verdict",
+  "title": {
+    "de": "Objekt ist nicht gleich Objekt",
+    "en": "An Object Is Not an Object"
+  },
+  "briefing": {
+    "de": "Adressobjekte sind benannte IP-Mengen: ein Host ist genau EINE Adresse, ein Subnetz ein ganzer Block. Die Firewall matcht die IP des Pakets gegen die Menge — nicht gegen den Namen.",
+    "en": "Address objects are named IP sets: a host is exactly ONE address, a subnet a whole block. The firewall matches the packet's IP against the set — not against the name."
+  },
+  "difficulty": 1,
+  "concepts": ["host-vs-subnet"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "SRV_BACKUP",
+        "name": "SRV_BACKUP",
+        "type": "host",
+        "host": "10.0.1.200"
+      },
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.0.0/16",
+        "iface": "port1"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "backup-ssh-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["SRV_BACKUP"],
+        "dstaddr": ["all"],
+        "service": ["SSH"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.200",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 22
+    }
+  ]
+}
