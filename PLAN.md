@@ -1,6 +1,18 @@
-# PacketClaw — Plan
+# AetherGate (ehem. Arbeitstitel PacketClaw) — Plan
 
-> Arbeitstitel: **PacketClaw**. Bisher kein besserer Name gefunden; Kandidaten werden hier notiert, ein Wechsel passiert nicht mitten im Projekt.
+> **Namensentscheidung (2026-07-10, Nutzerwunsch: Name gemäß QuestHall-Lore-Bible):**
+> Das Spiel heißt **AetherGate** — Schwestertitel zu QuestHall, verankert in dessen Welt
+> (Aethermoor, der Aetherstrom, das Venennetz des Turms). Framing: Der Spieler ist
+> **Torwächter des Venennetzes** — er entscheidet, welcher Aetherstrom (Traffic) die Tore
+> des Turms passieren darf. Das Krebs-Maskottchen bleibt und heißt **Snipp, der Torwächter**
+> (sein Snip beim DENY ist namensgebend). Verworfene Kandidaten: Aetherwacht, Venenwacht,
+> WardHall, Torwacht.
+> **Wichtig:** Die Lore ist Rahmen (Titel, Tickets, Flavor) — die Fachbegriffe im Spiel
+> (Policy, srcintf, VIP, Implicit Deny …) bleiben unverändert fachlich korrekt.
+> Technische IDs (Repo `packetclaw`, npm-Name, localStorage-Key) bleiben bis v1.0 stabil;
+> Repo-Rename ist optional Sache des Owners (GitHub redirectet).
+>
+> Hosting-Konzept (Container auf dem QuestHall-VPS): **docs/DEPLOY.md**.
 
 ## 1. Kurzarchitektur
 

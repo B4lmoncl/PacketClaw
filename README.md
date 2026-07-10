@@ -1,8 +1,12 @@
-# 🦞 PacketClaw
+# 🦞 AetherGate
 
 **Firewall-Policy-Puzzle-Game.** Trainiere First-Match-Logik, Regelreihenfolge, Adress-/Service-Objekte, Zonen, SNAT und VIPs/DNAT — als Spiel, im Browser, offline-fähig.
 
+Du bist **Torwächter des Venennetzes** im Turm von Aethermoor (der Welt von [QuestHall](https://github.com/B4lmoncl/QuestHall)): Entscheide, welcher Aetherstrom die Tore passieren darf. An deiner Seite: **Snipp, der Torwächter-Krebs**. Die Fachlichkeit darunter ist echt — Policies, Zonen, NAT, Implicit Deny.
+
 > **Disclaimer:** Unabhängiges Lernprojekt, inspiriert von Konzepten stateful arbeitender Firewalls (u. a. FortiOS). Nicht mit Fortinet affiliiert. Keine Fortinet-Logos, -Marken oder GUI-Nachbauten.
+>
+> _Arbeitstitel bis zur Namensentscheidung: PacketClaw — technische IDs (Repo, Paketname, Savegame-Key) behalten diesen Namen bis v1.0._
 
 ## Was ist das?
 

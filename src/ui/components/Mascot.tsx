@@ -30,7 +30,7 @@ export function Mascot({ pose = 'idle', size = 64 }: { pose?: MascotPose; size?:
       height={size}
       viewBox="0 0 100 80"
       role="img"
-      aria-label="Claw, das PacketClaw-Maskottchen"
+      aria-label="Snipp, der Torwächter — das AetherGate-Maskottchen"
     >
       {/* Beine */}
       <g stroke="#C74A31" strokeWidth="3" strokeLinecap="round" fill="none">
