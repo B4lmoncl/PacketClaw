@@ -1,0 +1,105 @@
+# PacketClaw — Plan
+
+> Arbeitstitel: **PacketClaw**. Bisher kein besserer Name gefunden; Kandidaten werden hier notiert, ein Wechsel passiert nicht mitten im Projekt.
+
+## 1. Kurzarchitektur
+
+```
+src/engine/        # pure TS-Lib: Typen, evaluate(), Analysefunktionen, seedbarer RNG — KEINE UI-Abhängigkeiten
+src/game/          # Modi-Logik, Scoring, Progression, Savegame (localStorage, versioniert)
+src/ui/            # React-Komponenten, Screens, Animationen (Framer Motion)
+src/theme/         # tokens.ts (Farben, Typo, Radii), globale Styles
+content/levels/    # JSON-Level pro Kapitel (Level = Daten, kein Code)
+content/i18n/      # de.json (Default), en.json
+scripts/           # validate-levels.ts, generate-daily-preview.ts
+docs/              # ENGINE.md (Semantik + Vereinfachungen), CONTENT.md (Level-Format)
+```
+
+Stack: Vite + React 18 + TypeScript (strict), TailwindCSS, Zustand, Framer Motion, i18next, vitest + fast-check + @testing-library/react. Kein Backend, Persistenz nur localStorage + JSON-Export/Import.
+
+**Grundsatz:** Die Engine ist die Wahrheit. Jede didaktische Aussage (Debrief, Trace-Animation, Sterne-Bewertung) wird aus Engine-Ausgaben generiert, nie handgeschrieben dupliziert.
+
+## 2. Engine-Semantik (verbindliche Entscheidungen)
+
+Evaluationsreihenfolge für ein Paket:
+
+1. **VIP/DNAT-Check zuerst:** Matcht `dstIp` (+ ggf. `protocol`/`extPort`) ein VIP-Objekt, wird die effektive Routing-Ziel-IP die `mappedIp`, und für den Policy-Match ist die Destination das **VIP-Objekt** (Policy matcht nur, wenn `dstaddr` den VIP-Namen enthält — `"all"` matcht DNAT-Traffic bewusst NICHT; das ist die klassische FortiOS-Lektion).
+   _Abweichung von der wörtlichen Prompt-Reihenfolge (Route vor VIP): FortiOS macht DNAT vor dem Routing-Lookup; nur so ergibt WAN→DMZ-Portforwarding das richtige `dstintf`. Fachkorrektheit gewinnt. Dokumentiert in docs/ENGINE.md._
+2. **Routing:** Longest-Prefix-Match der effektiven Ziel-IP gegen die Level-Routing-Tabelle → `dstintf`. Kein Match → Verdict `deny`, `matchedPolicyId: 0`, Trace „keine Route".
+3. **Top-down, First Match:** Policies in Listenreihenfolge; `enabled: false` wird übersprungen (Trace: skipped). Felder werden in fester Reihenfolge geprüft (srcintf → dstintf → srcaddr → dstaddr → service → schedule); das **erste** scheiternde Feld landet im Trace.
+4. **Feld-Matching:** Innerhalb eines Feldes ODER, zwischen Feldern UND. Interfaces: exakter Name, Zonen-Mitgliedschaft oder `"any"`. Adressen: rekursive Gruppenauflösung (zyklensicher), `"all"` matcht jede IP (außer DNAT-Traffic, s. o.), CIDR inkl. Netz-/Broadcast-Adresse, Ranges inklusiv. Services: rekursiv, `"ALL"` matcht alles; tcp/udp = Protokoll UND dstPort in Range; icmp = Protokoll (+ Typ falls gesetzt). Schedule `work-hours` = Mo–Fr 08:00–17:59 (Wanduhrzeit aus dem ISO-String, deterministisch, keine System-TZ); fehlender Timestamp ⇒ work-hours-Policies matchen nicht.
+5. **Implicit Deny:** keine Policy matcht → `deny`, `matchedPolicyId: 0`. UI zeigt immer Zeile „0 · Implicit Deny · DENY".
+6. **Stateful didaktisch:** Engine bewertet nur Initiator-Pakete. Antwortverkehr braucht keine Regel — Kapitel 5 macht daraus die „überflüssige Rückregel"-Falle.
+7. **SNAT:** nur Flag (`nat: true` + accept ⇒ `natApplied: true`, Egress-Interface-IP), keine IP-Pools.
+
+Analysefunktionen (Audit-Modus): `findShadowedPolicies` (konservative Mengenlogik, bei Unentscheidbarkeit NICHT markieren), `findRedundantPolicies` (entfernbar ohne Verhaltensänderung gegen Testsuite), `findOverbroadPolicies` (Accept-Policies mit all/ALL/any, die sich gegen die must-pass-Suite enger fassen lassen).
+
+Test-Gate Phase 1: vitest, >95 % Branch-Coverage auf `src/engine/`, alle Pflicht-Edge-Cases aus dem Briefing, fast-check-Property-Test (genau ein Verdict, matchedPolicyId ∈ {0} ∪ enabled-IDs, Trace konsistent).
+
+## 3. Spielmodi
+
+Alle Modi nutzen dieselbe Engine + dasselbe Level-Format. Nach jeder Antwort: **Debrief** aus dem Engine-Trace (welche Policy matchte und warum; pro darüberliegender Policy das erste gescheiterte Feld).
+
+- **A Verdict** (Kern, touch-first): Diagramm + Policy-Tabelle + Paket → (1) ACCEPT/DENY, (2) Policy-ID inkl. „0". Timer optional ab Kapitel 3.
+- **B Architect:** Ticket in Prosa + Objektbibliothek → Policies bauen/ordnen; unsichtbare must-pass/must-block-Suite prüft. Sterne für minimale Regelzahl + Verzicht auf all/ALL.
+- **C Audit:** gewachsenes Regelwerk (8–25 Regeln) → shadowed Rule finden, Reihenfolge fixen, Any-Any härten, Redundanz löschen. Verifikation via Analysefunktionen.
+- **D Incident:** Symptom-Ticket + Engine-generierter Forward-Log → schuldige Policy finden + Fix anwenden. Verifikation via Testsuite.
+- **Daily Run:** 10 prozedurale Verdict-Aufgaben, Seed = Datum (mulberry32, kein Math.random), Share-Text nur via Clipboard.
+- **Sandbox:** freies Netz/Regelwerk/Testpakete, animierter Match-Trace, JSON-Export/Import.
+
+## 4. Kampagnen-/Kapitelplan (8 Kapitel × 9 Level + 8 Boss = 80 Level)
+
+| Kap | Thema                       | Neue Konzepte                                           | Formate                        |
+| --- | --------------------------- | ------------------------------------------------------- | ------------------------------ |
+| 1   | First Match & Implicit Deny | Reihenfolge > Spezifität, Deny über Accept              | nur Verdict                    |
+| 2   | Adressobjekte               | CIDR, Host/Subnetz/Range, Gruppen, „all"-Fallen         | Verdict + erste Architect      |
+| 3   | Services                    | Portranges, tcp/udp, ICMP, „ALL"-Fallen                 | Verdict (Timer!) + Architect   |
+| 4   | Interfaces, VLANs & Zonen   | srcintf/dstintf, Zonen, „any", Routing→dstintf          | Verdict + Architect            |
+| 5   | Stateful Thinking           | Initiator vs. Antwort, überflüssige Rückregel           | Verdict + Audit                |
+| 6   | SNAT                        | nat-Flag, LAN→WAN vs. LAN→DMZ, vergessenes NAT          | Verdict + Incident             |
+| 7   | VIPs / DNAT                 | Portforwarding, extPort≠mappedPort, VIP-Objekt-Falle    | Verdict + Architect + Incident |
+| 8   | Audit & Hardening           | Shadowing, Redundanz, Any-Any, Logging, Least Privilege | fast nur Audit/Incident        |
+
+Kurve pro Kapitel: 1–3 einführend, 4–6 kombinierend, 7–9 gemein (Distraktoren: fast passende Regeln, disabled Regeln, Zonen-Verwechslung, Off-by-one an Port-/Subnetzgrenzen). Boss (Level 10) = Incident/Audit, mehrstufig, ohne Timer.
+
+Level = JSON unter `content/levels/`, validiert durch `npm run validate:levels` in CI (lösbar, eindeutig/konsistent, Referenzen existieren, Schwierigkeitsmetadaten, Timestamp-Pflicht sobald schedules vorkommen).
+
+## 5. Gamification
+
+- Verdict: 100 × Combo (×1,0 +0,1 je Serie, Cap ×3,0; Fehler = Reset) + Zeitbonus. Architect/Audit/Incident: 250–500 nach Schwierigkeitsmetadatum.
+- Sterne: 1 gelöst / 2 ohne Fehlversuch / 3 zusätzlich Zielzeit bzw. ≤ Referenz-Regelzahl ohne all/ALL bzw. minimaler Eingriff.
+- Ränge: Packet Rookie → Port Wächter → Rule Runner → Zone Keeper → NAT Navigator → Session Sensei → Audit Ace → Policy Architect → Implicit-Deny-Veteran → Claw Commander.
+- ≥25 Achievements, Daily-Streak mit Freeze-Token alle 7 Tage.
+- Save: localStorage, `saveVersion` + Migration, Export/Import als JSON.
+
+## 6. Design
+
+Tokens in `src/theme/tokens.ts`: BG `#0B1220`, Panel `#111A2E`, Akzent `#FF5A3C` (Claw-Koralle), Erfolg `#3DDC97`, Warn `#FFB020`, Deny `#FF3B5C`, Text `#E6EDF7`/`#8A97AD`. Space Grotesk (Display) / Inter (UI) / JetBrains Mono (Daten), lokal gebundelt. 6px/2px-Radien, 1px-Linien.
+
+**Signature: Packet Descent** — Paket-Chip fährt die Tabelle top-down ab, scheiternde Felder glimmen rot, Match rastet ein; ACCEPT = Claw schnappt & schleudert durchs Egress (Partikel in Trace-Grün), DENY = Snip + Fragment-Konfetti + ≤4px Shake, Implicit Deny = Durchfallen bis Zeile 0 (rotes Pulsieren). Läuft als skippbares Debrief-Replay. `prefers-reduced-motion` ⇒ statische Trace-Tabelle.
+
+**QuestHall-Orientierung** (Nutzerwunsch, 2026-07-10 — Schwesterprojekt `B4lmoncl/QuestHall`):
+PacketClaw übernimmt QuestHalls Gamification-Sprache und Teile der visuellen Signatur, ohne die eigene Identität (Ops-Terminal + Claw-Koralle) aufzugeben:
+
+- _Thematisch:_ Levelauswahl als **Quest-Board** (Karten statt nackter Liste); Kampagne als „Aufstieg" mit Kapitel-Türen wie QuestHalls Tower-Map; Achievements mit **Rarity-Stufen** (common → rare → epic → legendary) inkl. Rarity-Glow; Daily Run als „Daily Quest" mit Login-/Streak-Kalender-Gefühl; XP-Bar + Rang prominent im Header (RPG-Statbar); Tickets im Architect/Incident-Modus als „Quest-Auftrag" mit Auftraggeber-NPC-Flavor (z. B. „der Praktikant", „die Buchhaltung").
+- _Visuell:_ dezenter vertikaler Hintergrund-Gradient wie QuestHall (`#0B1220 → leicht violettes Tiefblau → #0B1220`, langsame Animation, unter reduced-motion statisch); Glow-„breathe"-Animationen für seltene Achievements/3-Sterne-Momente (Gold-Glow analog QuestHalls Legendary); Star-Earn-Animation bei Sternevergabe; kompakte Karten mit `hover:bg-white/[0.02]`-Idiom, `text-xs`-Dichte und Mono-Zahlen wie in QuestHalls Quest-Cards; Krebs-Maskottchen als **Pixel-Art-Sprite-Set** (passend zu QuestHalls Pixel-Assets), selbst gestaltet.
+- _Nicht übernehmen:_ Gacha/Loot/Professions-Mechaniken (REJECTED-Geist: polierter Kern gewinnt), Backend/Accounts, Next.js-Stack (PacketClaw bleibt Vite-SPA).
+
+Sound: selbstgenerierte Web-Audio-Blips, Mute prominent, kein Autoplay. Touch-first (Verdict einhändig @390px), PWA offline, A11y: Tastatur, Fokus, Farbinfo nie allein, AA-Kontraste.
+
+## 7. Phasen & Status
+
+- [x] Phase 0 — Plan (dieses Dokument, REJECTED.md, Scaffold)
+- [ ] Phase 1 — Engine + Analysefunktionen + Tests (Gate: grün, >95 % Branch-Coverage)
+- [ ] Phase 2 — Verdict spielbar (Kapitel 1, Packet Descent, Debrief, Save; Gate: Desktop + 390px, Screenshot-Selbstkritik)
+- [ ] Phase 3 — Volle Breite (alle Modi, Kapitel 2–8, Daily, Sandbox, Validator in CI)
+- [ ] Phase 4 — Gamification & Polish (XP/Sterne/Ränge/Achievements/Streak, Sound, PWA, i18n en, Onboarding, Settings)
+- [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)
+
+## 8. Offene Entscheidungen / Notizen
+
+- **Repo-Anlage:** Die GitHub-Integration darf keine neuen Repos anlegen (403). Der komplette Stand lebt als eigenständige Historie auf dem Session-Branch und wird nach manueller Anlage von `packetclaw` dorthin gepusht (`git push <neues-remote> HEAD:main`).
+- VIP-vor-Routing-Reihenfolge: entschieden (s. o., Fachkorrektheit).
+- `dstaddr:"all"` matcht keinen DNAT-Traffic: entschieden (FortiOS-Verhalten ohne match-vip; dokumentiert als bewusste Vereinfachung, dass es kein match-vip-Flag gibt).
+- Tailwind v3 (klassische Config) statt v4: bewusst, stabilere Token-Integration; Wechsel ist v1.1-Thema.
+- Schedule-Zeitzone: Wanduhrzeit aus dem ISO-String, Suffixe werden ignoriert — deterministisch auf jedem Client. In CONTENT.md dokumentieren.
