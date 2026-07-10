@@ -10,6 +10,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/engine/**'],
+      // Barrel-Datei und reine Typdeklarationen enthalten keine Logik
+      exclude: ['src/engine/index.ts', 'src/engine/types.ts', 'src/engine/__tests__/**'],
       reporter: ['text', 'html'],
       thresholds: {
         branches: 95,

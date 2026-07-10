@@ -96,6 +96,13 @@ Sound: selbstgenerierte Web-Audio-Blips, Mute prominent, kein Autoplay. Touch-fi
 - [ ] Phase 4 — Gamification & Polish (XP/Sterne/Ränge/Achievements/Streak, Sound, PWA, i18n en, Onboarding, Settings)
 - [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)
 
+## 7b. Nutzerwünsche (2026-07-10, verbindlich)
+
+- **Visuelle Regelverarbeitung ist Kern-Feature:** Der Spieler muss jederzeit SEHEN können, wie ein Paket verarbeitet wird — nach FortiGate-Vorbild (Policy-Lookup-Denke): Packet Descent als animierter Trace über die Policy-Tabelle, pro Zeile Aufleuchten des scheiternden Felds, statische Trace-Tabelle als reduced-motion-Variante UND als jederzeit aufrufbare „Warum?"-Ansicht im Debrief. Auch in der Sandbox: Paket abfeuern → Trace ansehen.
+- **Tutorial/Onboarding:** interaktives 3-Minuten-Tutorial (Phase 4) + kontextuelle Konzept-Einführungen pro Kapitel („Neu in diesem Kapitel"-Karte vor Level 1).
+- **Vollwertiges Spiel mit viel Content:** 80+ Level, alle Modi, Daily, Gamification — wie geplant; Umfang geht vor Deadline.
+- **Security Profiles / cert vs. deep inspection:** auf ROADMAP.md (v1.1) — eigenes Kapitel mit Inspection-Entscheid-Aufgaben. NAT/SNAT/DNAT sind bereits Kern-Kapitel 6/7.
+
 ## 8. Offene Entscheidungen / Notizen
 
 - **Repo-Anlage:** Die GitHub-Integration darf keine neuen Repos anlegen (403). Der komplette Stand lebt als eigenständige Historie auf dem Session-Branch und wird nach manueller Anlage von `packetclaw` dorthin gepusht (`git push <neues-remote> HEAD:main`).
