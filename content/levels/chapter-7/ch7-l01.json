@@ -1,0 +1,161 @@
+{
+  "id": "ch7-l01",
+  "chapter": 7,
+  "index": 1,
+  "mode": "verdict",
+  "title": {
+    "de": "Das Tor nach innen",
+    "en": "The Gate Inward"
+  },
+  "briefing": {
+    "de": "Ein VIP ist Ziel-NAT: Pakete auf die externe IP:Port-Kombi werden auf die interne Adresse umgeschrieben — VOR Routing und Policy-Match. Die Policy matcht dann über das VIP-OBJEKT als Destination.",
+    "en": "A VIP is destination NAT: packets to the external IP:port combo get rewritten to the internal address — BEFORE routing and policy match. The policy then matches via the VIP OBJECT as destination."
+  },
+  "difficulty": 1,
+  "concepts": ["vip-basics"],
+  "targetSeconds": 55,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_MAIL01",
+        "name": "SRV_MAIL01",
+        "type": "host",
+        "host": "172.16.0.25"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "SMTP",
+        "name": "SMTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [
+      {
+        "id": "VIP_WEB",
+        "name": "VIP_WEB",
+        "extIp": "203.0.113.10",
+        "extPort": 443,
+        "mappedIp": "172.16.0.10",
+        "mappedPort": 8443,
+        "protocol": "tcp"
+      }
+    ],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "publish-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["VIP_WEB"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.7",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ]
+}

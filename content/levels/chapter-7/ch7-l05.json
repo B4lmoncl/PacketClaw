@@ -1,0 +1,171 @@
+{
+  "id": "ch7-l05",
+  "chapter": 7,
+  "index": 5,
+  "mode": "architect",
+  "title": {
+    "de": "Publiziere den Webserver",
+    "en": "Publish the Web Server"
+  },
+  "briefing": {
+    "de": "Dein erstes Portforwarding: WAN → DMZ über das VIP-Objekt. Denk daran — Destination ist der VIP, nicht die Server-IP, und nicht 'all'.",
+    "en": "Your first port forwarding: WAN → DMZ via the VIP object. Remember — destination is the VIP, not the server IP, and not 'all'."
+  },
+  "ticket": {
+    "de": "SRV_WEB01 soll aus dem Internet über https://203.0.113.10 erreichbar sein (VIP_WEB existiert schon). NUR HTTPS, nur über den VIP. SSH auf den Server bleibt von draußen zu. — Webteam",
+    "en": "SRV_WEB01 must be reachable from the internet via https://203.0.113.10 (VIP_WEB already exists). ONLY HTTPS, only via the VIP. SSH to the server stays closed from outside. — Web team"
+  },
+  "difficulty": 2,
+  "concepts": ["vip-basics", "least-privilege"],
+  "referencePolicyCount": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_MAIL01",
+        "name": "SRV_MAIL01",
+        "type": "host",
+        "host": "172.16.0.25"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "SMTP",
+        "name": "SMTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [
+      {
+        "id": "VIP_WEB",
+        "name": "VIP_WEB",
+        "extIp": "203.0.113.10",
+        "extPort": 443,
+        "mappedIp": "172.16.0.10",
+        "mappedPort": 8443,
+        "protocol": "tcp"
+      }
+    ],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.7",
+        "dstIp": "203.0.113.10",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "203.0.113.99",
+        "dstIp": "203.0.113.10",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.7",
+        "dstIp": "203.0.113.10",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny",
+      "note": "kein SSH via extIp"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.7",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny",
+      "note": "nur ueber den VIP"
+    }
+  ]
+}

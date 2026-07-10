@@ -1,0 +1,192 @@
+{
+  "id": "ch7-l07",
+  "chapter": 7,
+  "index": 7,
+  "mode": "verdict",
+  "title": {
+    "de": "Zwei VIPs, eine IP",
+    "en": "Two VIPs, One IP"
+  },
+  "briefing": {
+    "de": "Dieselbe externe IP, zwei Dienste: 443 → Webserver, 25 → Mailserver. Der extPort entscheidet, welcher VIP greift — und damit, welche Policy überhaupt in Frage kommt.",
+    "en": "Same external IP, two services: 443 → web server, 25 → mail server. The extPort decides which VIP applies — and thus which policy is even in the running."
+  },
+  "difficulty": 3,
+  "concepts": ["multi-vip"],
+  "targetSeconds": 65,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_MAIL01",
+        "name": "SRV_MAIL01",
+        "type": "host",
+        "host": "172.16.0.25"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "SMTP",
+        "name": "SMTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [
+      {
+        "id": "VIP_WEB",
+        "name": "VIP_WEB",
+        "extIp": "203.0.113.10",
+        "extPort": 443,
+        "mappedIp": "172.16.0.10",
+        "mappedPort": 8443,
+        "protocol": "tcp"
+      },
+      {
+        "id": "VIP_MAIL",
+        "name": "VIP_MAIL",
+        "extIp": "203.0.113.10",
+        "extPort": 25,
+        "mappedIp": "172.16.0.25",
+        "mappedPort": 25,
+        "protocol": "tcp"
+      }
+    ],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "publish-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["VIP_WEB"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "publish-mail",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["VIP_MAIL"],
+        "service": ["SMTP"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.7",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 25
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.7",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 8080
+    }
+  ],
+  "timerSeconds": 30
+}

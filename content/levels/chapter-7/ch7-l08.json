@@ -1,0 +1,189 @@
+{
+  "id": "ch7-l08",
+  "chapter": 7,
+  "index": 8,
+  "mode": "verdict",
+  "title": {
+    "de": "Deny auf den VIP",
+    "en": "Deny on the VIP"
+  },
+  "briefing": {
+    "de": "Auch Sperren laufen über das VIP-Objekt: Die Deny-Regel oben blockt einen bestimmten Quell-Bereich — der Rest rutscht zur Publish-Regel durch. First Match, wie immer.",
+    "en": "Blocks work via the VIP object too: the deny rule on top blocks a specific source range — the rest slides through to the publish rule. First match, as always."
+  },
+  "difficulty": 3,
+  "concepts": ["vip-deny"],
+  "targetSeconds": 65,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_MAIL01",
+        "name": "SRV_MAIL01",
+        "type": "host",
+        "host": "172.16.0.25"
+      },
+      {
+        "id": "BAD_NET",
+        "name": "BAD_NET",
+        "type": "subnet",
+        "subnet": "198.51.100.0/24"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "SMTP",
+        "name": "SMTP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 25,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [
+      {
+        "id": "VIP_WEB",
+        "name": "VIP_WEB",
+        "extIp": "203.0.113.10",
+        "extPort": 443,
+        "mappedIp": "172.16.0.10",
+        "mappedPort": 8443,
+        "protocol": "tcp"
+      }
+    ],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "block-boese-quelle",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["BAD_NET"],
+        "dstaddr": ["VIP_WEB"],
+        "service": ["HTTPS"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "publish-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["VIP_WEB"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.66",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "185.199.1.7",
+      "dstIp": "203.0.113.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "timerSeconds": 30
+}
