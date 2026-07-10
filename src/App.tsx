@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { getLevel } from './game/levels';
 import { useGame } from './game/store';
 import { Header } from './ui/components/Header';
+import { ArchitectScreen } from './ui/screens/ArchitectScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
 import { HomeScreen } from './ui/screens/HomeScreen';
 import { VerdictScreen } from './ui/screens/VerdictScreen';
@@ -35,9 +36,15 @@ export default function App() {
         break;
       }
       onBack = () => navigate({ name: 'chapter', chapter: level.chapter });
-      // Phase 3 ergänzt Architect/Audit/Incident — bis dahin ist alles Verdict
+      // Audit/Incident folgen in Phase 3c
       content =
-        level.mode === 'verdict' ? <VerdictScreen key={level.id} level={level} /> : <HomeScreen />;
+        level.mode === 'verdict' ? (
+          <VerdictScreen key={level.id} level={level} />
+        ) : level.mode === 'architect' ? (
+          <ArchitectScreen key={level.id} level={level} />
+        ) : (
+          <HomeScreen />
+        );
       break;
     }
   }

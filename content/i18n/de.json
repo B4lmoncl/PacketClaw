@@ -89,5 +89,22 @@
   "network": {
     "diagram": "Netzübersicht",
     "zone": "Zone"
+  },
+  "architect": {
+    "ticket": "Turmpost — Auftrag",
+    "ruleset": "Regelwerk",
+    "referenceCount": "Referenz: {{count}} Regeln",
+    "policyName": "Policy-Name",
+    "savePolicy": "Policy speichern",
+    "cancel": "Abbrechen",
+    "addPolicy": "Neue Policy",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "moveUp": "nach oben",
+    "moveDown": "nach unten",
+    "check": "Regelwerk prüfen",
+    "failedTests": "{{count}} Testpaket(e) laufen falsch:",
+    "expectedGot": "Erwartet {{expected}}, bekommen {{got}} (Policy #{{policy}})",
+    "more": "weitere"
   }
 }

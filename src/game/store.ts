@@ -138,10 +138,12 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
 export function isLevelUnlocked(levelId: string, stars: Record<string, number>): boolean {
   const level = getLevel(levelId);
   if (!level) return false;
-  if (level.index === 1 && level.chapter === 1) return true;
-  if (level.index === 1) return isChapterUnlocked(level.chapter, stars);
-  const previous = levelsForChapter(level.chapter).find((l) => l.index === level.index - 1);
-  return previous !== undefined && (stars[previous.id] ?? 0) >= 1;
+  // Vorgänger = nächstniedrigeres existierendes Level (lückentolerant)
+  const previous = levelsForChapter(level.chapter)
+    .filter((l) => l.index < level.index)
+    .at(-1);
+  if (!previous) return isChapterUnlocked(level.chapter, stars);
+  return (stars[previous.id] ?? 0) >= 1;
 }
 
 export function isChapterUnlocked(chapter: number, stars: Record<string, number>): boolean {

@@ -1,0 +1,118 @@
+{
+  "id": "ch2-l04",
+  "chapter": 2,
+  "index": 4,
+  "mode": "architect",
+  "title": { "de": "Gast-WLAN, aber richtig", "en": "Guest Wi-Fi, Done Right" },
+  "briefing": {
+    "de": "Dein erstes Architect-Ticket: Du baust das Regelwerk selbst. Die Objektbibliothek unten hat alles, was du brauchst. Das Implicit Deny am Ende arbeitet für dich — du musst nur erlauben, was erlaubt sein soll.",
+    "en": "Your first architect ticket: you build the ruleset yourself. The object library below has everything you need. The implicit deny at the bottom works for you — you only need to allow what should be allowed."
+  },
+  "ticket": {
+    "de": "Das Gast-WLAN (vlan20) darf GENAU zwei Dinge: DNS zum internen Resolver SRV_DNS01 und HTTPS ins Internet. Sonst nichts — kein HTTP, kein DNS nach draußen, kein Zugriff ins LAN. — Die Geschäftsführung, nachdem der Praktikant im Gast-WLAN 'nur kurz was getestet' hat.",
+    "en": "The guest Wi-Fi (vlan20) may do EXACTLY two things: DNS to the internal resolver SRV_DNS01 and HTTPS to the internet. Nothing else — no HTTP, no external DNS, no access to the LAN. — Management, after the intern 'just quickly tested something' on the guest Wi-Fi."
+  },
+  "difficulty": 1,
+  "concepts": ["architect-basics", "least-privilege", "implicit-deny"],
+  "referencePolicyCount": 2,
+  "network": {
+    "interfaces": [
+      { "id": "port1", "name": "port1" },
+      { "id": "vlan20", "name": "vlan20" },
+      { "id": "wan1", "name": "wan1" }
+    ],
+    "zones": [],
+    "addresses": [
+      { "id": "LAN_NET", "name": "LAN_NET", "type": "subnet", "subnet": "10.0.1.0/24" },
+      { "id": "GUEST_NET", "name": "GUEST_NET", "type": "subnet", "subnet": "10.0.20.0/24" },
+      { "id": "SRV_DNS01", "name": "SRV_DNS01", "type": "host", "host": "10.0.1.53" }
+    ],
+    "addressGroups": [],
+    "services": [
+      { "id": "DNS", "name": "DNS", "protocol": "udp", "dstPorts": [{ "from": 53, "to": 53 }] },
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [{ "from": 443, "to": 443 }]
+      },
+      { "id": "HTTP", "name": "HTTP", "protocol": "tcp", "dstPorts": [{ "from": 80, "to": 80 }] }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      { "dst": "10.0.1.0/24", "iface": "port1" },
+      { "dst": "10.0.20.0/24", "iface": "vlan20" },
+      { "dst": "0.0.0.0/0", "iface": "wan1" }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.15",
+        "dstIp": "10.0.1.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept",
+      "note": "DNS zum internen Resolver"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.80",
+        "dstIp": "203.0.113.40",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "note": "HTTPS ins Internet"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.15",
+        "dstIp": "203.0.113.40",
+        "protocol": "tcp",
+        "dstPort": 80
+      },
+      "expect": "deny",
+      "note": "HTTP ist nicht erlaubt"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.15",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "DNS nach draußen ist nicht erlaubt"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.15",
+        "dstIp": "10.0.1.53",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny",
+      "note": "HTTPS ins LAN ist nicht erlaubt"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.15",
+        "dstIp": "10.0.1.20",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "DNS zu anderen LAN-Hosts ist nicht erlaubt"
+    }
+  ]
+}

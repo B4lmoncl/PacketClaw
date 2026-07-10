@@ -89,5 +89,22 @@
   "network": {
     "diagram": "Network overview",
     "zone": "Zone"
+  },
+  "architect": {
+    "ticket": "Tower mail — ticket",
+    "ruleset": "Ruleset",
+    "referenceCount": "Reference: {{count}} rules",
+    "policyName": "Policy name",
+    "savePolicy": "Save policy",
+    "cancel": "Cancel",
+    "addPolicy": "New policy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "moveUp": "move up",
+    "moveDown": "move down",
+    "check": "Check ruleset",
+    "failedTests": "{{count}} test packet(s) behave incorrectly:",
+    "expectedGot": "Expected {{expected}}, got {{got}} (policy #{{policy}})",
+    "more": "more"
   }
 }
