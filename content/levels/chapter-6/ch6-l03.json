@@ -1,0 +1,152 @@
+{
+  "id": "ch6-l03",
+  "chapter": 6,
+  "index": 3,
+  "mode": "verdict",
+  "title": {
+    "de": "NAT an einer Deny-Regel",
+    "en": "NAT on a Deny Rule"
+  },
+  "briefing": {
+    "de": "Kurioser Fund im Review: eine DENY-Regel mit gesetztem NAT-Flag. Was passiert? Nichts Besonderes — bei DENY ist NAT wirkungslos. Das Paket interessiert nur die Action.",
+    "en": "Curious review find: a DENY rule with the NAT flag set. What happens? Nothing special — NAT is meaningless on DENY. The packet only cares about the action."
+  },
+  "difficulty": 2,
+  "concepts": ["nat-on-deny"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_BACKUP",
+        "name": "SRV_BACKUP",
+        "type": "host",
+        "host": "10.0.1.200"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "ssh-block-mit-nat",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["SSH"],
+        "action": "deny",
+        "nat": true,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "lan-alles-raus",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.50",
+      "protocol": "tcp",
+      "dstPort": 22
+    }
+  ],
+  "timerSeconds": 35
+}

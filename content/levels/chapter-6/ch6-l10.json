@@ -1,0 +1,227 @@
+{
+  "id": "ch6-l10",
+  "chapter": 6,
+  "index": 10,
+  "mode": "incident",
+  "title": {
+    "de": "Boss: Der doppelte Fehler",
+    "en": "Boss: The Double Fault"
+  },
+  "briefing": {
+    "de": "Boss: Hier sind ZWEI Dinge kaputt — ein vergessener Block und ein fehlendes NAT-Flag. Der Log zeigt dir beide Spuren. Zwei Eingriffe, mehr gibt es für drei Sterne nicht.",
+    "en": "Boss: TWO things are broken — a forgotten block and a missing NAT flag. The log shows both trails. Two edits, that's all you get for three stars."
+  },
+  "ticket": {
+    "de": "Eskalation: 'Internet down im LAN.' Nach dem ersten Fix: 'Immer noch down, aber anders.' Der Praktikant hat diesmal wirklich nichts gemacht — es war der Azubi.",
+    "en": "Escalation: 'Internet down in the LAN.' After the first fix: 'Still down, but differently.' The intern really didn't touch anything this time — it was the trainee."
+  },
+  "difficulty": 3,
+  "concepts": ["forgotten-nat", "rule-order", "log-reading"],
+  "maxEdits": 2,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_BACKUP",
+        "name": "SRV_BACKUP",
+        "type": "host",
+        "host": "10.0.1.200"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "azubi-testregel",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS", "DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "logPackets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "203.0.113.50",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.21",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.66",
+      "dstIp": "10.0.1.5",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": true
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept",
+      "expectNat": true
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 23
+      },
+      "expect": "deny"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.66",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny"
+    }
+  ]
+}

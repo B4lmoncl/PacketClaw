@@ -1,0 +1,196 @@
+{
+  "id": "ch6-l09",
+  "chapter": 6,
+  "index": 9,
+  "mode": "audit",
+  "title": {
+    "de": "Wartungsfenster vergessen",
+    "en": "Maintenance Window Forgotten"
+  },
+  "briefing": {
+    "de": "Fix-Order: Der Wartungs-Block von letzter Woche steht noch ÜBER der Internet-Regel. Verschiebe, statt zu löschen — der Block soll fürs nächste Fenster erhalten bleiben (dann wieder oben, aber das ist nicht dein Problem heute).",
+    "en": "Fix order: last week's maintenance block still sits ABOVE the internet rule. Move instead of delete — the block should survive for the next window (back on top then, but that's not today's problem)."
+  },
+  "ticket": {
+    "de": "'Internet ist seit dem Wartungsfenster zu.' Das Fenster war letzte Woche. Die Deny-Regel steht noch an Position 1. Bring die Reihenfolge in Ordnung, ohne etwas zu löschen.",
+    "en": "'Internet has been down since the maintenance window.' The window was last week. The deny rule still sits at position 1. Fix the order without deleting anything."
+  },
+  "difficulty": 3,
+  "concepts": ["rule-order", "snat"],
+  "task": "fix-order",
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_BACKUP",
+        "name": "SRV_BACKUP",
+        "type": "host",
+        "host": "10.0.1.200"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "wartung-block",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "lan-web-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS", "DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": true
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept",
+      "expectNat": true
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny",
+      "note": "Block wirkt weiter fuer den Rest"
+    }
+  ]
+}

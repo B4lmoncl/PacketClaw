@@ -1,0 +1,163 @@
+{
+  "id": "ch6-l04",
+  "chapter": 6,
+  "index": 4,
+  "mode": "architect",
+  "title": {
+    "de": "Zwei Wege, ein Flag",
+    "en": "Two Paths, One Flag"
+  },
+  "briefing": {
+    "de": "Gleicher Client, zwei Ziele: Internet braucht SNAT, DMZ nicht. Die Suite prüft BEIDES — auch dein NAT-Flag.",
+    "en": "Same client, two destinations: internet needs SNAT, DMZ doesn't. The suite checks BOTH — including your NAT flag."
+  },
+  "ticket": {
+    "de": "LAN darf HTTPS ins Internet (mit SNAT, versteht sich) und HTTPS zum DMZ-Server SRV_WEB01 (OHNE NAT — die Server-Logs sollen echte Client-IPs zeigen). — Ops",
+    "en": "LAN may do HTTPS to the internet (with SNAT, obviously) and HTTPS to DMZ server SRV_WEB01 (WITHOUT NAT — server logs must show real client IPs). — Ops"
+  },
+  "difficulty": 2,
+  "concepts": ["snat", "nat-or-not"],
+  "referencePolicyCount": 2,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_BACKUP",
+        "name": "SRV_BACKUP",
+        "type": "host",
+        "host": "10.0.1.200"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": true,
+      "note": "Internet nur mit SNAT"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": false,
+      "note": "DMZ ohne NAT (Server-Logs!)"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 22
+      },
+      "expect": "deny"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.66",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "deny"
+    }
+  ]
+}
