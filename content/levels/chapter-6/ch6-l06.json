@@ -1,0 +1,233 @@
+{
+  "id": "ch6-l06",
+  "chapter": 6,
+  "index": 6,
+  "mode": "incident",
+  "title": {
+    "de": "Alles grün, nichts geht",
+    "en": "All Green, Nothing Works"
+  },
+  "briefing": {
+    "de": "Incident-Basics: Lies den Forward-Log. Wenn die Firewall accepted, aber trotzdem nichts ankommt, fehlt oft das SNAT — private Quell-IPs kommen ohne NAT nicht übers Internet zurück.",
+    "en": "Incident basics: read the forward log. When the firewall accepts but nothing works, SNAT is often missing — private source IPs never make it back across the internet without NAT."
+  },
+  "ticket": {
+    "de": "09:14 Uhr, Buchhaltung: 'Internet ist tot, seit ihr heute Nacht an der Firewall wart.' Im Log ist alles grün — Policy 2 accepted brav. Der DMZ-Zugriff funktioniert übrigens einwandfrei. Finde den Unterschied.",
+    "en": "9:14 am, accounting: 'Internet has been dead since you touched the firewall last night.' The log is all green — policy 2 happily accepts. DMZ access works fine, by the way. Spot the difference."
+  },
+  "difficulty": 2,
+  "concepts": ["snat", "forgotten-nat", "log-reading"],
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "port2",
+        "name": "port2"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SMB",
+        "name": "SMB",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 445,
+            "to": 445
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "lan-dmz-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["SRV_WEB01"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-internet-neu",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS", "DNS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "drop-inbound",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "logPackets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.21",
+      "dstIp": "172.16.0.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.34",
+      "dstIp": "203.0.113.50",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.34",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    },
+    {
+      "srcintf": "wan1",
+      "srcIp": "198.51.100.9",
+      "dstIp": "10.0.1.34",
+      "protocol": "tcp",
+      "dstPort": 445
+    }
+  ],
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.34",
+        "dstIp": "203.0.113.50",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": true,
+      "note": "Internet-Traffic braucht SNAT"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.34",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept",
+      "expectNat": true,
+      "note": "DNS ins Internet ebenso"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.21",
+        "dstIp": "172.16.0.10",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept",
+      "expectNat": false,
+      "note": "LAN→DMZ braucht KEIN NAT"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.9",
+        "dstIp": "10.0.1.34",
+        "protocol": "tcp",
+        "dstPort": 445
+      },
+      "expect": "deny",
+      "note": "Inbound bleibt zu"
+    }
+  ]
+}

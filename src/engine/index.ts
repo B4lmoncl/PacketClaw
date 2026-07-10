@@ -20,7 +20,7 @@ export {
   serviceObjectMatches,
   type Resolver,
 } from './resolve';
-export { evaluate, matchVip, firstFailedField } from './evaluate';
+export { evaluate, matchVip, firstFailedField, matchesExpectation } from './evaluate';
 export {
   findShadowedPolicies,
   findRedundantPolicies,

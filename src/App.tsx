@@ -4,6 +4,8 @@ import { getLevel } from './game/levels';
 import { useGame } from './game/store';
 import { Header } from './ui/components/Header';
 import { ArchitectScreen } from './ui/screens/ArchitectScreen';
+import { AuditScreen } from './ui/screens/AuditScreen';
+import { IncidentScreen } from './ui/screens/IncidentScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
 import { HomeScreen } from './ui/screens/HomeScreen';
 import { VerdictScreen } from './ui/screens/VerdictScreen';
@@ -17,6 +19,19 @@ export default function App() {
   useEffect(() => {
     if (i18n.language !== locale) void i18n.changeLanguage(locale);
   }, [locale, i18n]);
+
+  // Deep-Links: #level/<id> und #chapter/<n> (Dev, Teilen, PWA-Shortcuts)
+  useEffect(() => {
+    const hash = window.location.hash;
+    const levelMatch = /^#level\/(.+)$/.exec(hash);
+    if (levelMatch && getLevel(levelMatch[1] ?? '')) {
+      navigate({ name: 'level', levelId: levelMatch[1] as string });
+      return;
+    }
+    const chapterMatch = /^#chapter\/(\d+)$/.exec(hash);
+    if (chapterMatch) navigate({ name: 'chapter', chapter: Number(chapterMatch[1]) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   let content: React.ReactNode;
   let onBack: (() => void) | undefined;
@@ -36,14 +51,15 @@ export default function App() {
         break;
       }
       onBack = () => navigate({ name: 'chapter', chapter: level.chapter });
-      // Audit/Incident folgen in Phase 3c
       content =
         level.mode === 'verdict' ? (
           <VerdictScreen key={level.id} level={level} />
         ) : level.mode === 'architect' ? (
           <ArchitectScreen key={level.id} level={level} />
+        ) : level.mode === 'audit' ? (
+          <AuditScreen key={level.id} level={level} />
         ) : (
-          <HomeScreen />
+          <IncidentScreen key={level.id} level={level} />
         );
       break;
     }

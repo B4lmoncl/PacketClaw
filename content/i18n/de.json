@@ -106,5 +106,27 @@
     "failedTests": "{{count}} Testpaket(e) laufen falsch:",
     "expectedGot": "Erwartet {{expected}}, bekommen {{got}} (Policy #{{policy}})",
     "more": "weitere"
+  },
+  "audit": {
+    "ticket": "Audit-Auftrag",
+    "check": "Prüfen",
+    "edits": "Eingriffe: {{edits}} / max. {{max}} für 3 Sterne",
+    "wrongPick": "Diese Policy kann durchaus matchen. Such weiter — welche Regel wird von einer früheren vollständig abgedeckt?",
+    "suiteRed": "{{count}} Testpaket(e) laufen noch falsch. Der must-pass-Traffic darf nicht brechen.",
+    "stillBroad": "Da ist noch ein all/ALL/any, das sich enger fassen lässt.",
+    "nothingRemoved": "Es wurde nichts gelöscht — die redundante Regel ist noch drin.",
+    "disable": "Deakt.",
+    "enable": "Aktiv.",
+    "task": {
+      "find-shadowed": "Finde die shadowed Policy (Zeile antippen)",
+      "fix-order": "Korrigiere die Reihenfolge",
+      "harden-any": "Härte die Any-Any-Regel, ohne must-pass zu brechen",
+      "remove-redundant": "Lösche die redundante Regel"
+    }
+  },
+  "incident": {
+    "ticket": "Incident-Ticket",
+    "log": "Forward-Traffic-Log",
+    "fixIt": "Regelwerk reparieren"
   }
 }

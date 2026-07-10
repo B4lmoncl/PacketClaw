@@ -148,8 +148,12 @@ export function isLevelUnlocked(levelId: string, stars: Record<string, number>):
 
 export function isChapterUnlocked(chapter: number, stars: Record<string, number>): boolean {
   if (chapter === 1) return true;
-  const previousBoss = levelsForChapter(chapter - 1).find((l) => l.index === 10);
-  // Solange ein Kapitel (noch) keinen Boss hat, reicht das letzte vorhandene Level
-  const gate = previousBoss ?? levelsForChapter(chapter - 1).at(-1);
-  return gate !== undefined && (stars[gate.id] ?? 0) >= 1;
+  // Lückentolerant: das nächstniedrigere Kapitel MIT Leveln zählt als Gate
+  for (let previous = chapter - 1; previous >= 1; previous--) {
+    const levels = levelsForChapter(previous);
+    if (levels.length === 0) continue;
+    const gate = levels.find((l) => l.index === 10) ?? levels.at(-1);
+    return gate !== undefined && (stars[gate.id] ?? 0) >= 1;
+  }
+  return true;
 }

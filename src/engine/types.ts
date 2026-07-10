@@ -134,5 +134,7 @@ export interface NetworkConfig {
 export interface TestPacket {
   packet: Packet;
   expect: PolicyAction;
+  /** optional: erwartetes SNAT-Verhalten (Kapitel 6, "vergessenes NAT") */
+  expectNat?: boolean;
   note?: string;
 }

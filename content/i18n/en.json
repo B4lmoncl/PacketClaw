@@ -106,5 +106,27 @@
     "failedTests": "{{count}} test packet(s) behave incorrectly:",
     "expectedGot": "Expected {{expected}}, got {{got}} (policy #{{policy}})",
     "more": "more"
+  },
+  "audit": {
+    "ticket": "Audit ticket",
+    "check": "Check",
+    "edits": "Edits: {{edits}} / max {{max}} for 3 stars",
+    "wrongPick": "That policy can still match. Keep looking — which rule is fully covered by an earlier one?",
+    "suiteRed": "{{count}} test packet(s) still behave incorrectly. Must-pass traffic must not break.",
+    "stillBroad": "There is still an all/ALL/any that can be narrowed.",
+    "nothingRemoved": "Nothing was deleted — the redundant rule is still there.",
+    "disable": "Disable",
+    "enable": "Enable",
+    "task": {
+      "find-shadowed": "Find the shadowed policy (tap its row)",
+      "fix-order": "Fix the rule order",
+      "harden-any": "Harden the any-any rule without breaking must-pass",
+      "remove-redundant": "Delete the redundant rule"
+    }
+  },
+  "incident": {
+    "ticket": "Incident ticket",
+    "log": "Forward traffic log",
+    "fixIt": "Repair the ruleset"
   }
 }

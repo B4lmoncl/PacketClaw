@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   evaluate,
   findOverbroadPolicies,
+  matchesExpectation,
   type NetworkConfig,
   type Policy,
   type TestPacket,
@@ -49,8 +50,8 @@ export function ArchitectScreen({ level }: { level: ArchitectLevel }) {
   function check() {
     const failed: FailedTest[] = [];
     for (const test of level.suite) {
-      const verdict = evaluate(test.packet, config);
-      if (verdict.action !== test.expect) {
+      if (!matchesExpectation(test, config)) {
+        const verdict = evaluate(test.packet, config);
         failed.push({ test, got: verdict.action, matchedPolicyId: verdict.matchedPolicyId });
       }
     }

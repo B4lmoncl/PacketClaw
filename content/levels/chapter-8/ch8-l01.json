@@ -1,0 +1,258 @@
+{
+  "id": "ch8-l01",
+  "chapter": 8,
+  "index": 1,
+  "mode": "audit",
+  "title": {
+    "de": "Die Regel, die nie zieht",
+    "en": "The Rule That Never Fires"
+  },
+  "briefing": {
+    "de": "Shadowing: Eine Regel ist tot, wenn eine frühere Regel ihre komplette Match-Menge abdeckt — sie kann nie zuerst matchen. Genau solche Leichen sammeln sich in gewachsenen Regelwerken.",
+    "en": "Shadowing: a rule is dead when an earlier rule covers its entire match set — it can never match first. Grown rulesets collect exactly these corpses."
+  },
+  "ticket": {
+    "de": "Der Auditor zeigt auf die RDP-Sperre und fragt, warum der Praktikant trotzdem fröhlich RDP nach draußen macht. Tippe die Regel an, die nie ziehen kann.",
+    "en": "The auditor points at the RDP block and asks why the intern still happily RDPs to the outside. Tap the rule that can never fire."
+  },
+  "difficulty": 2,
+  "concepts": ["shadowing", "rule-order"],
+  "task": "find-shadowed",
+  "maxEdits": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "port1",
+        "name": "port1"
+      },
+      {
+        "id": "port2",
+        "name": "port2"
+      },
+      {
+        "id": "wan1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "RDP",
+        "name": "RDP",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 3389,
+            "to": 3389
+          }
+        ]
+      },
+      {
+        "id": "SMB",
+        "name": "SMB",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 445,
+            "to": 445
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "wan-dmz-web",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["all"],
+        "dstaddr": ["SRV_WEB01"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "lan-out-alles",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "dmz-dns-out",
+        "enabled": true,
+        "srcintf": ["port2"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["DMZ_NET"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "lan-dmz-web",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["port2"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["SRV_WEB01"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 5,
+        "name": "block-inbound",
+        "enabled": true,
+        "srcintf": ["wan1"],
+        "dstintf": ["port1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 6,
+        "name": "block-rdp-out",
+        "enabled": true,
+        "srcintf": ["port1"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["LAN_NET"],
+        "dstaddr": ["all"],
+        "service": ["RDP"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 7,
+        "name": "dmz-lan-block",
+        "enabled": true,
+        "srcintf": ["port2"],
+        "dstintf": ["port1"],
+        "srcaddr": ["DMZ_NET"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 8,
+        "name": "dmz-web-out",
+        "enabled": true,
+        "srcintf": ["port2"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["DMZ_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "203.0.113.9",
+        "protocol": "tcp",
+        "dstPort": 443
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.9",
+        "dstIp": "10.0.1.5",
+        "protocol": "tcp",
+        "dstPort": 445
+      },
+      "expect": "deny"
+    }
+  ]
+}

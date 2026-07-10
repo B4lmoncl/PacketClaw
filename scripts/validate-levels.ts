@@ -19,6 +19,7 @@ import { join } from 'node:path';
 import {
   evaluate,
   findShadowedPolicies,
+  matchesExpectation,
   isValidIPv4,
   parseCidr,
   type NetworkConfig,
@@ -277,9 +278,7 @@ function validateLevel(file: string) {
       if (!level.referencePolicyCount) fail(id, 'referencePolicyCount fehlt');
       // Startregelwerk ist leer oder minimal — die Suite darf NICHT schon grün sein
       // (leeres Regelwerk + must-pass-Erwartung kann nie grün sein; hasPass ist geprüft)
-      const alreadyGreen = level.suite.every(
-        (t) => evaluate(t.packet, level.network).action === t.expect,
-      );
+      const alreadyGreen = level.suite.every((t) => matchesExpectation(t, level.network));
       if (alreadyGreen) fail(id, 'Architect: Suite ist ohne Spielerzutun schon grün');
     }
 
@@ -288,7 +287,7 @@ function validateLevel(file: string) {
       if (level.mode === 'incident' && (!level.logPackets || level.logPackets.length === 0)) {
         fail(id, 'incident: logPackets fehlen');
       }
-      const green = level.suite.every((t) => evaluate(t.packet, level.network).action === t.expect);
+      const green = level.suite.every((t) => matchesExpectation(t, level.network));
       if (level.task === 'find-shadowed') {
         if (findShadowedPolicies(level.network).length === 0) {
           fail(id, 'audit find-shadowed: keine shadowed Policy vorhanden');

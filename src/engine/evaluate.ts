@@ -6,7 +6,16 @@
 import { longestPrefixMatch } from './ip';
 import { createResolver, type Resolver } from './resolve';
 import { scheduleMatches } from './schedule';
-import type { MatchField, NetworkConfig, Packet, Policy, TraceStep, Verdict, Vip } from './types';
+import type {
+  MatchField,
+  NetworkConfig,
+  Packet,
+  Policy,
+  TestPacket,
+  TraceStep,
+  Verdict,
+  Vip,
+} from './types';
 
 /** Findet das erste VIP-Objekt, dessen extIp/protocol/extPort auf das Paket passen. */
 export function matchVip(packet: Packet, vips: readonly Vip[]): Vip | undefined {
@@ -121,4 +130,12 @@ export function evaluate(packet: Packet, config: NetworkConfig): Verdict {
   // 4. Implicit Deny
   trace.push({ kind: 'implicit-deny' });
   return { action: 'deny', matchedPolicyId: 0, dstintf, natApplied: false, trace };
+}
+
+/** true, wenn das Verdict der Erwartung des Testpakets entspricht (action + ggf. NAT) */
+export function matchesExpectation(test: TestPacket, config: NetworkConfig): boolean {
+  const verdict = evaluate(test.packet, config);
+  if (verdict.action !== test.expect) return false;
+  if (test.expectNat !== undefined && verdict.natApplied !== test.expectNat) return false;
+  return true;
 }
