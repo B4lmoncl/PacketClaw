@@ -1,0 +1,180 @@
+{
+  "id": "ch4-l09",
+  "chapter": 4,
+  "index": 9,
+  "mode": "verdict",
+  "title": {
+    "de": "Kein Weg dorthin",
+    "en": "No Way There"
+  },
+  "briefing": {
+    "de": "Fieses Detail: Für 192.168.99.9 gibt es KEINE Route. Ohne Egress-Interface stirbt das Paket vor jeder Policy — Verdict: Zeile 0, 'keine Route'.",
+    "en": "Nasty detail: there is NO route for 192.168.99.9. Without an egress interface the packet dies before any policy — verdict: row 0, 'no route'."
+  },
+  "difficulty": 3,
+  "concepts": ["no-route"],
+  "targetSeconds": 45,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v10",
+        "name": "vlan10"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-inside",
+        "name": "inside",
+        "members": ["if-p1", "if-v10", "if-v20"]
+      },
+      {
+        "id": "z-dmz",
+        "name": "dmz",
+        "members": ["if-p2"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "VLAN10_NET",
+        "name": "VLAN10_NET",
+        "type": "subnet",
+        "subnet": "10.0.10.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.10.0/24",
+        "iface": "vlan10"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "inside-alles-raus",
+        "enabled": true,
+        "srcintf": ["inside"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "172.16.0.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "port1",
+      "srcIp": "10.0.1.5",
+      "dstIp": "192.168.99.9",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "timerSeconds": 30
+}

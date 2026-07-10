@@ -1,0 +1,226 @@
+{
+  "id": "ch4-l08",
+  "chapter": 4,
+  "index": 8,
+  "mode": "verdict",
+  "title": {
+    "de": "Der Gast in der Technik-Zone",
+    "en": "The Guest in the Tech Zone"
+  },
+  "briefing": {
+    "de": "Distraktoren-Festival: disabled Regel, Zonen-Regel, Interface-Regel. Prüfe der Reihe nach — und denk daran, wer wirklich in 'inside' wohnt.",
+    "en": "Distractor festival: disabled rule, zone rule, interface rule. Check in order — and remember who actually lives in 'inside'."
+  },
+  "difficulty": 3,
+  "concepts": ["zones", "disabled-policy"],
+  "targetSeconds": 60,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v10",
+        "name": "vlan10"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-inside",
+        "name": "inside",
+        "members": ["if-p1", "if-v10", "if-v20"]
+      },
+      {
+        "id": "z-dmz",
+        "name": "dmz",
+        "members": ["if-p2"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "VLAN10_NET",
+        "name": "VLAN10_NET",
+        "type": "subnet",
+        "subnet": "10.0.10.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.10.0/24",
+        "iface": "vlan10"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "notfall-block",
+        "enabled": false,
+        "srcintf": ["inside"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      },
+      {
+        "id": 2,
+        "name": "technik-out",
+        "enabled": true,
+        "srcintf": ["vlan10"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["VLAN10_NET"],
+        "dstaddr": ["all"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 3,
+        "name": "inside-dns-out",
+        "enabled": true,
+        "srcintf": ["inside"],
+        "dstintf": ["wan1"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["DNS"],
+        "action": "accept",
+        "nat": true,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 4,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "vlan20",
+      "srcIp": "10.0.20.5",
+      "dstIp": "203.0.113.7",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "vlan20",
+      "srcIp": "10.0.20.5",
+      "dstIp": "9.9.9.9",
+      "protocol": "udp",
+      "dstPort": 53
+    }
+  ],
+  "timerSeconds": 30
+}

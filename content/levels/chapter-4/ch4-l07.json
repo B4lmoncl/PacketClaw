@@ -1,0 +1,198 @@
+{
+  "id": "ch4-l07",
+  "chapter": 4,
+  "index": 7,
+  "mode": "verdict",
+  "title": {
+    "de": "Zone im dstintf",
+    "en": "Zone in dstintf"
+  },
+  "briefing": {
+    "de": "Auch dstintf kann eine Zone sein: 'dmz' deckt port2. Aber Achtung — das Paket zur DMZ-IP, die gar nicht geroutet wird, landet woanders.",
+    "en": "dstintf can be a zone too: 'dmz' covers port2. But careful — the packet to a DMZ-looking IP that isn't routed there ends up elsewhere."
+  },
+  "difficulty": 3,
+  "concepts": ["zone-dstintf", "routing-dstintf"],
+  "targetSeconds": 60,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v10",
+        "name": "vlan10"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-inside",
+        "name": "inside",
+        "members": ["if-p1", "if-v10", "if-v20"]
+      },
+      {
+        "id": "z-dmz",
+        "name": "dmz",
+        "members": ["if-p2"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "VLAN10_NET",
+        "name": "VLAN10_NET",
+        "type": "subnet",
+        "subnet": "10.0.10.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.10.0/24",
+        "iface": "vlan10"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": [
+      {
+        "id": 1,
+        "name": "inside-web-dmz",
+        "enabled": true,
+        "srcintf": ["inside"],
+        "dstintf": ["dmz"],
+        "srcaddr": ["all"],
+        "dstaddr": ["DMZ_NET"],
+        "service": ["HTTPS"],
+        "action": "accept",
+        "nat": false,
+        "schedule": "always",
+        "log": false
+      },
+      {
+        "id": 2,
+        "name": "deny-rest",
+        "enabled": true,
+        "srcintf": ["any"],
+        "dstintf": ["any"],
+        "srcaddr": ["all"],
+        "dstaddr": ["all"],
+        "service": ["ALL"],
+        "action": "deny",
+        "nat": false,
+        "schedule": "always",
+        "log": true
+      }
+    ]
+  },
+  "packets": [
+    {
+      "srcintf": "vlan10",
+      "srcIp": "10.0.10.5",
+      "dstIp": "172.16.0.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    },
+    {
+      "srcintf": "vlan10",
+      "srcIp": "10.0.10.5",
+      "dstIp": "172.17.0.10",
+      "protocol": "tcp",
+      "dstPort": 443
+    }
+  ],
+  "timerSeconds": 30
+}

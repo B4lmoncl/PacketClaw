@@ -1,0 +1,210 @@
+{
+  "id": "ch4-l05",
+  "chapter": 4,
+  "index": 5,
+  "mode": "architect",
+  "title": {
+    "de": "Zonen statt Zettelwirtschaft",
+    "en": "Zones Instead of Paperwork"
+  },
+  "briefing": {
+    "de": "Drei interne Interfaces, ein Ziel: Nutze die Zone 'inside', statt drei Regeln zu klonen.",
+    "en": "Three internal interfaces, one goal: use the 'inside' zone instead of cloning three rules."
+  },
+  "ticket": {
+    "de": "Alle internen Netze (port1, vlan10, vlan20) sollen DNS beim DMZ-Resolver SRV_DNS01 machen dürfen. Direkt-DNS ins Internet bleibt verboten. — Netzwerkteam, das Zonen liebt.",
+    "en": "All internal networks (port1, vlan10, vlan20) may do DNS against DMZ resolver SRV_DNS01. Direct DNS to the internet stays forbidden. — The network team, which loves zones."
+  },
+  "difficulty": 2,
+  "concepts": ["zones", "least-privilege"],
+  "referencePolicyCount": 1,
+  "network": {
+    "interfaces": [
+      {
+        "id": "if-p1",
+        "name": "port1"
+      },
+      {
+        "id": "if-v10",
+        "name": "vlan10"
+      },
+      {
+        "id": "if-v20",
+        "name": "vlan20"
+      },
+      {
+        "id": "if-p2",
+        "name": "port2"
+      },
+      {
+        "id": "if-w1",
+        "name": "wan1"
+      }
+    ],
+    "zones": [
+      {
+        "id": "z-inside",
+        "name": "inside",
+        "members": ["if-p1", "if-v10", "if-v20"]
+      },
+      {
+        "id": "z-dmz",
+        "name": "dmz",
+        "members": ["if-p2"]
+      }
+    ],
+    "addresses": [
+      {
+        "id": "LAN_NET",
+        "name": "LAN_NET",
+        "type": "subnet",
+        "subnet": "10.0.1.0/24"
+      },
+      {
+        "id": "VLAN10_NET",
+        "name": "VLAN10_NET",
+        "type": "subnet",
+        "subnet": "10.0.10.0/24"
+      },
+      {
+        "id": "GUEST_NET",
+        "name": "GUEST_NET",
+        "type": "subnet",
+        "subnet": "10.0.20.0/24"
+      },
+      {
+        "id": "DMZ_NET",
+        "name": "DMZ_NET",
+        "type": "subnet",
+        "subnet": "172.16.0.0/24"
+      },
+      {
+        "id": "SRV_WEB01",
+        "name": "SRV_WEB01",
+        "type": "host",
+        "host": "172.16.0.10"
+      },
+      {
+        "id": "SRV_DNS01",
+        "name": "SRV_DNS01",
+        "type": "host",
+        "host": "172.16.0.53"
+      }
+    ],
+    "addressGroups": [],
+    "services": [
+      {
+        "id": "HTTPS",
+        "name": "HTTPS",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 443,
+            "to": 443
+          }
+        ]
+      },
+      {
+        "id": "DNS",
+        "name": "DNS",
+        "protocol": "udp",
+        "dstPorts": [
+          {
+            "from": 53,
+            "to": 53
+          }
+        ]
+      },
+      {
+        "id": "SSH",
+        "name": "SSH",
+        "protocol": "tcp",
+        "dstPorts": [
+          {
+            "from": 22,
+            "to": 22
+          }
+        ]
+      }
+    ],
+    "serviceGroups": [],
+    "vips": [],
+    "routes": [
+      {
+        "dst": "10.0.1.0/24",
+        "iface": "port1"
+      },
+      {
+        "dst": "10.0.10.0/24",
+        "iface": "vlan10"
+      },
+      {
+        "dst": "10.0.20.0/24",
+        "iface": "vlan20"
+      },
+      {
+        "dst": "172.16.0.0/24",
+        "iface": "port2"
+      },
+      {
+        "dst": "0.0.0.0/0",
+        "iface": "wan1"
+      }
+    ],
+    "policies": []
+  },
+  "suite": [
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "172.16.0.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan10",
+        "srcIp": "10.0.10.5",
+        "dstIp": "172.16.0.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "vlan20",
+        "srcIp": "10.0.20.5",
+        "dstIp": "172.16.0.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "accept"
+    },
+    {
+      "packet": {
+        "srcintf": "port1",
+        "srcIp": "10.0.1.5",
+        "dstIp": "9.9.9.9",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "kein Direkt-DNS"
+    },
+    {
+      "packet": {
+        "srcintf": "wan1",
+        "srcIp": "198.51.100.7",
+        "dstIp": "172.16.0.53",
+        "protocol": "udp",
+        "dstPort": 53
+      },
+      "expect": "deny",
+      "note": "inside heisst inside"
+    }
+  ]
+}
