@@ -29,12 +29,45 @@ describe('generateDaily', () => {
     }
   });
 
-  it('Regelwerk hat 8–12 Policies mit eindeutigen IDs', () => {
+  it('Regelwerk hat 6–14 Policies mit eindeutigen IDs', () => {
     const run = generateDaily('2026-07-10');
-    expect(run.network.policies.length).toBeGreaterThanOrEqual(8);
-    expect(run.network.policies.length).toBeLessThanOrEqual(12);
+    expect(run.network.policies.length).toBeGreaterThanOrEqual(6);
+    expect(run.network.policies.length).toBeLessThanOrEqual(14);
     const ids = run.network.policies.map((p) => p.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('Ausgaenge sind balanciert — keine Implicit-Deny-Flut (30 Tage)', () => {
+    let totalImplicit = 0;
+    for (let day = 1; day <= 30; day++) {
+      const date = `2026-08-${String(day).padStart(2, '0')}`;
+      const run = generateDaily(date);
+      let accepts = 0;
+      let implicit = 0;
+      for (const packet of run.packets) {
+        const verdict = evaluate(packet, run.network);
+        if (verdict.action === 'accept') accepts++;
+        else if (verdict.matchedPolicyId === 0) implicit++;
+      }
+      totalImplicit += implicit;
+      // pro Tag: nie mehr als die Haelfte Implicit Deny, mindestens 2 Accepts
+      expect(implicit, date).toBeLessThanOrEqual(5);
+      expect(accepts, date).toBeGreaterThanOrEqual(2);
+    }
+    // im Schnitt ~3/10 Implicit — deutlich unter der alten Flut
+    expect(totalImplicit / 30).toBeLessThanOrEqual(3.6);
+  });
+
+  it('Regelwerke variieren zwischen Tagen (Laenge und Felder)', () => {
+    const lengths = new Set<number>();
+    const firstServices = new Set<string>();
+    for (let day = 1; day <= 14; day++) {
+      const run = generateDaily(`2026-09-${String(day).padStart(2, '0')}`);
+      lengths.add(run.network.policies.length);
+      firstServices.add(JSON.stringify(run.network.policies.map((p) => p.service)));
+    }
+    expect(lengths.size).toBeGreaterThanOrEqual(4);
+    expect(firstServices.size).toBe(14); // kein Tag hat dasselbe Regelwerk
   });
 });
 

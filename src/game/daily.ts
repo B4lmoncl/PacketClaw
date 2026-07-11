@@ -1,8 +1,10 @@
 /**
  * Daily Run: 10 prozedural generierte Verdict-Aufgaben, geseedet mit dem
  * Datum — gleicher Tag ⇒ gleiche Aufgaben für alle. Kein Math.random.
- * Aufbau: EIN Tagesregelwerk (8–12 Policies über einem festen Netz),
- * 10 Pakete mit steigender Gemeinheit.
+ * Jeder Tag hat ein THEMA (egress/dmz/lockdown), das Struktur und Länge
+ * des Regelwerks prägt (6–14 Policies), und die 10 Pakete werden nach
+ * Ausgang balanciert: ~4× ACCEPT, ~3× explizites DENY, ~3× Implicit Deny —
+ * statt "fast alles fällt durch bis Policy 0".
  */
 import { createRng, evaluate, makeConfig, makePolicy } from '../engine';
 import type { NetworkConfig, Packet, Policy, Rng } from '../engine';
@@ -52,10 +54,12 @@ const ROUTES = [
   { dst: '0.0.0.0/0', iface: 'wan1' },
 ];
 
-const SRC_ENTRIES = ['LAN_NET', 'GUEST_NET', 'DMZ_NET', 'ADMIN_PC', 'MGMT_RANGE', 'all'];
-const DST_ENTRIES = ['all', 'DMZ_NET', 'SRV_WEB01'];
-const SVC_ENTRIES = ['HTTPS', 'HTTP', 'DNS', 'SSH', 'RDP', 'PING', 'ALL'];
-const INTF_ENTRIES = ['port1', 'vlan20', 'port2', 'wan1', 'inside', 'any'];
+const ADDRESS_GROUPS = [
+  { id: 'INTERNAL', name: 'INTERNAL', members: ['LAN_NET', 'MGMT_RANGE'] },
+  { id: 'WEB_TIER', name: 'WEB_TIER', members: ['SRV_WEB01', 'DMZ_NET'] },
+];
+
+const SERVICE_GROUPS = [{ id: 'WEB', name: 'WEB', members: ['HTTPS', 'HTTP'] }];
 
 const SRC_IPS = [
   '10.0.1.5',
@@ -69,17 +73,70 @@ const SRC_IPS = [
 ];
 const DST_IPS = ['203.0.113.50', '9.9.9.9', '172.16.0.10', '10.0.1.5', '198.51.100.20'];
 
-function randomPolicy(rng: Rng, id: number): Policy {
+/** Tages-Thema: prägt Feld-Gewichtung und Regelwerk-Charakter. */
+type Theme = 'egress' | 'dmz' | 'lockdown';
+const THEMES: Theme[] = ['egress', 'dmz', 'lockdown'];
+
+interface ThemeShape {
+  src: string[];
+  dst: string[];
+  svc: string[];
+  intfIn: string[];
+  intfOut: string[];
+  acceptBias: number; // Wahrscheinlichkeit fuer action=accept
+}
+
+const SHAPES: Record<Theme, ThemeShape> = {
+  // Ausgehender Traffic: wer darf womit ins Internet?
+  egress: {
+    src: ['LAN_NET', 'GUEST_NET', 'INTERNAL', 'ADMIN_PC', 'MGMT_RANGE'],
+    dst: ['all'],
+    svc: ['HTTPS', 'WEB', 'DNS', 'HTTP', 'PING', 'ALL'],
+    intfIn: ['port1', 'vlan20', 'inside'],
+    intfOut: ['wan1'],
+    acceptBias: 0.6,
+  },
+  // Dienste in der DMZ: Zugriffe auf Server-Objekte
+  dmz: {
+    src: ['LAN_NET', 'GUEST_NET', 'INTERNAL', 'all', 'ADMIN_PC'],
+    dst: ['DMZ_NET', 'SRV_WEB01', 'WEB_TIER'],
+    svc: ['HTTPS', 'HTTP', 'WEB', 'SSH', 'PING'],
+    intfIn: ['port1', 'vlan20', 'inside', 'wan1', 'any'],
+    intfOut: ['port2'],
+    acceptBias: 0.55,
+  },
+  // Deny-lastig: enge Ausnahmen vor breiten Verboten
+  lockdown: {
+    src: ['ADMIN_PC', 'MGMT_RANGE', 'LAN_NET', 'GUEST_NET', 'all'],
+    dst: ['all', 'DMZ_NET', 'SRV_WEB01'],
+    svc: ['SSH', 'RDP', 'HTTPS', 'DNS', 'ALL', 'PING'],
+    intfIn: ['port1', 'vlan20', 'inside', 'any'],
+    intfOut: ['wan1', 'port2', 'any'],
+    acceptBias: 0.4,
+  },
+};
+
+/** Feldwert mit gelegentlich zwei Eintraegen — wie gewachsene Regelwerke. */
+function pickField(rng: Rng, pool: string[], multiChance = 0.2): string[] {
+  const first = rng.pick(pool);
+  if (first !== 'all' && first !== 'ALL' && rng.next() < multiChance) {
+    const second = rng.pick(pool);
+    if (second !== first && second !== 'all' && second !== 'ALL') return [first, second];
+  }
+  return [first];
+}
+
+function themedPolicy(rng: Rng, id: number, shape: ThemeShape): Policy {
   return makePolicy({
     id,
     name: `daily-${id}`,
-    enabled: rng.next() > 0.15, // gelegentlich disabled als Falle
-    srcintf: [rng.pick(INTF_ENTRIES)],
-    dstintf: [rng.pick(INTF_ENTRIES)],
-    srcaddr: [rng.pick(SRC_ENTRIES)],
-    dstaddr: [rng.pick(DST_ENTRIES)],
-    service: [rng.pick(SVC_ENTRIES)],
-    action: rng.next() > 0.45 ? 'accept' : 'deny',
+    enabled: rng.next() > 0.12, // gelegentlich disabled als Falle
+    srcintf: [rng.pick(shape.intfIn)],
+    dstintf: [rng.pick(shape.intfOut)],
+    srcaddr: pickField(rng, shape.src),
+    dstaddr: pickField(rng, shape.dst, 0.12),
+    service: pickField(rng, shape.svc),
+    action: rng.next() < shape.acceptBias ? 'accept' : 'deny',
     nat: rng.next() > 0.5,
   });
 }
@@ -101,59 +158,112 @@ function randomPacket(rng: Rng): Packet {
   return packet;
 }
 
-/** true, wenn das Paket eine "interessante" Aufgabe ist (nicht trivial Zeile 0 ab Regel 1) */
-function isInteresting(packet: Packet, network: NetworkConfig): boolean {
+type Outcome = 'accept' | 'deny' | 'implicit';
+
+function outcomeOf(packet: Packet, network: NetworkConfig): Outcome | null {
   const verdict = evaluate(packet, network);
-  // Mindestens eine Policy muss geprüft worden sein; no-route langweilt im Daily
-  return verdict.trace.some((s) => s.kind.startsWith('policy'));
+  // Aufgabe muss mindestens eine Policy beruehren (no-route langweilt im Daily)
+  if (!verdict.trace.some((s) => s.kind.startsWith('policy'))) return null;
+  if (verdict.matchedPolicyId === 0) return 'implicit';
+  return verdict.action;
 }
 
 export function generateDaily(date: string): DailyRun {
   const rng = createRng(`aethergate-daily-${date}`);
+  const theme = rng.pick(THEMES);
+  const shape = SHAPES[theme];
 
-  const policyCount = rng.int(8, 12);
+  const policyCount = rng.int(6, 14);
   const policies: Policy[] = [];
   for (let i = 0; i < policyCount; i++) {
-    policies.push(randomPolicy(rng, i + 1));
+    policies.push(themedPolicy(rng, i + 1, shape));
   }
-  // Der Tag braucht mindestens eine sichere Accept- und eine Deny-Regel
+  // Anker: eine sichere Accept-Regel, damit der Tag nie reine Deny-Wueste ist
+  const anchorService = rng.pick(['HTTPS', 'WEB', 'DNS']);
   policies[0] = makePolicy({
     id: 1,
     name: 'daily-1',
     srcintf: ['inside'],
-    dstintf: ['wan1'],
-    srcaddr: ['LAN_NET'],
-    dstaddr: ['all'],
-    service: [rng.pick(['HTTPS', 'DNS'])],
+    dstintf: [theme === 'dmz' ? 'port2' : 'wan1'],
+    srcaddr: [rng.pick(['LAN_NET', 'INTERNAL'])],
+    dstaddr: theme === 'dmz' ? ['WEB_TIER'] : ['all'],
+    service: [anchorService],
     action: 'accept',
-    nat: true,
+    nat: theme !== 'dmz',
   });
 
   const network = makeConfig({
     interfaces: INTERFACES,
     zones: ZONES,
     addresses: ADDRESSES,
+    addressGroups: ADDRESS_GROUPS,
     services: SERVICES,
+    serviceGroups: SERVICE_GROUPS,
     routes: ROUTES,
     policies,
   });
 
-  const packets: Packet[] = [];
-  let guard = 0;
-  while (packets.length < 10 && guard < 500) {
-    guard++;
-    const packet = randomPacket(rng);
-    if (isInteresting(packet, network)) packets.push(packet);
+  // Ausgangs-Balance statt Implicit-Deny-Flut: Ziel 4/3/3, seeded gemischt
+  const wanted: Outcome[] = [
+    'accept',
+    'accept',
+    'accept',
+    'accept',
+    'deny',
+    'deny',
+    'deny',
+    'implicit',
+    'implicit',
+    'implicit',
+  ];
+  for (let i = wanted.length - 1; i > 0; i--) {
+    const j = rng.int(0, i);
+    const a = wanted[i] as Outcome;
+    wanted[i] = wanted[j] as Outcome;
+    wanted[j] = a;
   }
-  // Fallback (praktisch unerreichbar): mit garantiert policy-berührenden Paketen auffüllen
-  while (packets.length < 10) {
-    packets.push({
-      srcintf: 'port1',
-      srcIp: '10.0.1.5',
-      dstIp: '203.0.113.50',
-      protocol: 'tcp',
-      dstPort: 443,
-    });
+
+  const packets: Packet[] = [];
+  for (const target of wanted) {
+    let found: Packet | null = null;
+    const seen: Partial<Record<Outcome, Packet>> = {};
+    for (let attempt = 0; attempt < 200 && !found; attempt++) {
+      const candidate = randomPacket(rng);
+      const outcome = outcomeOf(candidate, network);
+      if (outcome === null) continue;
+      if (outcome === target) found = candidate;
+      else seen[outcome] = seen[outcome] ?? candidate;
+    }
+    // Gibt das Tagesregelwerk den Ziel-Ausgang nicht her, lieber ein Paket
+    // mit EXPLIZITEM Match als noch ein Implicit Deny
+    packets.push(
+      found ??
+        seen.accept ??
+        seen.deny ??
+        seen.implicit ?? {
+          srcintf: 'port1',
+          srcIp: '10.0.1.5',
+          dstIp: '203.0.113.50',
+          protocol: 'tcp',
+          dstPort: 443,
+        },
+    );
+  }
+
+  // Garantie: mindestens 2 ACCEPT-Aufgaben. Wenn der Wuerfel sie nicht
+  // hergab, ersetzen wir Implicit-Denies durch Pakete, die sicher die
+  // Anker-Regel (Policy 1, ganz oben) treffen.
+  const anchorPacket = (): Packet => ({
+    srcintf: rng.pick(['port1', 'vlan20']),
+    srcIp: rng.pick(['10.0.1.5', '10.0.1.10', '10.0.1.19']),
+    dstIp: theme === 'dmz' ? '172.16.0.10' : rng.pick(['203.0.113.50', '9.9.9.9']),
+    protocol: anchorService === 'DNS' ? 'udp' : 'tcp',
+    dstPort: anchorService === 'DNS' ? 53 : 443,
+  });
+  const countAccepts = () => packets.filter((p) => evaluate(p, network).action === 'accept').length;
+  for (let i = packets.length - 1; i >= 0 && countAccepts() < 2; i--) {
+    const packet = packets[i] as Packet;
+    if (outcomeOf(packet, network) !== 'accept') packets[i] = anchorPacket();
   }
 
   return { date, network, packets };
