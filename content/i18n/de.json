@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "AetherGate",
-    "tagline": "Torwacht am Venennetz — Firewall-Puzzles für Netzwerk-Menschen"
+    "tagline": "Torwacht am Venennetz — Firewall-Puzzles für Netzwerk-Menschen",
+    "policyTableAria": "Policy-Tabelle",
+    "mascotAria": "Snipp, der Torwächter — das AetherGate-Maskottchen"
   },
   "nav": {
     "campaign": "Kampagne",
@@ -11,7 +13,12 @@
     "chapter": "Kapitel {{number}}",
     "comingSoon": "bald",
     "profile": "Profil",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "campaignSub": "8 Kapitel · First Match bis Hardening",
+    "dailySub": "10 Pakete · seeded · für alle gleich",
+    "sandboxSub": "Eigenes Netz, eigene Regeln, freies Feuern",
+    "mainMenu": "Hauptmenü",
+    "chapters": "Kapitel"
   },
   "level": {
     "boss": "Boss",

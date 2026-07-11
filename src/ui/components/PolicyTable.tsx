@@ -185,7 +185,7 @@ export function PolicyTable({
   );
 
   return (
-    <div className="flex flex-col gap-1" role="list" aria-label="Policy-Tabelle">
+    <div className="flex flex-col gap-1" role="list" aria-label={t('app.policyTableAria')}>
       {network.policies.map((policy) => (
         <div role="listitem" key={policy.id}>
           <PolicyRow

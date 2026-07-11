@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'AetherGate',
         short_name: 'AetherGate',
         description:
-          'Firewall-Policy-Puzzle-Game — unabhängiges Lernprojekt, nicht mit Fortinet affiliiert.',
-        lang: 'de',
+          'Firewall policy puzzle game — independent learning project, not affiliated with Fortinet.',
+        lang: 'en',
         theme_color: '#0B1220',
         background_color: '#0B1220',
         display: 'standalone',

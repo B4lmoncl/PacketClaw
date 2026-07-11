@@ -16,7 +16,11 @@ export function ChapterScreen({ chapter }: { chapter: number }) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 pt-4 lg:max-w-5xl lg:px-6">
       {/* Kapitel-Leiste */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Kapitel">
+      <div
+        className="flex gap-1.5 overflow-x-auto pb-1"
+        role="tablist"
+        aria-label={t('nav.chapters')}
+      >
         {CHAPTERS.map((c) => {
           const unlocked =
             isChapterUnlocked(c.number, stars) && levelsForChapter(c.number).length > 0;

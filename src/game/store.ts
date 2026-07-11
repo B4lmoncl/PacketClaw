@@ -78,7 +78,7 @@ export const useGame = create<GameState>()(
       achievements: [],
       streak: { ...EMPTY_STREAK },
       onboarded: false,
-      settings: { sound: true, motion: 'system', scanlines: false, locale: 'de' },
+      settings: { sound: true, motion: 'system', scanlines: false, locale: 'en' },
       screen: { name: 'home' },
       combo: 0,
       lastUnlocked: [],
@@ -267,7 +267,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
       sound: true,
       motion: 'system',
       scanlines: false,
-      locale: 'de',
+      locale: 'en',
       ...((save.settings as Partial<Settings>) ?? {}),
     },
   };

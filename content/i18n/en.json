@@ -1,7 +1,9 @@
 {
   "app": {
     "title": "AetherGate",
-    "tagline": "Gatekeeping the vein network — firewall puzzles for network people"
+    "tagline": "Gatekeeping the vein network — firewall puzzles for network people",
+    "policyTableAria": "Policy table",
+    "mascotAria": "Snipp the gatekeeper — the AetherGate mascot"
   },
   "nav": {
     "campaign": "Campaign",
@@ -11,7 +13,12 @@
     "chapter": "Chapter {{number}}",
     "comingSoon": "soon",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "campaignSub": "8 chapters · first match to hardening",
+    "dailySub": "10 packets · seeded · same for everyone",
+    "sandboxSub": "Your own network, your own rules, free fire",
+    "mainMenu": "Main menu",
+    "chapters": "Chapters"
   },
   "level": {
     "boss": "Boss",

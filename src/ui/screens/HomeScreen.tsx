@@ -18,7 +18,7 @@ export function HomeScreen() {
 
       <nav
         className="flex w-full flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-4"
-        aria-label="Hauptmenü"
+        aria-label={t('nav.mainMenu')}
       >
         <button
           onClick={() => navigate({ name: 'chapter', chapter: 1 })}
@@ -26,7 +26,7 @@ export function HomeScreen() {
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.campaign')}</div>
-            <div className="font-mono text-xs text-dim">8 Kapitel · First Match bis Hardening</div>
+            <div className="font-mono text-xs text-dim">{t('nav.campaignSub')}</div>
           </div>
           <span className="text-claw transition-transform group-hover:translate-x-1">→</span>
         </button>
@@ -37,7 +37,7 @@ export function HomeScreen() {
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.daily')}</div>
-            <div className="font-mono text-xs text-dim">10 Pakete · seeded · für alle gleich</div>
+            <div className="font-mono text-xs text-dim">{t('nav.dailySub')}</div>
           </div>
           <span className="text-warn transition-transform group-hover:translate-x-1">→</span>
         </button>
@@ -48,9 +48,7 @@ export function HomeScreen() {
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.sandbox')}</div>
-            <div className="font-mono text-xs text-dim">
-              Eigenes Netz, eigene Regeln, freies Feuern
-            </div>
+            <div className="font-mono text-xs text-dim">{t('nav.sandboxSub')}</div>
           </div>
           <span className="text-trace transition-transform group-hover:translate-x-1">→</span>
         </button>

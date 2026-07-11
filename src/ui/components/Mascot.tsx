@@ -1,10 +1,13 @@
 /**
- * Claw — das PacketClaw-Maskottchen. Eigenes SVG, kein Fremd-Artwork.
+ * Snipp, der Torwächter — das AetherGate-Maskottchen. Eigenes SVG, kein Fremd-Artwork.
  * Posen: idle, happy (Jubel), snip (DENY), facepalm (Fehlversuch).
  */
+import { useTranslation } from 'react-i18next';
+
 export type MascotPose = 'idle' | 'happy' | 'snip' | 'facepalm';
 
 export function Mascot({ pose = 'idle', size = 64 }: { pose?: MascotPose; size?: number }) {
+  const { t } = useTranslation();
   const leftClawTransform = {
     idle: 'rotate(-15 22 34)',
     happy: 'rotate(-60 22 34)',
@@ -30,7 +33,7 @@ export function Mascot({ pose = 'idle', size = 64 }: { pose?: MascotPose; size?:
       height={size}
       viewBox="0 0 100 80"
       role="img"
-      aria-label="Snipp, der Torwächter — das AetherGate-Maskottchen"
+      aria-label={t('app.mascotAria')}
     >
       {/* Beine */}
       <g stroke="#C74A31" strokeWidth="3" strokeLinecap="round" fill="none">
