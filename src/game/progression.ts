@@ -24,7 +24,7 @@ export const RANKS: Rank[] = [
   { id: 'audit-ace', name: 'Audit Ace', minXp: 12000 },
   { id: 'policy-architect', name: 'Policy Architect', minXp: 17000 },
   { id: 'implicit-deny-veteran', name: 'Implicit-Deny-Veteran', minXp: 23000 },
-  { id: 'claw-commander', name: 'Claw Commander', minXp: 30000 },
+  { id: 'claw-commander', name: 'Aether-Kommandant', minXp: 30000 },
 ];
 
 export function rankFor(xp: number): { rank: Rank; next: Rank | null; progress: number } {
@@ -383,7 +383,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'rank-commander',
     rarity: 'legendary',
-    title: { de: 'Claw Commander', en: 'Claw Commander' },
+    title: { de: 'Aether-Kommandant', en: 'Aether Commander' },
     description: {
       de: 'Höchsten Rang erreicht (30000 XP).',
       en: 'Reached the highest rank (30000 XP).',

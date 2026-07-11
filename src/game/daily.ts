@@ -167,9 +167,9 @@ export function todayString(now = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
-/** Share-Text im Stil "AetherGate Daily 2026-07-10 · 9/10 · 🦞🟩🟩🟥…" */
+/** Share-Text im Stil "AetherGate Daily 2026-07-10 · 9/10 · 🛡️🟩🟩🟥…" */
 export function buildShareText(date: string, results: boolean[]): string {
   const correct = results.filter(Boolean).length;
   const grid = results.map((r) => (r ? '🟩' : '🟥')).join('');
-  return `AetherGate Daily ${date} · ${correct}/${results.length} · 🦞${grid}`;
+  return `AetherGate Daily ${date} · ${correct}/${results.length} · 🛡️${grid}`;
 }

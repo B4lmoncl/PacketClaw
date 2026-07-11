@@ -22,7 +22,7 @@ describe('rankFor', () => {
     expect(rankFor(0).rank.name).toBe('Packet Rookie');
     expect(rankFor(499).rank.name).toBe('Packet Rookie');
     expect(rankFor(500).rank.name).toBe('Port Wächter');
-    expect(rankFor(999999).rank.name).toBe('Claw Commander');
+    expect(rankFor(999999).rank.name).toBe('Aether-Kommandant');
     expect(rankFor(999999).next).toBeNull();
   });
 

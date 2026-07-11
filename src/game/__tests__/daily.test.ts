@@ -48,6 +48,6 @@ describe('todayString', () => {
 describe('buildShareText', () => {
   it('baut den Share-Text im vereinbarten Format', () => {
     const text = buildShareText('2026-07-10', [true, true, false, true]);
-    expect(text).toBe('AetherGate Daily 2026-07-10 · 3/4 · 🦞🟩🟩🟥🟩');
+    expect(text).toBe('AetherGate Daily 2026-07-10 · 3/4 · 🛡️🟩🟩🟥🟩');
   });
 });

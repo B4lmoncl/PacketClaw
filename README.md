@@ -1,4 +1,4 @@
-# 🦞 AetherGate
+# 🛡️ AetherGate
 
 **Firewall-Policy-Puzzle-Game.** Trainiere First-Match-Logik, Regelreihenfolge, Adress-/Service-Objekte, Zonen, SNAT und VIPs/DNAT — als Spiel, im Browser, offline-fähig, installierbar als PWA.
 
