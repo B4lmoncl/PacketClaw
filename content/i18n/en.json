@@ -55,7 +55,7 @@
   },
   "policyTable": {
     "id": "ID",
-    "name": "Name",
+    "name": "Name/ID",
     "srcintf": "Src intf",
     "dstintf": "Dst intf",
     "srcaddr": "Source",
@@ -68,7 +68,10 @@
     "disabled": "disabled",
     "filter": "Filter: source, service, name, action …",
     "filterClear": "Clear filter",
-    "filterNoMatch": "No policy matches the filter — implicit deny stays visible."
+    "filterNoMatch": "No policy matches the filter — implicit deny stays visible.",
+    "filterField": "Filter field",
+    "filterValue": "value …",
+    "addFilter": "Add field filter"
   },
   "debrief": {
     "title": "Debrief",

@@ -165,6 +165,41 @@ function PolicyRow({
   );
 }
 
+/** Spaltenfilter wie im FortiGate-GUI: Feld + Wert, additiv (UND-verknuepft). */
+type FilterField = 'srcaddr' | 'dstaddr' | 'service' | 'srcintf' | 'dstintf' | 'action' | 'name';
+
+const FILTER_FIELDS: FilterField[] = [
+  'srcaddr',
+  'dstaddr',
+  'service',
+  'srcintf',
+  'dstintf',
+  'action',
+  'name',
+];
+
+interface FieldFilter {
+  field: FilterField;
+  q: string;
+}
+
+function fieldValues(policy: Policy, field: FilterField): string[] {
+  switch (field) {
+    case 'name':
+      return [policy.name, String(policy.id)];
+    case 'action':
+      return [policy.action];
+    default:
+      return policy[field];
+  }
+}
+
+function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
+  return filters.every(({ field, q }) =>
+    fieldValues(policy, field).some((v) => v.toLowerCase().includes(q)),
+  );
+}
+
 /** Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen. */
 function policyMatches(policy: Policy, tokens: string[]): boolean {
   const haystack = [
@@ -193,11 +228,21 @@ export function PolicyTable({
 }: PolicyTableProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const [filters, setFilters] = useState<FieldFilter[]>([]);
+  const [draftField, setDraftField] = useState<FilterField>('srcaddr');
+  const [draftQ, setDraftQ] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-  const visiblePolicies =
-    tokens.length === 0
-      ? network.policies
-      : network.policies.filter((p) => policyMatches(p, tokens));
+  const filtering = tokens.length > 0 || filters.length > 0;
+  const visiblePolicies = !filtering
+    ? network.policies
+    : network.policies.filter((p) => policyMatches(p, tokens) && matchesFieldFilters(p, filters));
+
+  const addFilter = () => {
+    const q = draftQ.trim().toLowerCase();
+    if (!q) return;
+    setFilters((f) => [...f, { field: draftField, q }]);
+    setDraftQ('');
+  };
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
   const implicitSelected = selectedId === 0;
 
@@ -223,23 +268,71 @@ export function PolicyTable({
             aria-label={t('policyTable.filter')}
             className="w-full rounded-row border border-line bg-bg px-2.5 py-1.5 font-mono text-xs text-ink placeholder:text-dim/60 focus:border-claw/60 focus:outline-none"
           />
-          {tokens.length > 0 && (
-            <>
-              <span className="shrink-0 font-mono text-[10px] tabular-nums text-dim">
-                {visiblePolicies.length}/{network.policies.length}
-              </span>
-              <button
-                onClick={() => setQuery('')}
-                className="shrink-0 rounded-row border border-line px-2 py-1 text-xs text-dim hover:text-ink"
-                aria-label={t('policyTable.filterClear')}
-              >
-                ✕
-              </button>
-            </>
+          <select
+            value={draftField}
+            onChange={(e) => setDraftField(e.target.value as FilterField)}
+            aria-label={t('policyTable.filterField')}
+            className="shrink-0 rounded-row border border-line bg-bg px-1.5 py-1.5 font-mono text-[11px] text-dim"
+          >
+            {FILTER_FIELDS.map((f) => (
+              <option key={f} value={f}>
+                {t(`policyTable.${f}`)}
+              </option>
+            ))}
+          </select>
+          <input
+            value={draftQ}
+            onChange={(e) => setDraftQ(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addFilter()}
+            placeholder={t('policyTable.filterValue')}
+            aria-label={t('policyTable.filterValue')}
+            className="w-28 shrink-0 rounded-row border border-line bg-bg px-2 py-1.5 font-mono text-xs text-ink placeholder:text-dim/60 focus:border-claw/60 focus:outline-none"
+          />
+          <button
+            onClick={addFilter}
+            disabled={!draftQ.trim()}
+            className="shrink-0 rounded-row border border-line px-2 py-1 text-xs text-dim hover:text-ink disabled:opacity-40"
+            aria-label={t('policyTable.addFilter')}
+          >
+            +
+          </button>
+          {filtering && (
+            <span className="shrink-0 font-mono text-[10px] tabular-nums text-dim">
+              {visiblePolicies.length}/{network.policies.length}
+            </span>
           )}
         </div>
       )}
-      {tokens.length > 0 && visiblePolicies.length === 0 && (
+      {filters.length > 0 && (
+        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+          {filters.map((f, i) => (
+            <button
+              key={`${f.field}-${f.q}-${i}`}
+              onClick={() => setFilters((all) => all.filter((_, j) => j !== i))}
+              className="inline-flex items-baseline gap-1 rounded-row border border-claw/50 bg-claw/10 px-1.5 py-0.5 font-mono text-[11px] text-ink hover:bg-claw/20"
+              title={t('policyTable.filterClear')}
+            >
+              <span className="text-[8px] uppercase tracking-wide text-claw">
+                {t(`policyTable.${f.field}`)}
+              </span>
+              {f.q}
+              <span aria-hidden className="text-dim">
+                ✕
+              </span>
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              setFilters([]);
+              setQuery('');
+            }}
+            className="rounded-row px-1.5 py-0.5 text-[11px] text-dim underline hover:text-ink"
+          >
+            {t('policyTable.filterClear')}
+          </button>
+        </div>
+      )}
+      {filtering && visiblePolicies.length === 0 && (
         <p className="rounded-row border border-line/60 px-2 py-1.5 text-xs text-dim">
           {t('policyTable.filterNoMatch')}
         </p>

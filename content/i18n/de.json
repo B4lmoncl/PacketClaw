@@ -55,7 +55,7 @@
   },
   "policyTable": {
     "id": "ID",
-    "name": "Name",
+    "name": "Name/ID",
     "srcintf": "Src-Intf",
     "dstintf": "Dst-Intf",
     "srcaddr": "Source",
@@ -68,7 +68,10 @@
     "disabled": "deaktiviert",
     "filter": "Filter: Source, Service, Name, Aktion …",
     "filterClear": "Filter leeren",
-    "filterNoMatch": "Keine Policy passt auf den Filter — Implicit Deny bleibt sichtbar."
+    "filterNoMatch": "Keine Policy passt auf den Filter — Implicit Deny bleibt sichtbar.",
+    "filterField": "Filter-Feld",
+    "filterValue": "Wert …",
+    "addFilter": "Feld-Filter hinzufügen"
   },
   "debrief": {
     "title": "Debrief",
