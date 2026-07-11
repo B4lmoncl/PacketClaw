@@ -162,8 +162,35 @@ export function VerdictScreen({
     setSecondsLeft(level.timerSeconds ?? null);
   }
 
+  const actionButtons = (
+    <>
+      <button
+        onClick={() => setUserAction('accept')}
+        aria-pressed={userAction === 'accept'}
+        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
+          userAction === 'accept'
+            ? 'bg-trace text-bg shadow-[0_0_20px_rgba(61,220,151,0.4)]'
+            : 'border border-trace/50 text-trace hover:bg-trace/10'
+        }`}
+      >
+        ✓ {t('verdict.accept')}
+      </button>
+      <button
+        onClick={() => setUserAction('deny')}
+        aria-pressed={userAction === 'deny'}
+        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
+          userAction === 'deny'
+            ? 'bg-deny text-bg shadow-[0_0_20px_rgba(255,59,92,0.4)]'
+            : 'border border-deny/50 text-deny hover:bg-deny/10'
+        }`}
+      >
+        ✕ {t('verdict.deny')}
+      </button>
+    </>
+  );
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-28 pt-3">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-28 pt-3 lg:max-w-7xl lg:px-6 lg:pb-8">
       <div className="flex items-baseline justify-between gap-2">
         <h1 className="font-display text-lg font-bold">{level.title[locale]}</h1>
         <span className="font-mono text-xs text-dim">
@@ -180,104 +207,96 @@ export function VerdictScreen({
           onBack={() => navigate({ name: 'chapter', chapter: level.chapter })}
         />
       ) : (
-        <>
-          {packetIndex === 0 && phase === 'answer' && (
-            <p className="rounded-panel border border-line bg-panel/70 px-3 py-2 text-sm leading-relaxed text-dim">
-              {level.briefing[locale]}
-            </p>
-          )}
-          <NetworkDiagram network={level.network} />
-          <PacketCard packet={packet} />
-
-          <PolicyTable
-            network={level.network}
-            highlights={descent.highlights}
-            chipRow={descent.chipRow}
-            selectable={phase === 'answer' && userAction !== null}
-            selectedId={userPolicyId}
-            onSelect={(id) => submit(id)}
-          />
-
-          {level.timerSeconds && phase === 'answer' && secondsLeft !== null && (
-            <div
-              className={`self-center rounded-panel border px-4 py-1 font-mono text-lg font-bold tabular-nums ${
-                secondsLeft <= 5 ? 'border-deny text-deny' : 'border-warn/50 text-warn'
-              }`}
-              role="timer"
-              aria-live="off"
-            >
-              {secondsLeft}s
+        // Desktop (QuestHall-Breite): links Netz + Policy-Tabelle,
+        // rechts Paket, Timer, Debrief und die Aktions-Buttons (sticky).
+        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-6">
+          <div className="flex min-w-0 flex-col gap-3">
+            {packetIndex === 0 && phase === 'answer' && (
+              <p className="rounded-panel border border-line bg-panel/70 px-3 py-2 text-sm leading-relaxed text-dim">
+                {level.briefing[locale]}
+              </p>
+            )}
+            <NetworkDiagram network={level.network} />
+            <div className="lg:hidden">
+              <PacketCard packet={packet} />
             </div>
-          )}
-          {timedOut && phase === 'answer' && (
-            <p className="text-center text-sm text-deny" aria-live="polite">
-              {t('verdict.timeout')}
-            </p>
-          )}
-          {phase === 'answer' && userAction === null && (
-            <p className="text-center text-sm text-dim">{t('verdict.question1')}</p>
-          )}
-          {phase === 'answer' && userAction !== null && (
-            <p className="text-center text-sm text-dim" aria-live="polite">
-              {t('verdict.pickPolicy')}
-            </p>
-          )}
 
-          {phase === 'descent' && (
-            <button
-              onClick={descent.skip}
-              className="self-center rounded-panel border border-line px-4 py-2 text-sm text-dim hover:text-ink"
-            >
-              {t('verdict.skipReplay')}
-            </button>
-          )}
-
-          {phase === 'debrief' && userAction !== null && userPolicyId !== null && (
-            <Debrief
-              verdict={verdict}
-              answer={{ action: userAction, policyId: userPolicyId }}
-              correct={lastCorrect}
-              allowRetry={!dailyMode}
-              onNext={nextPacket}
-              onRetry={retry}
-              onReplay={() => {
-                setPhase('descent');
-                descent.reset();
-                descent.start();
-              }}
+            <PolicyTable
+              network={level.network}
+              highlights={descent.highlights}
+              chipRow={descent.chipRow}
+              selectable={phase === 'answer' && userAction !== null}
+              selectedId={userPolicyId}
+              onSelect={(id) => submit(id)}
             />
-          )}
+          </div>
+
+          <div className="flex flex-col gap-3 lg:sticky lg:top-16">
+            <div className="hidden lg:block">
+              <PacketCard packet={packet} />
+            </div>
+
+            {level.timerSeconds && phase === 'answer' && secondsLeft !== null && (
+              <div
+                className={`self-center rounded-panel border px-4 py-1 font-mono text-lg font-bold tabular-nums ${
+                  secondsLeft <= 5 ? 'border-deny text-deny' : 'border-warn/50 text-warn'
+                }`}
+                role="timer"
+                aria-live="off"
+              >
+                {secondsLeft}s
+              </div>
+            )}
+            {timedOut && phase === 'answer' && (
+              <p className="text-center text-sm text-deny" aria-live="polite">
+                {t('verdict.timeout')}
+              </p>
+            )}
+            {phase === 'answer' && userAction === null && (
+              <p className="text-center text-sm text-dim">{t('verdict.question1')}</p>
+            )}
+            {phase === 'answer' && userAction !== null && (
+              <p className="text-center text-sm text-dim" aria-live="polite">
+                {t('verdict.pickPolicy')}
+              </p>
+            )}
+
+            {phase === 'descent' && (
+              <button
+                onClick={descent.skip}
+                className="self-center rounded-panel border border-line px-4 py-2 text-sm text-dim hover:text-ink"
+              >
+                {t('verdict.skipReplay')}
+              </button>
+            )}
+
+            {phase === 'debrief' && userAction !== null && userPolicyId !== null && (
+              <Debrief
+                verdict={verdict}
+                answer={{ action: userAction, policyId: userPolicyId }}
+                correct={lastCorrect}
+                allowRetry={!dailyMode}
+                onNext={nextPacket}
+                onRetry={retry}
+                onReplay={() => {
+                  setPhase('descent');
+                  descent.reset();
+                  descent.start();
+                }}
+              />
+            )}
+
+            {/* Desktop: Buttons in der Seitenleiste statt fixer Fußleiste */}
+            {phase === 'answer' && <div className="hidden gap-3 lg:flex">{actionButtons}</div>}
+          </div>
 
           {/* Große Daumen-Buttons: einhändig am Smartphone */}
           {phase === 'answer' && (
-            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 backdrop-blur">
-              <div className="mx-auto flex w-full max-w-2xl gap-3">
-                <button
-                  onClick={() => setUserAction('accept')}
-                  aria-pressed={userAction === 'accept'}
-                  className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
-                    userAction === 'accept'
-                      ? 'bg-trace text-bg shadow-[0_0_20px_rgba(61,220,151,0.4)]'
-                      : 'border border-trace/50 text-trace hover:bg-trace/10'
-                  }`}
-                >
-                  ✓ {t('verdict.accept')}
-                </button>
-                <button
-                  onClick={() => setUserAction('deny')}
-                  aria-pressed={userAction === 'deny'}
-                  className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
-                    userAction === 'deny'
-                      ? 'bg-deny text-bg shadow-[0_0_20px_rgba(255,59,92,0.4)]'
-                      : 'border border-deny/50 text-deny hover:bg-deny/10'
-                  }`}
-                >
-                  ✕ {t('verdict.deny')}
-                </button>
-              </div>
+            <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 backdrop-blur lg:hidden">
+              <div className="mx-auto flex w-full max-w-2xl gap-3">{actionButtons}</div>
             </div>
           )}
-        </>
+        </div>
       )}
       {/* Zielzeit dezent anzeigen */}
       {phase !== 'done' && (
@@ -308,7 +327,7 @@ function DonePanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <section className="flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+    <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
       <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
       <StarBar stars={stars} size={36} animated />
       <div className="font-mono text-sm text-ink">{t('score.points', { points: score })}</div>

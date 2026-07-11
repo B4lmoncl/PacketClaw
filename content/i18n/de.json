@@ -176,7 +176,30 @@
     "reset": "Spielstand zurücksetzen …",
     "resetConfirm": "Wirklich alles löschen?",
     "resetYes": "Löschen",
-    "disclaimer": "Unabhängiges Lernprojekt, inspiriert von FortiOS-Konzepten. Nicht mit Fortinet affiliiert."
+    "disclaimer": "Unabhängiges Lernprojekt, inspiriert von FortiOS-Konzepten. Nicht mit Fortinet affiliiert.",
+    "general": "Allgemein",
+    "account": {
+      "title": "Konto & Server-Sync",
+      "hint": "Ohne Konto liegt dein Spielstand nur in diesem Browser. Mit Konto wird er auf dem Server gespeichert und du kannst auf jedem Gerät weiterspielen.",
+      "name": "Spielername",
+      "password": "Passwort",
+      "login": "Anmelden",
+      "register": "Konto erstellen",
+      "logout": "Abmelden",
+      "loggedInAs": "Angemeldet als {{name}}",
+      "statusSynced": "Spielstand synchronisiert ✓",
+      "statusSyncing": "Synchronisiere …",
+      "statusError": "Server gerade nicht erreichbar — es wird lokal weitergespielt.",
+      "errors": {
+        "name-taken": "Der Name ist schon vergeben.",
+        "invalid-credentials": "Name oder Passwort falsch.",
+        "invalid-name": "3–24 Zeichen: Buchstaben, Zahlen, - und _.",
+        "invalid-password": "Passwort braucht mindestens 6 Zeichen.",
+        "session-expired": "Sitzung abgelaufen — bitte neu anmelden.",
+        "too-many-requests": "Zu viele Versuche — kurz warten.",
+        "network": "Server nicht erreichbar."
+      }
+    }
   },
   "onboarding": {
     "title": "Willkommen, Torwächter",

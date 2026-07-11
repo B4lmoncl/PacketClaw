@@ -20,3 +20,11 @@ Neue verworfene Ideen werden hier ergänzt (mit Datum und Ein-Satz-Begründung).
 - _2026-07-10:_ **src-Port-Matching in Services** — reale Firewalls matchen praktisch immer auf dst-Port; src-Port-Matching wäre eine Falle ohne Lerneffekt.
 - _2026-07-10:_ **`match-vip`-Sonderfall bei Deny-Policies** — FortiOS-Detailtiefe, die den didaktischen Kern (Policies matchen VIP-Traffic über das VIP-Objekt) verwässert. Als Vereinfachung in docs/ENGINE.md dokumentiert.
 - _2026-07-10:_ **Session-Tabelle/Verbindungs-Simulation** — Stateful-Prinzip wird didaktisch vermittelt (nur Initiator-Pakete werden bewertet), nicht simuliert.
+
+## Revidiert
+
+- **„Kein Backend / keine Accounts" (v1)** — am 2026-07-11 auf Nutzerwunsch
+  revidiert: Logins + serverseitiger Spielstand „wie bei QuestHall".
+  Umsetzung bewusst minimal: ein Express-Prozess im selben Container,
+  JSON-Dateien im Volume, scrypt + Bearer-Token. Kein OAuth, keine DB,
+  kein E-Mail-Flow — das bleibt abgelehnt, solange es niemand braucht.

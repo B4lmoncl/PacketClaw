@@ -9,6 +9,9 @@ import '@fontsource/jetbrains-mono/700.css';
 import App from './App';
 import './i18n';
 import './index.css';
+import { initSync } from './game/sync';
+
+initSync();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

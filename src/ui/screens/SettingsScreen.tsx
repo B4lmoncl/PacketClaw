@@ -1,10 +1,11 @@
 /**
- * Einstellungen: Sound, Reduced Motion, Scanlines, Sprache,
- * Savegame-Export/-Import (JSON-Datei) und Zurücksetzen.
+ * Einstellungen: Konto & Server-Sync, Sound, Reduced Motion, Scanlines,
+ * Sprache, Savegame-Export/-Import (JSON-Datei) und Zurücksetzen.
  */
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGame } from '../../game/store';
+import { login, logout, register, useAuth } from '../../game/sync';
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -43,6 +44,112 @@ function Toggle({
   );
 }
 
+/** Konto-Panel: Login/Registrierung bzw. Sync-Status + Logout. */
+function AccountPanel() {
+  const { t } = useTranslation();
+  const auth = useAuth();
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function submit(action: typeof login) {
+    if (busy) return;
+    setBusy(true);
+    const ok = await action(name.trim(), password);
+    setBusy(false);
+    if (ok) setPassword('');
+  }
+
+  const inputClass =
+    'w-full rounded-row border border-line bg-bg px-3 py-2 font-mono text-sm text-ink placeholder:text-dim/60 focus:border-trace/60 focus:outline-none';
+
+  if (auth.name) {
+    return (
+      <div className="flex flex-col gap-2 rounded-panel border border-line bg-panel px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-sm text-ink">
+              {t('settings.account.loggedInAs', { name: auth.name })}
+            </div>
+            <div
+              className={`font-mono text-[11px] ${auth.status === 'error' ? 'text-warn' : 'text-dim'}`}
+              aria-live="polite"
+            >
+              {auth.status === 'syncing'
+                ? t('settings.account.statusSyncing')
+                : auth.status === 'error'
+                  ? t('settings.account.statusError')
+                  : t('settings.account.statusSynced')}
+            </div>
+          </div>
+          <button
+            onClick={() => void logout()}
+            className="rounded-panel border border-line px-4 py-2 text-sm text-dim hover:text-ink"
+          >
+            {t('settings.account.logout')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      className="flex flex-col gap-2 rounded-panel border border-line bg-panel px-4 py-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void submit(login);
+      }}
+    >
+      <p className="text-xs leading-relaxed text-dim">{t('settings.account.hint')}</p>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder={t('settings.account.name')}
+        autoComplete="username"
+        aria-label={t('settings.account.name')}
+        className={inputClass}
+      />
+      <input
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        type="password"
+        placeholder={t('settings.account.password')}
+        autoComplete="current-password"
+        aria-label={t('settings.account.password')}
+        className={inputClass}
+      />
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={busy || !name.trim() || !password}
+          className="flex-1 rounded-panel border border-trace/50 px-4 py-2.5 text-sm text-trace hover:bg-trace/10 disabled:opacity-40"
+        >
+          {t('settings.account.login')}
+        </button>
+        <button
+          type="button"
+          disabled={busy || !name.trim() || !password}
+          onClick={() => void submit(register)}
+          className="flex-1 rounded-panel border border-line px-4 py-2.5 text-sm text-dim hover:text-ink disabled:opacity-40"
+        >
+          {t('settings.account.register')}
+        </button>
+      </div>
+      {auth.status === 'syncing' && (
+        <p className="font-mono text-[11px] text-dim" aria-live="polite">
+          {t('settings.account.statusSyncing')}
+        </p>
+      )}
+      {auth.error && (
+        <p className="text-sm text-deny" aria-live="polite">
+          {t(`settings.account.errors.${auth.error}`, t('settings.account.errors.network'))}
+        </p>
+      )}
+    </form>
+  );
+}
+
 export function SettingsScreen() {
   const { t } = useTranslation();
   const settings = useGame((s) => s.settings);
@@ -75,9 +182,17 @@ export function SettingsScreen() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-3 pb-8 pt-4">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-3 pb-8 pt-4 lg:max-w-xl">
       <h1 className="mb-1 font-display text-xl font-bold">{t('settings.title')}</h1>
 
+      <div className="font-mono text-[10px] uppercase tracking-widest text-dim">
+        {t('settings.account.title')}
+      </div>
+      <AccountPanel />
+
+      <div className="mt-2 font-mono text-[10px] uppercase tracking-widest text-dim">
+        {t('settings.general')}
+      </div>
       <Row label={t('settings.sound')}>
         <Toggle
           on={settings.sound}

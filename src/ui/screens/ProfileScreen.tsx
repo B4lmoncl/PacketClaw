@@ -22,7 +22,7 @@ export function ProfileScreen() {
   const unlockedSet = new Set(achievements);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 pb-8 pt-4">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 pb-8 pt-4 lg:max-w-4xl lg:px-6">
       {/* Rang */}
       <section className="flex items-center gap-4 rounded-panel border border-claw/40 bg-panel px-4 py-4">
         <Mascot pose="idle" size={64} />

@@ -53,7 +53,7 @@ export function DailyScreen() {
       justFinished ? correct : 0,
     );
     return (
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pt-6">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pt-6 lg:max-w-lg">
         <section className="flex flex-col items-center gap-3 rounded-panel border border-claw/50 bg-panel px-6 py-6 text-center">
           <div className="font-display text-xl font-bold text-claw">
             {t('daily.result', { date })}

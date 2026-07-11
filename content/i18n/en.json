@@ -176,7 +176,30 @@
     "reset": "Reset savegame …",
     "resetConfirm": "Really delete everything?",
     "resetYes": "Delete",
-    "disclaimer": "Independent learning project inspired by FortiOS concepts. Not affiliated with Fortinet."
+    "disclaimer": "Independent learning project inspired by FortiOS concepts. Not affiliated with Fortinet.",
+    "general": "General",
+    "account": {
+      "title": "Account & server sync",
+      "hint": "Without an account your progress only lives in this browser. With an account it is stored on the server and you can continue on any device.",
+      "name": "Player name",
+      "password": "Password",
+      "login": "Log in",
+      "register": "Create account",
+      "logout": "Log out",
+      "loggedInAs": "Logged in as {{name}}",
+      "statusSynced": "Progress synced ✓",
+      "statusSyncing": "Syncing …",
+      "statusError": "Server unreachable right now — playing locally.",
+      "errors": {
+        "name-taken": "That name is already taken.",
+        "invalid-credentials": "Wrong name or password.",
+        "invalid-name": "3–24 characters: letters, digits, - and _.",
+        "invalid-password": "Password needs at least 6 characters.",
+        "session-expired": "Session expired — please log in again.",
+        "too-many-requests": "Too many attempts — wait a moment.",
+        "network": "Server unreachable."
+      }
+    }
   },
   "onboarding": {
     "title": "Welcome, Gatekeeper",

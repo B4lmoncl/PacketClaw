@@ -85,7 +85,7 @@ export function OnboardingScreen() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3 lg:max-w-3xl">
       <div className="flex items-baseline justify-between">
         <h1 className="font-display text-lg font-bold text-claw">{t('onboarding.title')}</h1>
         <button onClick={finish} className="font-mono text-xs text-dim underline hover:text-ink">

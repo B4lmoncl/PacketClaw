@@ -7,3 +7,5 @@ coverage
 !README.md
 playwright-report
 test-results
+data
+.env

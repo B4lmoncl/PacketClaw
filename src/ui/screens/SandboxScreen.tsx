@@ -132,7 +132,7 @@ export function SandboxScreen() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3 lg:max-w-6xl lg:px-6">
       <div className="flex items-baseline justify-between">
         <h1 className="font-display text-lg font-bold">{t('nav.sandbox')}</h1>
         <div className="flex gap-2 font-mono text-xs">

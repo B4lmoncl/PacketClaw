@@ -21,21 +21,32 @@ Du bist **Torwächter des Venennetzes** im Turm von Aethermoor (der Welt von [Qu
 - **Daily Run:** 10 seeded Aufgaben pro Tag (gleich für alle), Historie + Bestwert lokal, Share-Text ins Clipboard
 - **Sandbox:** Regelwerk frei bauen, Testpakete abfeuern, Trace ansehen, Netz als JSON exportieren/importieren
 - **Gamification:** XP mit Combo-Multiplikator, 3-Sterne-Kriterien pro Modus, 10 Ränge (Packet Rookie → Claw Commander), 26 Achievements mit Rarity-Stufen, Daily-Streak mit Freeze-Token
-- **PWA:** installierbar, komplett offline (alle Assets inkl. Fonts precached), kein Netzwerk-Traffic zur Laufzeit, kein Tracking
+- **Accounts & Sync (optional):** Name + Passwort, Spielstand liegt auf dem eigenen Server (JSON im Docker-Volume, scrypt-gehashte Passwörter) und synct automatisch — ohne Konto bleibt alles lokal im Browser
+- **PWA:** installierbar, komplett offline spielbar (alle Assets inkl. Fonts precached), kein Tracking, keine Drittanbieter-Requests
 - **A11y:** durchgängige Tastaturbedienung, sichtbarer Fokus, Farbinformation nie alleinstehend, AA-Kontraste
 - **i18n:** Deutsch (Default) + Englisch
 
-## Deploy in 3 Befehlen (VPS, hinter Reverse Proxy)
+## Deploy (VPS, ohne DNS — wie QuestHall)
+
+Einmalig als root (baut direkt aus dem Repo, kein Registry-Login nötig):
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/B4lmoncl/PacketClaw/main/compose.yml
-AETHERGATE_PORT=8090 docker compose up -d
+cd /opt && git clone https://github.com/B4lmoncl/PacketClaw.git aethergate
+cd /opt/aethergate
+printf 'AETHERGATE_BIND=0.0.0.0\nAETHERGATE_PORT=8090\n' > .env
+docker compose up -d --build
 docker compose ps   # healthy?
 ```
 
-Der Container lauscht nur auf `127.0.0.1:${AETHERGATE_PORT}` — TLS und Subdomain macht der Host-Reverse-Proxy (nginx/Traefik-Beispiele: [docs/DEPLOY.md](docs/DEPLOY.md)). Update: `docker compose pull && docker compose up -d`.
+Danach läuft das Spiel auf `http://<VPS-IP>:8090`. Accounts + Spielstände liegen im
+Docker-Volume `aethergate-data` und überleben Rebuilds. Update:
+`cd /opt/aethergate && git pull && docker compose up -d --build`.
 
-Das Image kommt aus der CI: `ghcr.io/b4lmoncl/packetclaw` (`latest` + Versionstags, gebaut bei `v*`-Tags — Tests, Level-Validierung und Lint laufen im Build; ein rotes Image existiert nicht).
+Hinter Reverse Proxy (TLS): `.env` weglassen — Default ist `127.0.0.1:8090`.
+Details, Backup und Traefik/nginx-Beispiele: [docs/DEPLOY.md](docs/DEPLOY.md)
+
+> Ohne HTTPS registriert der Browser keinen Service Worker — PWA-Install/Offline
+> gibt es dann nicht, das Spiel selbst läuft aber vollständig.
 
 ## Entwicklung
 

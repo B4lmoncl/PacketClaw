@@ -14,7 +14,7 @@ export function ChapterScreen({ chapter }: { chapter: number }) {
   const chapterMeta = CHAPTERS.find((c) => c.number === chapter);
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 pt-4">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-3 pt-4 lg:max-w-5xl lg:px-6">
       {/* Kapitel-Leiste */}
       <div className="flex gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Kapitel">
         {CHAPTERS.map((c) => {
@@ -47,7 +47,7 @@ export function ChapterScreen({ chapter }: { chapter: number }) {
         {chapterMeta?.title[locale]}
       </h1>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 lg:gap-3">
         {levels.map((level) => {
           const unlocked = isLevelUnlocked(level.id, stars);
           const levelStars = stars[level.id] ?? 0;

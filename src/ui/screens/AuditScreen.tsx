@@ -111,7 +111,7 @@ export function AuditScreen({ level }: { level: AuditLevel }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-3 pb-8 pt-3 lg:max-w-6xl lg:px-6">
       <h1 className="font-display text-lg font-bold">{level.title[locale]}</h1>
 
       <section className="rounded-panel border border-warn/40 bg-panel px-4 py-3">

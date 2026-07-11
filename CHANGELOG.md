@@ -1,5 +1,22 @@
 # Changelog
 
+## v1.1.0 — 2026-07-11
+
+- **Accounts & Server-Sync (QuestHall-Stil):** Express-Server im selben Container
+  serviert Spiel + API (`/api/auth/*`, `/api/save`, `/api/health`); Passwörter
+  scrypt-gehasht, Tokens persistent, Saves als JSON im Docker-Volume
+  `aethergate-data` (atomare Writes). Client pullt beim Login/App-Start und pusht
+  Änderungen debounced; ohne Konto bleibt alles lokal.
+- **Desktop-Layout:** volle Breite wie QuestHall (max-w-7xl), Verdict zweispaltig
+  (Netz + Policy-Tabelle links, Paket/Timer/Debrief/Buttons rechts, sticky),
+  Kapitel-Grid 5 Spalten, Home-Karten nebeneinander.
+- **Deploy wie QuestHall:** compose baut direkt aus dem Repo-Checkout
+  (`build: .`), non-root via entrypoint + su-exec, `AETHERGATE_BIND`/`_PORT`
+  per .env; nginx-Stage entfernt (Security-Header/CSP in Express portiert).
+- Settings: Konto-Panel (Registrieren/Anmelden/Abmelden, Sync-Status), i18n de/en.
+- 13 neue Server-Tests (vitest + supertest), E2E: Registrieren → Spielen →
+  Login auf zweitem Gerät → Fortschritt vorhanden.
+
 ## v1.0.0 — 2026-07-11
 
 Erste Vollversion. AetherGate (Arbeitstitel PacketClaw) ist ein browserbasiertes

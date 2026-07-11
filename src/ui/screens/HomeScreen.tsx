@@ -7,16 +7,19 @@ export function HomeScreen() {
   const navigate = useGame((s) => s.navigate);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-6 px-4 pt-10">
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-6 px-4 pt-10 lg:max-w-5xl lg:gap-10 lg:pt-20">
       <div className="flex flex-col items-center gap-2 text-center">
         <Mascot pose="idle" size={110} />
-        <h1 className="font-display text-4xl font-bold tracking-tight text-claw">
+        <h1 className="font-display text-4xl font-bold tracking-tight text-claw lg:text-5xl">
           {t('app.title')}
         </h1>
-        <p className="text-sm text-dim">{t('app.tagline')}</p>
+        <p className="text-sm text-dim lg:text-base">{t('app.tagline')}</p>
       </div>
 
-      <nav className="flex w-full flex-col gap-3" aria-label="Hauptmenü">
+      <nav
+        className="flex w-full flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-4"
+        aria-label="Hauptmenü"
+      >
         <button
           onClick={() => navigate({ name: 'chapter', chapter: 1 })}
           className="group flex items-center justify-between rounded-panel border border-claw/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-claw/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw"

@@ -7,3 +7,4 @@ coverage/
 .claude/*.log
 playwright-report/
 test-results/
+data/

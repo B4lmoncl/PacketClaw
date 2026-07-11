@@ -134,3 +134,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
 - `dstaddr:"all"` matcht keinen DNAT-Traffic: entschieden (FortiOS-Verhalten ohne match-vip; dokumentiert als bewusste Vereinfachung, dass es kein match-vip-Flag gibt).
 - Tailwind v3 (klassische Config) statt v4: bewusst, stabilere Token-Integration; Wechsel ist v1.1-Thema.
 - Schedule-Zeitzone: Wanduhrzeit aus dem ISO-String, Suffixe werden ignoriert — deterministisch auf jedem Client. In CONTENT.md dokumentieren.
+
+## Nachtrag 2026-07-11: Accounts + VPS-Deploy (Nutzerwunsch)
+
+- Backend im QuestHall-Stil: `server/` (Express, scrypt, Token, JSON in
+  DATA_DIR), Client-Sync in `src/game/sync.ts`, Konto-Panel in den Settings.
+- Deploy: `git clone` auf dem VPS + `docker compose up -d --build`,
+  Bind über `AETHERGATE_BIND` (0.0.0.0 = direkt über Public IP, ohne DNS).
+- Desktop-first-Layout (max-w-7xl, Verdict-Zweispalter) — PC ist Prio,
+  Mobile bleibt voll spielbar.
+- Offen/Roadmap: QuestHall-Optik-Feinschliff (Animationen, weniger
+  Claw-Referenzen in Texten), HTTPS via Reverse Proxy wenn gewünscht.

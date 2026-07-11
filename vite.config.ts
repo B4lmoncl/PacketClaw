@@ -32,6 +32,11 @@ export default defineConfig({
       },
     }),
   ],
+  // Dev-Komfort: API-Aufrufe an den lokal laufenden Server durchreichen
+  // (node server/index.mjs — Produktion serviert beides aus einem Prozess)
+  server: {
+    proxy: { '/api': 'http://localhost:8080' },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
