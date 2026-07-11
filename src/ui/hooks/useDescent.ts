@@ -59,6 +59,9 @@ interface DescentState {
 }
 
 const FRAME_MS = 650;
+/** Die matchende Zeile bleibt laenger stehen, bevor das Debrief erscheint —
+ * der Moment ist die Pointe der Animation und darf nicht weggehetzt wirken. */
+const FINAL_HOLD_MS = 1300;
 
 export function useDescent(
   verdict: Verdict | null,
@@ -75,11 +78,15 @@ export function useDescent(
   useEffect(() => {
     if (!running) return;
     if (index >= 0) playTick(); // Match-Tick pro Zeile (Sound-Setting greift in sound.ts)
-    const timer = window.setTimeout(() => {
-      const next = index + 1;
-      setIndex(next);
-      if (next >= frames.length) doneRef.current();
-    }, FRAME_MS);
+    const isFinalFrame = index === frames.length - 1;
+    const timer = window.setTimeout(
+      () => {
+        const next = index + 1;
+        setIndex(next);
+        if (next >= frames.length) doneRef.current();
+      },
+      isFinalFrame ? FINAL_HOLD_MS : FRAME_MS,
+    );
     return () => window.clearTimeout(timer);
   }, [index, running, frames.length]);
 
