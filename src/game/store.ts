@@ -6,6 +6,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getLevel, levelsForChapter } from './levels';
+import {
+  advanceStreak,
+  EMPTY_STATS,
+  EMPTY_STREAK,
+  evaluateAchievements,
+  type Stats,
+  type StreakState,
+} from './progression';
 
 export const SAVE_VERSION = 1;
 
@@ -22,7 +30,9 @@ export type Screen =
   | { name: 'chapter'; chapter: number }
   | { name: 'level'; levelId: string }
   | { name: 'daily' }
-  | { name: 'sandbox' };
+  | { name: 'sandbox' }
+  | { name: 'profile' }
+  | { name: 'settings' };
 
 interface GameState {
   // --- persistiert (Savegame) ---
@@ -32,14 +42,24 @@ interface GameState {
   bestScores: Record<string, number>;
   /** Daily-Historie: Datum → Ergebnis pro Paket */
   dailyHistory: Record<string, boolean[]>;
+  stats: Stats;
+  achievements: string[];
+  streak: StreakState;
+  onboarded: boolean;
   settings: Settings;
   // --- flüchtig ---
   screen: Screen;
   combo: number; // aktuelle Serie richtiger Antworten (über Level hinweg)
 
+  /** zuletzt freigeschaltete Achievements (für Toasts, flüchtig) */
+  lastUnlocked: string[];
+
   navigate(screen: Screen): void;
   recordLevelResult(levelId: string, stars: number, score: number): void;
   recordDaily(date: string, results: boolean[], score: number): void;
+  bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
+  setOnboarded(): void;
+  clearUnlocked(): void;
   setCombo(combo: number): void;
   updateSettings(patch: Partial<Settings>): void;
   exportSave(): string;
@@ -54,41 +74,122 @@ export const useGame = create<GameState>()(
       stars: {},
       bestScores: {},
       dailyHistory: {},
+      stats: { ...EMPTY_STATS },
+      achievements: [],
+      streak: { ...EMPTY_STREAK },
+      onboarded: false,
       settings: { sound: true, motion: 'system', scanlines: false, locale: 'de' },
       screen: { name: 'home' },
       combo: 0,
+      lastUnlocked: [],
 
       navigate: (screen) => set({ screen }),
 
       recordLevelResult: (levelId, stars, score) =>
-        set((state) => ({
-          xp: state.xp + score,
-          stars: {
+        set((state) => {
+          const nextStars = {
             ...state.stars,
             [levelId]: Math.max(state.stars[levelId] ?? 0, stars),
-          },
-          bestScores: {
-            ...state.bestScores,
-            [levelId]: Math.max(state.bestScores[levelId] ?? 0, score),
-          },
-        })),
+          };
+          const xp = state.xp + score;
+          const unlocked = evaluateAchievements(
+            { stats: state.stats, xp, stars: nextStars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            stars: nextStars,
+            bestScores: {
+              ...state.bestScores,
+              [levelId]: Math.max(state.bestScores[levelId] ?? 0, score),
+            },
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
 
       recordDaily: (date, results, score) =>
-        set((state) => ({
-          xp: state.xp + score,
-          dailyHistory: state.dailyHistory[date]
-            ? state.dailyHistory
-            : { ...state.dailyHistory, [date]: results },
-        })),
+        set((state) => {
+          if (state.dailyHistory[date]) return state; // ein gewertetes Ergebnis pro Tag
+          const xp = state.xp + score;
+          const streak = advanceStreak(state.streak, date);
+          const stats: Stats = {
+            ...state.stats,
+            dailiesPlayed: state.stats.dailiesPlayed + 1,
+            dailiesPerfect: state.stats.dailiesPerfect + (results.every(Boolean) ? 1 : 0),
+          };
+          const unlocked = evaluateAchievements(
+            { stats, xp, stars: state.stars, streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            streak,
+            stats,
+            dailyHistory: { ...state.dailyHistory, [date]: results },
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
+      bumpStats: (increments, maxima = {}) =>
+        set((state) => {
+          const stats = { ...state.stats };
+          for (const [key, value] of Object.entries(increments)) {
+            if (typeof value === 'number' && value !== 0) {
+              stats[key as keyof Stats] += value;
+            }
+          }
+          for (const [key, value] of Object.entries(maxima)) {
+            if (typeof value === 'number') {
+              const k = key as keyof Stats;
+              stats[k] = Math.max(stats[k], value);
+            }
+          }
+          const unlocked = evaluateAchievements(
+            { stats, xp: state.xp, stars: state.stars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            stats,
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
+      setOnboarded: () => set({ onboarded: true }),
+      clearUnlocked: () => set({ lastUnlocked: [] }),
 
       setCombo: (combo) => set({ combo }),
 
       updateSettings: (patch) => set((state) => ({ settings: { ...state.settings, ...patch } })),
 
       exportSave: () => {
-        const { saveVersion, xp, stars, bestScores, dailyHistory, settings } = get();
+        const {
+          saveVersion,
+          xp,
+          stars,
+          bestScores,
+          dailyHistory,
+          stats,
+          achievements,
+          streak,
+          onboarded,
+          settings,
+        } = get();
         return JSON.stringify(
-          { saveVersion, xp, stars, bestScores, dailyHistory, settings },
+          {
+            saveVersion,
+            xp,
+            stars,
+            bestScores,
+            dailyHistory,
+            stats,
+            achievements,
+            streak,
+            onboarded,
+            settings,
+          },
           null,
           2,
         );
@@ -121,6 +222,10 @@ export const useGame = create<GameState>()(
         stars: state.stars,
         bestScores: state.bestScores,
         dailyHistory: state.dailyHistory,
+        stats: state.stats,
+        achievements: state.achievements,
+        streak: state.streak,
+        onboarded: state.onboarded,
         settings: state.settings,
       }),
       migrate: (persisted) => migrateSave(persisted as { saveVersion: number }),
@@ -135,6 +240,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   stars: Record<string, number>;
   bestScores: Record<string, number>;
   dailyHistory: Record<string, boolean[]>;
+  stats: Stats;
+  achievements: string[];
+  streak: StreakState;
+  onboarded: boolean;
   settings: Settings;
 } {
   // Zukünftige Migrationen: if (save.saveVersion === 1) { ...auf 2 heben... }
@@ -144,6 +253,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     stars: (save.stars as Record<string, number>) ?? {},
     bestScores: (save.bestScores as Record<string, number>) ?? {},
     dailyHistory: (save.dailyHistory as Record<string, boolean[]>) ?? {},
+    stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats>) ?? {}) },
+    achievements: (save.achievements as string[]) ?? [],
+    streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState>) ?? {}) },
+    onboarded: (save.onboarded as boolean) ?? false,
     settings: {
       sound: true,
       motion: 'system',

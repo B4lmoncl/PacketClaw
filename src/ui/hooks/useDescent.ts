@@ -4,6 +4,7 @@
  * markiert (das IST die First-Match-Didaktik). Skippbar.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { playTick } from '../../game/sound';
 import type { TraceStep, Verdict } from '../../engine';
 import type { RowHighlight } from '../components/PolicyTable';
 
@@ -73,6 +74,7 @@ export function useDescent(
 
   useEffect(() => {
     if (!running) return;
+    if (index >= 0) playTick(); // Match-Tick pro Zeile (Sound-Setting greift in sound.ts)
     const timer = window.setTimeout(() => {
       const next = index + 1;
       setIndex(next);

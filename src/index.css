@@ -59,3 +59,18 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 90, 60, 0.35);
 }
+
+/* Optionaler CRT-Scanline-Effekt (Settings, default aus) */
+.pc-scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}

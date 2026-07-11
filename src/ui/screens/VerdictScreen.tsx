@@ -10,6 +10,7 @@ import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { PolicyTable } from '../components/PolicyTable';
 import { StarBar } from '../components/StarBar';
+import { playChime } from '../../game/sound';
 import { useDescent } from '../hooks/useDescent';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
@@ -32,6 +33,7 @@ export function VerdictScreen({
   const combo = useGame((s) => s.combo);
   const setCombo = useGame((s) => s.setCombo);
   const recordLevelResult = useGame((s) => s.recordLevelResult);
+  const bumpStats = useGame((s) => s.bumpStats);
   const navigate = useGame((s) => s.navigate);
 
   const [packetIndex, setPacketIndex] = useState(0);
@@ -96,6 +98,15 @@ export function VerdictScreen({
     setTimedOut(false);
     if (dailyMode) resultsRef.current.push(correct);
     if (correct) {
+      bumpStats(
+        {
+          implicitDenyCorrect: verdict.matchedPolicyId === 0 ? 1 : 0,
+          fastCorrect: elapsedSeconds < 5 ? 1 : 0,
+        },
+        { maxComboStreak: combo + 1 },
+      );
+    }
+    if (correct) {
       const { points } = scoreVerdictAnswer({
         correct,
         streakBefore: combo,
@@ -128,6 +139,12 @@ export function VerdictScreen({
       });
       setFinalStars(stars);
       recordLevelResult(level.id, stars, totalScore);
+      bumpStats({
+        levelsSolved: 1,
+        verdictSolved: 1,
+        noMistakeLevels: wrongAttempts === 0 ? 1 : 0,
+        nightSolves: new Date().getHours() < 5 ? 1 : 0,
+      });
       setPhase('done');
     }
   }
@@ -286,6 +303,10 @@ function DonePanel({
   onBack: () => void;
 }) {
   const { t } = useTranslation();
+  useEffect(() => {
+    playChime(stars);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <section className="flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
       <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>

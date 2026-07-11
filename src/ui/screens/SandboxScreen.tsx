@@ -7,6 +7,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { evaluate, makeConfig, makePolicy } from '../../engine';
 import type { NetworkConfig, Packet, Verdict } from '../../engine';
+import { useGame } from '../../game/store';
 import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
@@ -64,6 +65,7 @@ const DEFAULT_NETWORK: NetworkConfig = makeConfig({
 export function SandboxScreen() {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotionPref();
+  const bumpStats = useGame((s) => s.bumpStats);
   const [network, setNetwork] = useState<NetworkConfig>(DEFAULT_NETWORK);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [firedPacket, setFiredPacket] = useState<Packet | null>(null);
@@ -91,6 +93,7 @@ export function SandboxScreen() {
   function fire() {
     try {
       const result = evaluate(packet, network);
+      bumpStats({ sandboxFired: 1 });
       setFiredPacket(packet);
       setVerdict(result);
       setShowTrace(false);

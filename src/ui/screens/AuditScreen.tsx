@@ -23,6 +23,7 @@ export function AuditScreen({ level }: { level: AuditLevel }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en' : 'de';
   const recordLevelResult = useGame((s) => s.recordLevelResult);
+  const bumpStats = useGame((s) => s.bumpStats);
   const navigate = useGame((s) => s.navigate);
 
   const [policies, setPolicies] = useState<Policy[]>(level.network.policies);
@@ -44,6 +45,18 @@ export function AuditScreen({ level }: { level: AuditLevel }) {
     });
     const score = Math.round(modeBaseScore(level.difficulty) * (wrongAttempts === 0 ? 1 : 0.6));
     recordLevelResult(level.id, stars, score);
+    bumpStats({
+      levelsSolved: 1,
+      auditsSolved: 1,
+      noMistakeLevels: wrongAttempts === 0 ? 1 : 0,
+      shadowedFound: level.task === 'find-shadowed' ? 1 : 0,
+      anyHardened: level.task === 'harden-any' ? 1 : 0,
+      redundantDeleted:
+        level.task === 'remove-redundant'
+          ? Math.max(0, level.network.policies.length - policies.length)
+          : 0,
+      nightSolves: new Date().getHours() < 5 ? 1 : 0,
+    });
     setDone({ stars, score });
   }
 

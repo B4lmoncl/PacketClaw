@@ -9,7 +9,9 @@
     "sandbox": "Sandbox",
     "back": "Zurück",
     "chapter": "Kapitel {{number}}",
-    "comingSoon": "bald"
+    "comingSoon": "bald",
+    "profile": "Profil",
+    "settings": "Einstellungen"
   },
   "level": {
     "boss": "Boss",
@@ -143,5 +145,37 @@
     "export": "Export",
     "import": "Import",
     "importError": "Das war kein gültiges Netz-JSON (oder eine ungültige IP im Paket)."
+  },
+  "profile": {
+    "achievementUnlocked": "Achievement freigeschaltet",
+    "nextRank": "nächster Rang: {{rank}} ({{xp}} XP)",
+    "maxRank": "Höchster Rang erreicht",
+    "streak": "Daily-Streak",
+    "best": "Best:",
+    "levels": "Level gelöst",
+    "ranks": "Ränge",
+    "achievements": "Achievements",
+    "rarity": {
+      "common": "gewöhnlich",
+      "rare": "selten",
+      "epic": "episch",
+      "legendary": "legendär"
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "sound": "Sound",
+    "reducedMotion": "Reduzierte Animationen",
+    "scanlines": "Scanlines (CRT)",
+    "language": "Sprache",
+    "savegame": "Spielstand",
+    "export": "Als JSON exportieren",
+    "import": "JSON importieren",
+    "importOk": "Spielstand importiert.",
+    "importError": "Das war kein gültiger Spielstand.",
+    "reset": "Spielstand zurücksetzen …",
+    "resetConfirm": "Wirklich alles löschen?",
+    "resetYes": "Löschen",
+    "disclaimer": "Unabhängiges Lernprojekt, inspiriert von FortiOS-Konzepten. Nicht mit Fortinet affiliiert."
   }
 }

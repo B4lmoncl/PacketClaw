@@ -4,8 +4,10 @@
  * Policy das erste Feld, an dem sie gescheitert ist.
  */
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Verdict } from '../../engine';
+import { playAccept, playSnip, playWrong } from '../../game/sound';
 import { Mascot } from './Mascot';
 
 export interface UserAnswer {
@@ -32,6 +34,13 @@ export function Debrief({
   onReplay: () => void;
 }) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!correct) playWrong();
+    else if (verdict.action === 'accept') playAccept();
+    else playSnip();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const lines: string[] = [];
   for (const step of verdict.trace) {

@@ -32,6 +32,7 @@ export function ArchitectScreen({ level }: { level: ArchitectLevel }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en' : 'de';
   const recordLevelResult = useGame((s) => s.recordLevelResult);
+  const bumpStats = useGame((s) => s.bumpStats);
   const navigate = useGame((s) => s.navigate);
 
   const [policies, setPolicies] = useState<Policy[]>(level.network.policies);
@@ -70,6 +71,18 @@ export function ArchitectScreen({ level }: { level: ArchitectLevel }) {
       modeBaseScore(level.difficulty) * (wrongAttempts === 0 ? 1 : 0.6) + (stars === 3 ? 100 : 0),
     );
     recordLevelResult(level.id, stars, score);
+    const usesBroad = policies.some((p) =>
+      [p.srcintf, p.dstintf, p.srcaddr, p.dstaddr, p.service].some((field) =>
+        field.some((entry) => entry === 'all' || entry === 'ALL' || entry === 'any'),
+      ),
+    );
+    bumpStats({
+      levelsSolved: 1,
+      architectSolved: 1,
+      noMistakeLevels: wrongAttempts === 0 ? 1 : 0,
+      architectNoBroad: usesBroad ? 0 : 1,
+      nightSolves: new Date().getHours() < 5 ? 1 : 0,
+    });
     setDone({ stars, score });
   }
 

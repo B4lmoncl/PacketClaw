@@ -9,7 +9,9 @@
     "sandbox": "Sandbox",
     "back": "Back",
     "chapter": "Chapter {{number}}",
-    "comingSoon": "soon"
+    "comingSoon": "soon",
+    "profile": "Profile",
+    "settings": "Settings"
   },
   "level": {
     "boss": "Boss",
@@ -143,5 +145,37 @@
     "export": "Export",
     "import": "Import",
     "importError": "That was not valid network JSON (or an invalid IP in the packet)."
+  },
+  "profile": {
+    "achievementUnlocked": "Achievement unlocked",
+    "nextRank": "next rank: {{rank}} ({{xp}} XP)",
+    "maxRank": "Highest rank reached",
+    "streak": "Daily streak",
+    "best": "Best:",
+    "levels": "Levels solved",
+    "ranks": "Ranks",
+    "achievements": "Achievements",
+    "rarity": {
+      "common": "common",
+      "rare": "rare",
+      "epic": "epic",
+      "legendary": "legendary"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "sound": "Sound",
+    "reducedMotion": "Reduced animations",
+    "scanlines": "Scanlines (CRT)",
+    "language": "Language",
+    "savegame": "Savegame",
+    "export": "Export as JSON",
+    "import": "Import JSON",
+    "importOk": "Savegame imported.",
+    "importError": "That was not a valid savegame.",
+    "reset": "Reset savegame …",
+    "resetConfirm": "Really delete everything?",
+    "resetYes": "Delete",
+    "disclaimer": "Independent learning project inspired by FortiOS concepts. Not affiliated with Fortinet."
   }
 }

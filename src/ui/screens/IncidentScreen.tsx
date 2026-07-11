@@ -41,6 +41,7 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en' : 'de';
   const recordLevelResult = useGame((s) => s.recordLevelResult);
+  const bumpStats = useGame((s) => s.bumpStats);
   const navigate = useGame((s) => s.navigate);
 
   const [policies, setPolicies] = useState<Policy[]>(level.network.policies);
@@ -62,6 +63,12 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
     const stars = starsFor({ solved: true, wrongAttempts, minimalEdits: edits <= level.maxEdits });
     const score = Math.round(modeBaseScore(level.difficulty) * (wrongAttempts === 0 ? 1 : 0.6));
     recordLevelResult(level.id, stars, score);
+    bumpStats({
+      levelsSolved: 1,
+      incidentsSolved: 1,
+      noMistakeLevels: wrongAttempts === 0 ? 1 : 0,
+      nightSolves: new Date().getHours() < 5 ? 1 : 0,
+    });
     setDone({ stars, score });
   }
 
