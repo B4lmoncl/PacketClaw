@@ -1,29 +1,79 @@
 /**
- * Objekt-Chips mit Inspektion (FortiGate-Anleihe): Hover/Fokus/Tap auf einen
- * Objektnamen öffnet ein Popover mit dem aufgelösten Inhalt — Gruppen als
- * eingerückter Mitglieder-Baum, Objekte mit Wert (CIDR, Portrange, …).
+ * Objekt-Chips mit Inspektion (FortiGate × CK3-Tooltips wie in QuestHall):
+ * Hover/Fokus zeigt das Popover, Klick/Tap LOCKT es (bleibt offen, bekommt ✕;
+ * Escape oder Klick außerhalb schließt). Im gelockten Popover sind Gruppen-
+ * Mitglieder selbst hoverbar — verschachtelte Inspektion bis zum Wert.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig } from '../../engine';
 import { resolveObjectInfo, type ObjectField, type ObjectInfo } from '../../game/objectInfo';
 
-function InfoPopover({ children }: { children: React.ReactNode }) {
+type OpenState = 'closed' | 'hover' | 'locked';
+
+/** Schliesst bei Klick/Tap ausserhalb des Elements. */
+function useClickOutside(active: boolean, ref: React.RefObject<HTMLElement>, close: () => void) {
+  useEffect(() => {
+    if (!active) return;
+    const handler = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) close();
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [active, ref, close]);
+}
+
+function InfoPopover({
+  locked,
+  onClose,
+  children,
+}: {
+  locked: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <span
       role="tooltip"
-      className="absolute left-0 top-full z-40 mt-1 block w-max max-w-[280px] cursor-default rounded-panel border border-line bg-bg px-3 py-2 text-left shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+      className={`absolute left-0 top-full z-40 mt-1 block w-max max-w-[300px] cursor-default rounded-panel border bg-bg px-3 py-2 text-left shadow-[0_8px_24px_rgba(0,0,0,0.5)] ${
+        locked ? 'border-claw/60' : 'border-line'
+      }`}
     >
+      {locked && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          aria-label="close"
+          className="absolute right-1 top-0.5 px-1 text-[11px] text-dim hover:text-ink"
+        >
+          ✕
+        </button>
+      )}
       {children}
     </span>
   );
 }
 
-function ObjectInfoBody({ info }: { info: ObjectInfo }) {
+function ObjectInfoBody({
+  info,
+  network,
+  field,
+  nested,
+}: {
+  info: ObjectInfo;
+  network: NetworkConfig;
+  field: ObjectField;
+  /** true = Mitglieder-Zeilen sind selbst hoverbar (CK3-Verschachtelung) */
+  nested: boolean;
+}) {
   const { t } = useTranslation();
+  // Mitglieder von Zonen sind Interfaces — sonst erbt das Kind das Eltern-Feld
+  const childField: ObjectField = info.kindKey === 'zone' ? 'srcintf' : field;
   return (
     <>
-      <span className="flex items-baseline justify-between gap-3">
+      <span className="flex items-baseline justify-between gap-3 pr-3">
         <span className="font-mono text-[11px] font-bold text-ink">{info.name}</span>
         <span className="text-[9px] uppercase tracking-wide text-dim">
           {t(`objectInfo.kind.${info.kindKey}`)}
@@ -44,7 +94,11 @@ function ObjectInfoBody({ info }: { info: ObjectInfo }) {
             >
               <span className={line.group ? 'text-warn' : 'text-ink/90'}>
                 {line.group ? '▸ ' : ''}
-                {line.name}
+                {nested ? (
+                  <ObjectValue network={network} field={childField} name={line.name} />
+                ) : (
+                  line.name
+                )}
               </span>
               {line.detail && <span className="text-dim">{line.detail}</span>}
             </span>
@@ -60,7 +114,7 @@ function ObjectInfoBody({ info }: { info: ObjectInfo }) {
   );
 }
 
-/** Ein hoverbarer Objektname innerhalb eines Feld-Chips. */
+/** Ein hover-/lockbarer Objektname (auch verschachtelt im Popover nutzbar). */
 function ObjectValue({
   network,
   field,
@@ -70,7 +124,10 @@ function ObjectValue({
   field: ObjectField;
   name: string;
 }) {
-  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<OpenState>('closed');
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  useClickOutside(state === 'locked', wrapRef, () => setState('closed'));
+  const open = state !== 'closed';
   const info = useMemo(
     () => (open ? resolveObjectInfo(network, field, name) : null),
     [open, network, field, name],
@@ -81,28 +138,36 @@ function ObjectValue({
 
   return (
     <span
+      ref={wrapRef}
       className="relative inline-block"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
-      onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      onMouseEnter={() => setState((s) => (s === 'closed' ? 'hover' : s))}
+      onMouseLeave={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onFocus={() => setState((s) => (s === 'closed' ? 'hover' : s))}
+      onBlur={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          setState('closed');
+        }
+      }}
     >
       <span
         tabIndex={0}
-        className="cursor-help font-mono text-[11px] underline decoration-dotted decoration-line underline-offset-2 hover:decoration-ink focus-visible:outline focus-visible:outline-1 focus-visible:outline-claw"
+        className={`cursor-help font-mono text-[11px] underline decoration-dotted underline-offset-2 focus-visible:outline focus-visible:outline-1 focus-visible:outline-claw ${
+          state === 'locked' ? 'decoration-claw text-ink' : 'decoration-line hover:decoration-ink'
+        }`}
         onClick={(e) => {
-          // Tap am Touch-Gerät: Popover togglen, ohne die Zeile auszuwählen
+          // Klick/Tap: locken bzw. wieder loesen — waehlt NICHT die Zeile aus
           e.stopPropagation();
           e.preventDefault();
-          setOpen((o) => !o);
+          setState((s) => (s === 'locked' ? 'closed' : 'locked'));
         }}
       >
         {name}
       </span>
       {open && info && (
-        <InfoPopover>
-          <ObjectInfoBody info={info} />
+        <InfoPopover locked={state === 'locked'} onClose={() => setState('closed')}>
+          <ObjectInfoBody info={info} network={network} field={field} nested={state === 'locked'} />
         </InfoPopover>
       )}
     </span>
@@ -145,7 +210,7 @@ export function ObjectChip({
   );
 }
 
-/** Chip mit statischem Erklaertext (Schedule, SNAT). */
+/** Chip mit statischem Erklaertext (Schedule, SNAT) — gleiches Lock-Verhalten. */
 export function InfoChip({
   label,
   value,
@@ -158,17 +223,20 @@ export function InfoChip({
   infoKey: string;
 }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [state, setState] = useState<OpenState>('closed');
+  const wrapRef = useRef<HTMLSpanElement>(null);
+  useClickOutside(state === 'locked', wrapRef, () => setState('closed'));
   return (
     <span
+      ref={wrapRef}
       className={`relative inline-flex items-baseline gap-1 rounded-row border px-1.5 py-0.5 transition-colors ${
         failed ? 'border-deny bg-deny/20 text-deny' : 'border-line/60 text-ink/90'
       }`}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => setOpen(false)}
-      onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
+      onMouseEnter={() => setState((s) => (s === 'closed' ? 'hover' : s))}
+      onMouseLeave={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onFocus={() => setState((s) => (s === 'closed' ? 'hover' : s))}
+      onBlur={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onKeyDown={(e) => e.key === 'Escape' && setState('closed')}
     >
       <span className="text-[8px] uppercase tracking-wide text-dim">{label}</span>
       <span
@@ -177,7 +245,7 @@ export function InfoChip({
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          setOpen((o) => !o);
+          setState((s) => (s === 'locked' ? 'closed' : 'locked'));
         }}
       >
         {value}
@@ -187,9 +255,9 @@ export function InfoChip({
           ✕
         </span>
       )}
-      {open && (
-        <InfoPopover>
-          <span className="block max-w-[240px] text-[10px] leading-snug text-dim">
+      {state !== 'closed' && (
+        <InfoPopover locked={state === 'locked'} onClose={() => setState('closed')}>
+          <span className="block max-w-[240px] pr-3 text-[10px] leading-snug text-dim">
             {t(infoKey)}
           </span>
         </InfoPopover>
