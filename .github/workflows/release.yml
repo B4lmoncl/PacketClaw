@@ -1,0 +1,64 @@
+# Release per Knopfdruck (workflow_dispatch): prueft alles, erstellt das
+# v-Tag, baut das ghcr-Image (Version + latest) und legt das GitHub-Release
+# mit den CHANGELOG-Notes an. Noetig, weil Sessions nur Branches pushen
+# duerfen — und praktisch als Ein-Klick-Release sowieso.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version ohne v-Praefix, z. B. 1.0.0'
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # Gate: ein Release ohne gruene Suite existiert nicht
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:coverage
+      - run: npm run validate:levels
+      - run: npm run build
+
+      - name: Tag erstellen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ inputs.version }}" -m "AetherGate v${{ inputs.version }}"
+          git push origin "v${{ inputs.version }}"
+
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/packetclaw:${{ inputs.version }}
+            ghcr.io/${{ github.repository_owner }}/packetclaw:latest
+
+      - name: GitHub-Release anlegen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          awk '/^## v${{ inputs.version }}/{flag=1; next} /^## v/{flag=0} flag' CHANGELOG.md > /tmp/notes.md
+          gh release create "v${{ inputs.version }}" \
+            --title "AetherGate v${{ inputs.version }}" \
+            --notes-file /tmp/notes.md
