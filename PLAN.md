@@ -1,5 +1,12 @@
 # AetherGate (ehem. Arbeitstitel PacketClaw) — Plan
 
+> **⭐ OBERSTE DIREKTIVE (Prio 1, Nutzerwunsch 2026-07-11):** AetherGate soll
+> sich so nah wie möglich **1:1 wie ein echtes FortiGate-GUI** bedienen — mit
+> allem, was dazugehört — und darüber werden Aufgaben spielerisch gelöst, damit
+> der Spieler lernt, mit echten FortiGates zu arbeiten. GUI-Nähe schlägt eigene
+> Design-Ideen; fachliche Korrektheit ist nicht verhandelbar; Lore/Gamification
+> ist Rahmen, nie Ersatz. Details: **CLAUDE.md** ganz oben.
+
 > **Namensentscheidung (2026-07-10, Nutzerwunsch: Name gemäß QuestHall-Lore-Bible):**
 > Das Spiel heißt **AetherGate** — Schwestertitel zu QuestHall, verankert in dessen Welt
 > (Aethermoor, der Aetherstrom, das Venennetz des Turms). Framing: Der Spieler ist
