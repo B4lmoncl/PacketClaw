@@ -65,7 +65,10 @@
     "action": "Action",
     "nat": "NAT",
     "implicitDeny": "Implicit Deny",
-    "disabled": "disabled"
+    "disabled": "disabled",
+    "filter": "Filter: source, service, name, action …",
+    "filterClear": "Clear filter",
+    "filterNoMatch": "No policy matches the filter — implicit deny stays visible."
   },
   "debrief": {
     "title": "Debrief",

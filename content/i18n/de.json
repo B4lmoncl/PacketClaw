@@ -65,7 +65,10 @@
     "action": "Aktion",
     "nat": "NAT",
     "implicitDeny": "Implicit Deny",
-    "disabled": "deaktiviert"
+    "disabled": "deaktiviert",
+    "filter": "Filter: Source, Service, Name, Aktion …",
+    "filterClear": "Filter leeren",
+    "filterNoMatch": "Keine Policy passt auf den Filter — Implicit Deny bleibt sichtbar."
   },
   "debrief": {
     "title": "Debrief",

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatchField, NetworkConfig, Policy } from '../../engine';
 import { InfoChip, ObjectChip } from './ObjectChip';
@@ -164,6 +165,24 @@ function PolicyRow({
   );
 }
 
+/** Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen. */
+function policyMatches(policy: Policy, tokens: string[]): boolean {
+  const haystack = [
+    String(policy.id),
+    policy.name,
+    policy.action,
+    policy.schedule,
+    policy.nat ? 'snat nat' : '',
+    policy.enabled ? '' : 'disabled',
+    ...policy.srcintf,
+    ...policy.dstintf,
+    ...policy.srcaddr,
+    ...policy.dstaddr,
+    ...policy.service,
+  ].map((v) => v.toLowerCase());
+  return tokens.every((token) => haystack.some((v) => v.includes(token)));
+}
+
 export function PolicyTable({
   network,
   highlights,
@@ -173,6 +192,12 @@ export function PolicyTable({
   onSelect,
 }: PolicyTableProps) {
   const { t } = useTranslation();
+  const [query, setQuery] = useState('');
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const visiblePolicies =
+    tokens.length === 0
+      ? network.policies
+      : network.policies.filter((p) => policyMatches(p, tokens));
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
   const implicitSelected = selectedId === 0;
 
@@ -189,7 +214,37 @@ export function PolicyTable({
 
   return (
     <div className="flex flex-col gap-1" role="list" aria-label={t('app.policyTableAria')}>
-      {network.policies.map((policy) => (
+      {network.policies.length > 6 && (
+        <div className="mb-1 flex items-center gap-2">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('policyTable.filter')}
+            aria-label={t('policyTable.filter')}
+            className="w-full rounded-row border border-line bg-bg px-2.5 py-1.5 font-mono text-xs text-ink placeholder:text-dim/60 focus:border-claw/60 focus:outline-none"
+          />
+          {tokens.length > 0 && (
+            <>
+              <span className="shrink-0 font-mono text-[10px] tabular-nums text-dim">
+                {visiblePolicies.length}/{network.policies.length}
+              </span>
+              <button
+                onClick={() => setQuery('')}
+                className="shrink-0 rounded-row border border-line px-2 py-1 text-xs text-dim hover:text-ink"
+                aria-label={t('policyTable.filterClear')}
+              >
+                ✕
+              </button>
+            </>
+          )}
+        </div>
+      )}
+      {tokens.length > 0 && visiblePolicies.length === 0 && (
+        <p className="rounded-row border border-line/60 px-2 py-1.5 text-xs text-dim">
+          {t('policyTable.filterNoMatch')}
+        </p>
+      )}
+      {visiblePolicies.map((policy) => (
         <div role="listitem" key={policy.id}>
           <PolicyRow
             policy={policy}
