@@ -26,7 +26,8 @@
     "level": "Level {{index}}",
     "targetTime": "Target time {{seconds}} s",
     "packetOf": "Packet {{current}} / {{total}}",
-    "start": "Start"
+    "start": "Start",
+    "timeUsed": "⏱ took {{seconds}}s · target {{target}}s"
   },
   "verdict": {
     "question1": "What happens to this packet?",
@@ -94,7 +95,8 @@
     "noMistakes": "no failed attempts",
     "underTarget": "under target time",
     "toChapter": "Back to level select",
-    "again": "Play again"
+    "again": "Play again",
+    "totalTime": "Total time: {{seconds}}s"
   },
   "network": {
     "diagram": "Network overview",

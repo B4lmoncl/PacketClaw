@@ -49,6 +49,9 @@ export function VerdictScreen({
   const [timedOut, setTimedOut] = useState(false);
   const questionStartedAt = useRef(Date.now());
   const resultsRef = useRef<boolean[]>([]);
+  const [elapsed, setElapsed] = useState(0); // laufende Stoppuhr (Antwortphase)
+  const lastElapsedRef = useRef(0);
+  const totalSecondsRef = useRef(0);
 
   const packet = level.packets[packetIndex];
   const verdict = useMemo(
@@ -84,6 +87,17 @@ export function VerdictScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, packetIndex, level.timerSeconds]);
 
+  // Sichtbare Stoppuhr, wenn kein Countdown laeuft — man soll wissen,
+  // wie lange man wirklich braucht (Zielzeit steht daneben).
+  useEffect(() => {
+    if (level.timerSeconds || phase !== 'answer') return;
+    setElapsed(0);
+    const timer = window.setInterval(() => {
+      setElapsed(Math.floor((Date.now() - questionStartedAt.current) / 1000));
+    }, 500);
+    return () => window.clearInterval(timer);
+  }, [phase, packetIndex, level.timerSeconds]);
+
   if (!packet || !verdict) return null;
 
   function submit(policyId: number) {
@@ -94,6 +108,8 @@ export function VerdictScreen({
 
     const elapsedSeconds = (Date.now() - questionStartedAt.current) / 1000;
     if (elapsedSeconds > level.targetSeconds) setAllUnderTarget(false);
+    lastElapsedRef.current = Math.round(elapsedSeconds);
+    totalSecondsRef.current += elapsedSeconds;
 
     setTimedOut(false);
     if (dailyMode) resultsRef.current.push(correct);
@@ -204,6 +220,7 @@ export function VerdictScreen({
           score={totalScore}
           wrongAttempts={wrongAttempts}
           underTarget={allUnderTarget}
+          totalSeconds={Math.round(totalSecondsRef.current)}
           onBack={() => navigate({ name: 'chapter', chapter: level.chapter })}
         />
       ) : (
@@ -247,6 +264,15 @@ export function VerdictScreen({
                 {secondsLeft}s
               </div>
             )}
+            {!level.timerSeconds && phase === 'answer' && (
+              <div
+                className="self-center font-mono text-xs tabular-nums text-dim"
+                role="timer"
+                aria-live="off"
+              >
+                ⏱ {elapsed}s <span className="text-dim/60">/ {level.targetSeconds}s</span>
+              </div>
+            )}
             {timedOut && phase === 'answer' && (
               <p className="text-center text-sm text-deny" aria-live="polite">
                 {t('verdict.timeout')}
@@ -270,6 +296,18 @@ export function VerdictScreen({
               </button>
             )}
 
+            {phase === 'debrief' && userAction !== null && userPolicyId !== null && (
+              <div
+                className={`self-center font-mono text-xs tabular-nums ${
+                  lastElapsedRef.current <= level.targetSeconds ? 'text-trace' : 'text-warn'
+                }`}
+              >
+                {t('level.timeUsed', {
+                  seconds: lastElapsedRef.current,
+                  target: level.targetSeconds,
+                })}
+              </div>
+            )}
             {phase === 'debrief' && userAction !== null && userPolicyId !== null && (
               <Debrief
                 verdict={verdict}
@@ -313,12 +351,14 @@ function DonePanel({
   score,
   wrongAttempts,
   underTarget,
+  totalSeconds,
   onBack,
 }: {
   stars: 0 | 1 | 2 | 3;
   score: number;
   wrongAttempts: number;
   underTarget: boolean;
+  totalSeconds: number;
   onBack: () => void;
 }) {
   const { t } = useTranslation();
@@ -331,6 +371,9 @@ function DonePanel({
       <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
       <StarBar stars={stars} size={36} animated />
       <div className="font-mono text-sm text-ink">{t('score.points', { points: score })}</div>
+      <div className="font-mono text-xs text-dim">
+        {t('score.totalTime', { seconds: totalSeconds })}
+      </div>
       <div className="flex flex-wrap justify-center gap-2 font-mono text-[10px] text-dim">
         {wrongAttempts === 0 && (
           <span className="rounded-row border border-trace/40 px-2 py-0.5 text-trace">

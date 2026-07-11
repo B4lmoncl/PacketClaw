@@ -152,7 +152,7 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   compose build (docs/DEPLOY.md), Desktop-Layout 7xl, Default-Sprache en,
   QuestHall-Animationen, Objekt-Inspektion Schritt 1+2 (resolveObjectInfo +
   Hover/Tap-Popover in PolicyTable). OFFEN (Tasks #18-24): CK3-Lock-Tooltips
-  + verschachtelte Hover + Workbench-Integration; FortiGate-Filterleiste;
-  Challenge-Level mit langen/verworrenen Regelwerken; Daily-Generator
-  (Varianz, weniger Implicit Deny); echte Zeitanzeige in Verdict/Daily;
-  Endlos-Modus; Animations-Timing-Review.
+  - verschachtelte Hover + Workbench-Integration; FortiGate-Filterleiste;
+    Challenge-Level mit langen/verworrenen Regelwerken; Daily-Generator
+    (Varianz, weniger Implicit Deny); echte Zeitanzeige in Verdict/Daily;
+    Endlos-Modus; Animations-Timing-Review.

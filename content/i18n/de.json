@@ -26,7 +26,8 @@
     "level": "Level {{index}}",
     "targetTime": "Zielzeit {{seconds}} s",
     "packetOf": "Paket {{current}} / {{total}}",
-    "start": "Start"
+    "start": "Start",
+    "timeUsed": "⏱ {{seconds}}s gebraucht · Ziel {{target}}s"
   },
   "verdict": {
     "question1": "Was passiert mit diesem Paket?",
@@ -94,7 +95,8 @@
     "noMistakes": "ohne Fehlversuch",
     "underTarget": "unter Zielzeit",
     "toChapter": "Zur Levelauswahl",
-    "again": "Nochmal spielen"
+    "again": "Nochmal spielen",
+    "totalTime": "Gesamtzeit: {{seconds}}s"
   },
   "network": {
     "diagram": "Netzübersicht",
