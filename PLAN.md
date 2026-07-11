@@ -116,7 +116,7 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
 - 📝 Offen für Phase 4: Claw-Snip-Animation beim DENY ist aktuell nur Row-Highlight (Partikel/Konfetti + Screen-Shake folgen mit Sound zusammen); Descent-Chip könnte beim ACCEPT durchs Egress „geschleudert" werden (Partikelspur).
 - [x] Phase 3 — Volle Breite: alle 4 Modi, 80 Level über 8 Kapitel, Daily Run (seeded), Sandbox (JSON-Export/Import), Validator in CI; jeder Modus E2E im Browser verifiziert
 - [x] Phase 4 — Gamification & Polish: Ränge/Achievements/Streak, Web-Audio-Sound, PWA (Manifest + SW, offline), i18n en, interaktives Onboarding, Settings inkl. Save-Export/Import; E2E verifiziert (Onboarding-Flow, SW-Registrierung, Profil, reduced-motion via Daily-E2E)
-- [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)
+- [x] Phase 5 — Ship: Multi-Stage-Dockerfile (Tests im Build), nginx-SPA-Config mit CSP, compose (localhost-Bindung, Healthcheck, Traefik-Beispiel), CI-ghcr-Push bei v*-Tags, README (Features, Screenshots, Deploy in 3 Befehlen), CHANGELOG, docs/CONTENT.md, Tag v1.0.0. Hinweis: Docker-Build lokal nicht verifizierbar (kein Daemon im Dev-Container) — Verifikation über den CI-Lauf des Tags.
 
 ## 7b. Nutzerwünsche (2026-07-10, verbindlich)
 
