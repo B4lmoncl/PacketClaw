@@ -163,3 +163,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
     Challenge-Level mit langen/verworrenen Regelwerken; Daily-Generator
     (Varianz, weniger Implicit Deny); echte Zeitanzeige in Verdict/Daily;
     Endlos-Modus; Animations-Timing-Review.
+- 2026-07-11 (später): Oberste Direktive verankert (CLAUDE.md: 1:1
+  FortiGate-GUI-Nähe als Prio 1). Erledigt: Stoppuhr/Zeitanzeige in
+  Verdict/Daily; Daily-Generator neu (Themen, 6-14 Policies, balancierte
+  Ausgänge statt Implicit-Deny-Flut, ≥2 Accepts garantiert); Freitext- +
+  additive Feld-Filter in der Policy-Tabelle (FortiGate-Stil); CK3-Tooltips
+  (Hover→Lock per Klick, verschachtelte Member-Inspektion); Descent hält
+  1,3s auf der Match-Zeile. OFFEN (hohe Prio zuerst): #26 FortiGate-
+  Spaltenlayout der Policy-Tabelle (+ Filter am Spaltenkopf, linke Navi,
+  Log-Ansicht wie Original), #18-Rest (Chips in RulesetWorkbench, Popover-
+  Randkollision), #22 lange verworrene Challenge-Regelwerke (+ Workbench-
+  Filter, IP-Containment-Suche), #19 Endlos-Modus.
