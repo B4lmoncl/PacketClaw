@@ -129,5 +129,19 @@
     "ticket": "Incident-Ticket",
     "log": "Forward-Traffic-Log",
     "fixIt": "Regelwerk reparieren"
+  },
+  "daily": {
+    "result": "Daily {{date}}",
+    "share": "Ergebnis kopieren",
+    "copied": "Kopiert!",
+    "best": "Bestwert: {{best}}/10",
+    "history": "Historie"
+  },
+  "sandbox": {
+    "packetForm": "Testpaket",
+    "fire": "Abfeuern",
+    "export": "Export",
+    "import": "Import",
+    "importError": "Das war kein gültiges Netz-JSON (oder eine ungültige IP im Paket)."
   }
 }

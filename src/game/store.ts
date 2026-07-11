@@ -18,7 +18,11 @@ export interface Settings {
 }
 
 export type Screen =
-  { name: 'home' } | { name: 'chapter'; chapter: number } | { name: 'level'; levelId: string };
+  | { name: 'home' }
+  | { name: 'chapter'; chapter: number }
+  | { name: 'level'; levelId: string }
+  | { name: 'daily' }
+  | { name: 'sandbox' };
 
 interface GameState {
   // --- persistiert (Savegame) ---
@@ -26,6 +30,8 @@ interface GameState {
   xp: number;
   stars: Record<string, number>;
   bestScores: Record<string, number>;
+  /** Daily-Historie: Datum → Ergebnis pro Paket */
+  dailyHistory: Record<string, boolean[]>;
   settings: Settings;
   // --- flüchtig ---
   screen: Screen;
@@ -33,6 +39,7 @@ interface GameState {
 
   navigate(screen: Screen): void;
   recordLevelResult(levelId: string, stars: number, score: number): void;
+  recordDaily(date: string, results: boolean[], score: number): void;
   setCombo(combo: number): void;
   updateSettings(patch: Partial<Settings>): void;
   exportSave(): string;
@@ -46,6 +53,7 @@ export const useGame = create<GameState>()(
       xp: 0,
       stars: {},
       bestScores: {},
+      dailyHistory: {},
       settings: { sound: true, motion: 'system', scanlines: false, locale: 'de' },
       screen: { name: 'home' },
       combo: 0,
@@ -65,13 +73,25 @@ export const useGame = create<GameState>()(
           },
         })),
 
+      recordDaily: (date, results, score) =>
+        set((state) => ({
+          xp: state.xp + score,
+          dailyHistory: state.dailyHistory[date]
+            ? state.dailyHistory
+            : { ...state.dailyHistory, [date]: results },
+        })),
+
       setCombo: (combo) => set({ combo }),
 
       updateSettings: (patch) => set((state) => ({ settings: { ...state.settings, ...patch } })),
 
       exportSave: () => {
-        const { saveVersion, xp, stars, bestScores, settings } = get();
-        return JSON.stringify({ saveVersion, xp, stars, bestScores, settings }, null, 2);
+        const { saveVersion, xp, stars, bestScores, dailyHistory, settings } = get();
+        return JSON.stringify(
+          { saveVersion, xp, stars, bestScores, dailyHistory, settings },
+          null,
+          2,
+        );
       },
 
       importSave: (json) => {
@@ -100,6 +120,7 @@ export const useGame = create<GameState>()(
         xp: state.xp,
         stars: state.stars,
         bestScores: state.bestScores,
+        dailyHistory: state.dailyHistory,
         settings: state.settings,
       }),
       migrate: (persisted) => migrateSave(persisted as { saveVersion: number }),
@@ -113,6 +134,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   xp: number;
   stars: Record<string, number>;
   bestScores: Record<string, number>;
+  dailyHistory: Record<string, boolean[]>;
   settings: Settings;
 } {
   // Zukünftige Migrationen: if (save.saveVersion === 1) { ...auf 2 heben... }
@@ -121,6 +143,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     xp: typeof save.xp === 'number' ? save.xp : 0,
     stars: (save.stars as Record<string, number>) ?? {},
     bestScores: (save.bestScores as Record<string, number>) ?? {},
+    dailyHistory: (save.dailyHistory as Record<string, boolean[]>) ?? {},
     settings: {
       sound: true,
       motion: 'system',

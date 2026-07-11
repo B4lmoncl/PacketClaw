@@ -15,7 +15,16 @@ import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
 type Phase = 'answer' | 'descent' | 'debrief' | 'done';
 
-export function VerdictScreen({ level }: { level: VerdictLevel }) {
+export function VerdictScreen({
+  level,
+  dailyMode = false,
+  onDailyComplete,
+}: {
+  level: VerdictLevel;
+  /** Daily: kein Retry, Ergebnis pro Paket wird gesammelt */
+  dailyMode?: boolean;
+  onDailyComplete?: (results: boolean[], score: number) => void;
+}) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'en' ? 'en' : 'de';
   const reducedMotion = useReducedMotionPref();
@@ -37,6 +46,7 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
   const [secondsLeft, setSecondsLeft] = useState<number | null>(level.timerSeconds ?? null);
   const [timedOut, setTimedOut] = useState(false);
   const questionStartedAt = useRef(Date.now());
+  const resultsRef = useRef<boolean[]>([]);
 
   const packet = level.packets[packetIndex];
   const verdict = useMemo(
@@ -84,6 +94,7 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
     if (elapsedSeconds > level.targetSeconds) setAllUnderTarget(false);
 
     setTimedOut(false);
+    if (dailyMode) resultsRef.current.push(correct);
     if (correct) {
       const { points } = scoreVerdictAnswer({
         correct,
@@ -106,6 +117,9 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
     if (packetIndex + 1 < level.packets.length) {
       setPacketIndex((i) => i + 1);
       resetQuestion();
+    } else if (dailyMode) {
+      onDailyComplete?.([...resultsRef.current], totalScore);
+      return;
     } else {
       const stars = starsFor({
         solved: true,
@@ -206,6 +220,7 @@ export function VerdictScreen({ level }: { level: VerdictLevel }) {
               verdict={verdict}
               answer={{ action: userAction, policyId: userPolicyId }}
               correct={lastCorrect}
+              allowRetry={!dailyMode}
               onNext={nextPacket}
               onRetry={retry}
               onReplay={() => {

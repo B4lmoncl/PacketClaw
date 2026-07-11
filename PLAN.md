@@ -114,7 +114,7 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
 - ✅ Debrief generiert aus Trace (Match-Begründung + SNAT-Hinweis); Chip sitzt sichtbar in der gematchten Zeile.
 - 🔧 Behoben: Emoji im Netzdiagramm (🦞) renderte im Headless-Container nicht → ersetzt durch SVG-Zangen + „FW"-Label (font-unabhängig). ⚔ beim Boss ebenso → ★.
 - 📝 Offen für Phase 4: Claw-Snip-Animation beim DENY ist aktuell nur Row-Highlight (Partikel/Konfetti + Screen-Shake folgen mit Sound zusammen); Descent-Chip könnte beim ACCEPT durchs Egress „geschleudert" werden (Partikelspur).
-- [ ] Phase 3 — Volle Breite (alle Modi, Kapitel 2–8, Daily, Sandbox, Validator in CI)
+- [x] Phase 3 — Volle Breite: alle 4 Modi, 80 Level über 8 Kapitel, Daily Run (seeded), Sandbox (JSON-Export/Import), Validator in CI; jeder Modus E2E im Browser verifiziert
 - [ ] Phase 4 — Gamification & Polish (XP/Sterne/Ränge/Achievements/Streak, Sound, PWA, i18n en, Onboarding, Settings)
 - [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)
 
@@ -124,6 +124,8 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
 - **Tutorial/Onboarding:** interaktives 3-Minuten-Tutorial (Phase 4) + kontextuelle Konzept-Einführungen pro Kapitel („Neu in diesem Kapitel"-Karte vor Level 1).
 - **Vollwertiges Spiel mit viel Content:** 80+ Level, alle Modi, Daily, Gamification — wie geplant; Umfang geht vor Deadline.
 - **Security Profiles / cert vs. deep inspection:** auf ROADMAP.md (v1.1) — eigenes Kapitel mit Inspection-Entscheid-Aufgaben. NAT/SNAT/DNAT sind bereits Kern-Kapitel 6/7.
+
+- **HA-Cluster, Perimeter- vs. interne FW, Routing vertieft (2026-07-10):** DMZ + Routing (LPM→dstintf) sind bereits Kern; Placement-Aufgaben („auf welcher der beiden Firewalls blocke ich — und warum") und HA-Fallen (Config-Sync, Failover, Session-Pickup) als **v1.2** auf ROADMAP.md ausgearbeitet — Wunsch: Aufnahme „nach und nach".
 
 ## 8. Offene Entscheidungen / Notizen
 

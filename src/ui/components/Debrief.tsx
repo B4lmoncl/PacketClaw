@@ -17,6 +17,7 @@ export function Debrief({
   verdict,
   answer,
   correct,
+  allowRetry = true,
   onNext,
   onRetry,
   onReplay,
@@ -24,6 +25,8 @@ export function Debrief({
   verdict: Verdict;
   answer: UserAnswer;
   correct: boolean;
+  /** false (Daily): auch nach Fehlern geht es nur weiter */
+  allowRetry?: boolean;
   onNext: () => void;
   onRetry: () => void;
   onReplay: () => void;
@@ -99,7 +102,7 @@ export function Debrief({
       </ul>
 
       <div className="mt-3 flex flex-wrap gap-2">
-        {correct ? (
+        {correct || !allowRetry ? (
           <button
             onClick={onNext}
             className="rounded-panel bg-claw px-5 py-2.5 font-display font-bold text-bg hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"

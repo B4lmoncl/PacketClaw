@@ -129,5 +129,19 @@
     "ticket": "Incident ticket",
     "log": "Forward traffic log",
     "fixIt": "Repair the ruleset"
+  },
+  "daily": {
+    "result": "Daily {{date}}",
+    "share": "Copy result",
+    "copied": "Copied!",
+    "best": "Best: {{best}}/10",
+    "history": "History"
+  },
+  "sandbox": {
+    "packetForm": "Test packet",
+    "fire": "Fire",
+    "export": "Export",
+    "import": "Import",
+    "importError": "That was not valid network JSON (or an invalid IP in the packet)."
   }
 }

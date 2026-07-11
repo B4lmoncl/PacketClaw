@@ -28,27 +28,29 @@ export function HomeScreen() {
           <span className="text-claw transition-transform group-hover:translate-x-1">→</span>
         </button>
 
-        <div className="flex items-center justify-between rounded-panel border border-line bg-panel/50 px-5 py-4 opacity-60">
+        <button
+          onClick={() => navigate({ name: 'daily' })}
+          className="group flex items-center justify-between rounded-panel border border-warn/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-warn/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-warn"
+        >
           <div>
-            <div className="font-display text-lg font-bold text-dim">{t('nav.daily')}</div>
+            <div className="font-display text-lg font-bold text-ink">{t('nav.daily')}</div>
             <div className="font-mono text-xs text-dim">10 Pakete · seeded · für alle gleich</div>
           </div>
-          <span className="rounded-row border border-line px-2 py-0.5 font-mono text-[10px] uppercase text-dim">
-            {t('nav.comingSoon')}
-          </span>
-        </div>
+          <span className="text-warn transition-transform group-hover:translate-x-1">→</span>
+        </button>
 
-        <div className="flex items-center justify-between rounded-panel border border-line bg-panel/50 px-5 py-4 opacity-60">
+        <button
+          onClick={() => navigate({ name: 'sandbox' })}
+          className="group flex items-center justify-between rounded-panel border border-trace/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-trace/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-trace"
+        >
           <div>
-            <div className="font-display text-lg font-bold text-dim">{t('nav.sandbox')}</div>
+            <div className="font-display text-lg font-bold text-ink">{t('nav.sandbox')}</div>
             <div className="font-mono text-xs text-dim">
               Eigenes Netz, eigene Regeln, freies Feuern
             </div>
           </div>
-          <span className="rounded-row border border-line px-2 py-0.5 font-mono text-[10px] uppercase text-dim">
-            {t('nav.comingSoon')}
-          </span>
-        </div>
+          <span className="text-trace transition-transform group-hover:translate-x-1">→</span>
+        </button>
       </nav>
     </div>
   );

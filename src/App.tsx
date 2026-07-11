@@ -7,7 +7,9 @@ import { ArchitectScreen } from './ui/screens/ArchitectScreen';
 import { AuditScreen } from './ui/screens/AuditScreen';
 import { IncidentScreen } from './ui/screens/IncidentScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
+import { DailyScreen } from './ui/screens/DailyScreen';
 import { HomeScreen } from './ui/screens/HomeScreen';
+import { SandboxScreen } from './ui/screens/SandboxScreen';
 import { VerdictScreen } from './ui/screens/VerdictScreen';
 
 export default function App() {
@@ -39,6 +41,14 @@ export default function App() {
   switch (screen.name) {
     case 'home':
       content = <HomeScreen />;
+      break;
+    case 'daily':
+      content = <DailyScreen />;
+      onBack = () => navigate({ name: 'home' });
+      break;
+    case 'sandbox':
+      content = <SandboxScreen />;
+      onBack = () => navigate({ name: 'home' });
       break;
     case 'chapter':
       content = <ChapterScreen chapter={screen.chapter} />;
