@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import type { MatchField, NetworkConfig, Policy } from '../../engine';
+import { InfoChip, ObjectChip } from './ObjectChip';
 
 export type RowState =
   'idle' | 'active' | 'failed' | 'skipped' | 'matched-accept' | 'matched-deny' | 'implicit-hit';
@@ -31,24 +32,6 @@ const ROW_STATE_CLASSES: Record<RowState, string> = {
   'implicit-hit': 'border-deny bg-deny/15 animate-pulse',
 };
 
-function FieldChip({ label, value, failed }: { label: string; value: string; failed: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-baseline gap-1 rounded-row border px-1.5 py-0.5 transition-colors ${
-        failed ? 'border-deny bg-deny/20 text-deny' : 'border-line/60 text-ink/90'
-      }`}
-    >
-      <span className="text-[8px] uppercase tracking-wide text-dim">{label}</span>
-      <span className="font-mono text-[11px]">{value}</span>
-      {failed && (
-        <span aria-hidden className="text-[10px]">
-          ✕
-        </span>
-      )}
-    </span>
-  );
-}
-
 function PacketChip() {
   return (
     <motion.span
@@ -62,6 +45,7 @@ function PacketChip() {
 
 function PolicyRow({
   policy,
+  network,
   highlight,
   hasChip,
   selectable,
@@ -69,6 +53,7 @@ function PolicyRow({
   onSelect,
 }: {
   policy: Policy;
+  network: NetworkConfig;
   highlight: RowHighlight;
   hasChip: boolean;
   selectable: boolean;
@@ -105,39 +90,57 @@ function PolicyRow({
         </span>
       </div>
       <div className="mt-1 flex flex-wrap gap-1 pl-7">
-        <FieldChip
+        <ObjectChip
           label={t('policyTable.srcintf')}
-          value={policy.srcintf.join(', ')}
+          values={policy.srcintf}
+          field="srcintf"
+          network={network}
           failed={failed('srcintf')}
         />
-        <FieldChip
+        <ObjectChip
           label={t('policyTable.dstintf')}
-          value={policy.dstintf.join(', ')}
+          values={policy.dstintf}
+          field="dstintf"
+          network={network}
           failed={failed('dstintf')}
         />
-        <FieldChip
+        <ObjectChip
           label={t('policyTable.srcaddr')}
-          value={policy.srcaddr.join(', ')}
+          values={policy.srcaddr}
+          field="srcaddr"
+          network={network}
           failed={failed('srcaddr')}
         />
-        <FieldChip
+        <ObjectChip
           label={t('policyTable.dstaddr')}
-          value={policy.dstaddr.join(', ')}
+          values={policy.dstaddr}
+          field="dstaddr"
+          network={network}
           failed={failed('dstaddr')}
         />
-        <FieldChip
+        <ObjectChip
           label={t('policyTable.service')}
-          value={policy.service.join(', ')}
+          values={policy.service}
+          field="service"
+          network={network}
           failed={failed('service')}
         />
         {policy.schedule !== 'always' && (
-          <FieldChip
+          <InfoChip
             label={t('policyTable.schedule')}
             value={policy.schedule}
             failed={failed('schedule')}
+            infoKey="objectInfo.schedule"
           />
         )}
-        {policy.nat && <FieldChip label={t('policyTable.nat')} value="SNAT" failed={false} />}
+        {policy.nat && (
+          <InfoChip
+            label={t('policyTable.nat')}
+            value="SNAT"
+            failed={false}
+            infoKey="objectInfo.nat"
+          />
+        )}
       </div>
     </>
   );
@@ -190,6 +193,7 @@ export function PolicyTable({
         <div role="listitem" key={policy.id}>
           <PolicyRow
             policy={policy}
+            network={network}
             highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
             hasChip={chipRow === policy.id}
             selectable={selectable}

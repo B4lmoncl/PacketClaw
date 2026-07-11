@@ -219,5 +219,29 @@
     "stepDone": "That's it: read the packet, ACCEPT/DENY, tap the policy ID, understand the trace. The rest comes chapter by chapter. Good luck at the gate!",
     "finish": "Let's go",
     "hintRow1": "Hint: it's the row whose fields ALL match the packet."
+  },
+  "objectInfo": {
+    "kind": {
+      "address": "Address object",
+      "addressGroup": "Address group",
+      "service": "Service",
+      "serviceGroup": "Service group",
+      "iface": "Interface",
+      "zone": "Zone",
+      "vip": "VIP (DNAT)",
+      "any": "Wildcard",
+      "unknown": "Unknown"
+    },
+    "note": {
+      "allSrc": "Matches any source IP.",
+      "allDst": "Matches any destination IP — but no DNAT traffic: that requires the VIP object in the policy.",
+      "allService": "Matches any service (all protocols and ports).",
+      "anyIface": "Matches any interface.",
+      "vip": "Policies match on the VIP object, not the internal IP.",
+      "unknown": "Not defined anywhere — matches nothing."
+    },
+    "inZone": "Zone: {{zone}}",
+    "schedule": "Mon–Fri 08:00–17:59 (wall clock). Outside of that the rule does not match.",
+    "nat": "SNAT: the source IP is rewritten to the egress interface IP on the way out."
   }
 }

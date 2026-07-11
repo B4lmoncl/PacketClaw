@@ -219,5 +219,29 @@
     "stepDone": "Das war's schon: Paket lesen, ACCEPT/DENY, Policy-ID tippen, Trace verstehen. Der Rest kommt Kapitel für Kapitel. Viel Erfolg am Tor!",
     "finish": "Los geht's",
     "hintRow1": "Tipp: Es ist die Zeile, deren Felder ALLE zum Paket passen."
+  },
+  "objectInfo": {
+    "kind": {
+      "address": "Adressobjekt",
+      "addressGroup": "Adressgruppe",
+      "service": "Service",
+      "serviceGroup": "Service-Gruppe",
+      "iface": "Interface",
+      "zone": "Zone",
+      "vip": "VIP (DNAT)",
+      "any": "Wildcard",
+      "unknown": "Unbekannt"
+    },
+    "note": {
+      "allSrc": "Matcht jede Quell-IP.",
+      "allDst": "Matcht jede Ziel-IP — aber keinen DNAT-Traffic: dafür muss das VIP-Objekt in der Policy stehen.",
+      "allService": "Matcht jeden Service (alle Protokolle und Ports).",
+      "anyIface": "Matcht jedes Interface.",
+      "vip": "Policies matchen über das VIP-Objekt, nicht über die interne IP.",
+      "unknown": "Nirgends definiert — matcht nichts."
+    },
+    "inZone": "Zone: {{zone}}",
+    "schedule": "Mo–Fr 08:00–17:59 (Wanduhrzeit). Außerhalb matcht die Regel nicht.",
+    "nat": "SNAT: Die Quell-IP wird beim Verlassen auf die IP des Egress-Interfaces umgeschrieben."
   }
 }

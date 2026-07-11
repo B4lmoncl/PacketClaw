@@ -145,3 +145,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Mobile bleibt voll spielbar.
 - Offen/Roadmap: QuestHall-Optik-Feinschliff (Animationen, weniger
   Claw-Referenzen in Texten), HTTPS via Reverse Proxy wenn gewünscht.
+
+## Status-Log (für zukünftige Sessions — Details in den Task-Todos)
+
+- 2026-07-11: Accounts+Sync live (server/, sync.ts), Deploy via git clone +
+  compose build (docs/DEPLOY.md), Desktop-Layout 7xl, Default-Sprache en,
+  QuestHall-Animationen, Objekt-Inspektion Schritt 1+2 (resolveObjectInfo +
+  Hover/Tap-Popover in PolicyTable). OFFEN (Tasks #18-24): CK3-Lock-Tooltips
+  + verschachtelte Hover + Workbench-Integration; FortiGate-Filterleiste;
+  Challenge-Level mit langen/verworrenen Regelwerken; Daily-Generator
+  (Varianz, weniger Implicit Deny); echte Zeitanzeige in Verdict/Daily;
+  Endlos-Modus; Animations-Timing-Review.
