@@ -177,5 +177,17 @@
     "resetConfirm": "Really delete everything?",
     "resetYes": "Delete",
     "disclaimer": "Independent learning project inspired by FortiOS concepts. Not affiliated with Fortinet."
+  },
+  "onboarding": {
+    "title": "Welcome, Gatekeeper",
+    "skip": "Skip tutorial",
+    "stepPacket": "I'm Snipp, your fellow gatekeeper. This is a packet: it enters through an interface (port1), has a source, a destination and a service (tcp/443 = HTTPS). Your job: decide what happens to it.",
+    "stepTable": "This is the policy table. The firewall reads it TOP-DOWN — the first rule where ALL fields match wins. At the very bottom sits row 0: the implicit deny. Whatever no rule allows falls through there.",
+    "stepAction": "Our packet: a LAN client wants HTTPS to the internet. Rule 1 allows exactly that. So — what happens? Tap ACCEPT.",
+    "stepPolicy": "Correct. And WHICH rule matches? Tap its row.",
+    "stepDescent": "Watch: the packet walks the table and locks into rule 1. Every debrief works like this — the engine always shows you why.",
+    "stepDone": "That's it: read the packet, ACCEPT/DENY, tap the policy ID, understand the trace. The rest comes chapter by chapter. Good luck at the gate!",
+    "finish": "Let's go",
+    "hintRow1": "Hint: it's the row whose fields ALL match the packet."
   }
 }

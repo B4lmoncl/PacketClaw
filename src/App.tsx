@@ -13,6 +13,7 @@ import { DailyScreen } from './ui/screens/DailyScreen';
 import { ProfileScreen } from './ui/screens/ProfileScreen';
 import { SettingsScreen } from './ui/screens/SettingsScreen';
 import { HomeScreen } from './ui/screens/HomeScreen';
+import { OnboardingScreen } from './ui/screens/OnboardingScreen';
 import { SandboxScreen } from './ui/screens/SandboxScreen';
 import { VerdictScreen } from './ui/screens/VerdictScreen';
 
@@ -21,6 +22,7 @@ export default function App() {
   const locale = useGame((s) => s.settings.locale);
   const sound = useGame((s) => s.settings.sound);
   const scanlines = useGame((s) => s.settings.scanlines);
+  const onboarded = useGame((s) => s.onboarded);
   const navigate = useGame((s) => s.navigate);
   const { i18n } = useTranslation();
 
@@ -50,7 +52,7 @@ export default function App() {
 
   switch (screen.name) {
     case 'home':
-      content = <HomeScreen />;
+      content = onboarded ? <HomeScreen /> : <OnboardingScreen />;
       break;
     case 'daily':
       content = <DailyScreen />;

@@ -177,5 +177,17 @@
     "resetConfirm": "Wirklich alles löschen?",
     "resetYes": "Löschen",
     "disclaimer": "Unabhängiges Lernprojekt, inspiriert von FortiOS-Konzepten. Nicht mit Fortinet affiliiert."
+  },
+  "onboarding": {
+    "title": "Willkommen, Torwächter",
+    "skip": "Tutorial überspringen",
+    "stepPacket": "Ich bin Snipp, dein Torwächter-Kollege. Das hier ist ein Paket: Es kommt über ein Interface rein (port1), hat Quelle, Ziel und einen Service (tcp/443 = HTTPS). Deine Aufgabe: entscheiden, was damit passiert.",
+    "stepTable": "Das ist die Policy-Tabelle. Die Firewall liest sie VON OBEN NACH UNTEN — die erste Regel, bei der ALLE Felder passen, gewinnt. Ganz unten wartet Zeile 0: das Implicit Deny. Was keine Regel erlaubt, fällt dort durch.",
+    "stepAction": "Unser Paket: LAN-Client will HTTPS ins Internet. Regel 1 erlaubt genau das. Also — was passiert? Tippe ACCEPT.",
+    "stepPolicy": "Richtig. Und WELCHE Regel matcht? Tippe die Zeile an.",
+    "stepDescent": "Schau zu: Das Paket fährt die Tabelle ab und rastet bei Regel 1 ein. Genau so läuft nachher jedes Debrief — die Engine zeigt dir immer, warum.",
+    "stepDone": "Das war's schon: Paket lesen, ACCEPT/DENY, Policy-ID tippen, Trace verstehen. Der Rest kommt Kapitel für Kapitel. Viel Erfolg am Tor!",
+    "finish": "Los geht's",
+    "hintRow1": "Tipp: Es ist die Zeile, deren Felder ALLE zum Paket passen."
   }
 }

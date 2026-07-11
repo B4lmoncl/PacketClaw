@@ -229,6 +229,12 @@ export const useGame = create<GameState>()(
         settings: state.settings,
       }),
       migrate: (persisted) => migrateSave(persisted as { saveVersion: number }),
+      // Jede Rehydration normalisieren: fehlende Felder (aeltere/unvollstaendige
+      // Saves) werden aus den Defaults ergaenzt — unabhaengig von der Version.
+      merge: (persisted, current) => ({
+        ...current,
+        ...migrateSave((persisted ?? {}) as { saveVersion: number }),
+      }),
     },
   ),
 );
@@ -253,10 +259,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     stars: (save.stars as Record<string, number>) ?? {},
     bestScores: (save.bestScores as Record<string, number>) ?? {},
     dailyHistory: (save.dailyHistory as Record<string, boolean[]>) ?? {},
-    stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats>) ?? {}) },
-    achievements: (save.achievements as string[]) ?? [],
-    streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState>) ?? {}) },
-    onboarded: (save.onboarded as boolean) ?? false,
+    stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
+    achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
+    streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },
+    onboarded: save.onboarded === true,
     settings: {
       sound: true,
       motion: 'system',

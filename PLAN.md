@@ -115,7 +115,7 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
 - 🔧 Behoben: Emoji im Netzdiagramm (🦞) renderte im Headless-Container nicht → ersetzt durch SVG-Zangen + „FW"-Label (font-unabhängig). ⚔ beim Boss ebenso → ★.
 - 📝 Offen für Phase 4: Claw-Snip-Animation beim DENY ist aktuell nur Row-Highlight (Partikel/Konfetti + Screen-Shake folgen mit Sound zusammen); Descent-Chip könnte beim ACCEPT durchs Egress „geschleudert" werden (Partikelspur).
 - [x] Phase 3 — Volle Breite: alle 4 Modi, 80 Level über 8 Kapitel, Daily Run (seeded), Sandbox (JSON-Export/Import), Validator in CI; jeder Modus E2E im Browser verifiziert
-- [ ] Phase 4 — Gamification & Polish (XP/Sterne/Ränge/Achievements/Streak, Sound, PWA, i18n en, Onboarding, Settings)
+- [x] Phase 4 — Gamification & Polish: Ränge/Achievements/Streak, Web-Audio-Sound, PWA (Manifest + SW, offline), i18n en, interaktives Onboarding, Settings inkl. Save-Export/Import; E2E verifiziert (Onboarding-Flow, SW-Registrierung, Profil, reduced-motion via Daily-E2E)
 - [ ] Phase 5 — Ship (Docker, compose, CI + ghcr, README, CHANGELOG, v1.0.0)
 
 ## 7b. Nutzerwünsche (2026-07-10, verbindlich)
