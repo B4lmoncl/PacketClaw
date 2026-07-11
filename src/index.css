@@ -39,10 +39,28 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Offscreen-Karten erst beim Scrollen rendern (QuestHall-Idiom) */
+/* Offscreen-Karten erst beim Scrollen rendern + sanft einblenden (QuestHall-Idiom) */
 .cv-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 110px;
+  animation: pc-card-fade-in 0.25s ease-out;
+}
+
+@keyframes pc-card-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-auto {
+    animation: none;
+  }
 }
 
 ::-webkit-scrollbar {

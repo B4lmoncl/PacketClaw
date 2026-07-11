@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { setSoundEnabled } from './game/sound';
 import { useTranslation } from 'react-i18next';
 import { getLevel } from './game/levels';
@@ -16,6 +17,7 @@ import { HomeScreen } from './ui/screens/HomeScreen';
 import { OnboardingScreen } from './ui/screens/OnboardingScreen';
 import { SandboxScreen } from './ui/screens/SandboxScreen';
 import { VerdictScreen } from './ui/screens/VerdictScreen';
+import { useReducedMotionPref } from './ui/hooks/useReducedMotionPref';
 
 export default function App() {
   const screen = useGame((s) => s.screen);
@@ -25,6 +27,7 @@ export default function App() {
   const onboarded = useGame((s) => s.onboarded);
   const navigate = useGame((s) => s.navigate);
   const { i18n } = useTranslation();
+  const reducedMotion = useReducedMotionPref();
 
   useEffect(() => {
     if (i18n.language !== locale) void i18n.changeLanguage(locale);
@@ -99,7 +102,17 @@ export default function App() {
     <div className="min-h-screen bg-bg font-body text-ink pc-bg-gradient">
       <Header onBack={onBack} />
       <AchievementToast />
-      <main>{content}</main>
+      {/* Sanfter Einblend-Uebergang pro Screen (QuestHall-Anleihe) */}
+      <main>
+        <motion.div
+          key={JSON.stringify(screen)}
+          initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+        >
+          {content}
+        </motion.div>
+      </main>
       {scanlines && <div className="pc-scanlines" aria-hidden />}
     </div>
   );

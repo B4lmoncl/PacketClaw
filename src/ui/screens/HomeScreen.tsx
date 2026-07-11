@@ -22,7 +22,7 @@ export function HomeScreen() {
       >
         <button
           onClick={() => navigate({ name: 'chapter', chapter: 1 })}
-          className="group flex items-center justify-between rounded-panel border border-claw/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-claw/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw"
+          className="group flex items-center justify-between rounded-panel border border-claw/50 bg-panel px-5 py-4 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:bg-claw/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw"
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.campaign')}</div>
@@ -33,7 +33,7 @@ export function HomeScreen() {
 
         <button
           onClick={() => navigate({ name: 'daily' })}
-          className="group flex items-center justify-between rounded-panel border border-warn/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-warn/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-warn"
+          className="group flex items-center justify-between rounded-panel border border-warn/50 bg-panel px-5 py-4 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:bg-warn/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-warn"
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.daily')}</div>
@@ -44,7 +44,7 @@ export function HomeScreen() {
 
         <button
           onClick={() => navigate({ name: 'sandbox' })}
-          className="group flex items-center justify-between rounded-panel border border-trace/50 bg-panel px-5 py-4 text-left transition-colors hover:bg-trace/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-trace"
+          className="group flex items-center justify-between rounded-panel border border-trace/50 bg-panel px-5 py-4 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:bg-trace/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-trace"
         >
           <div>
             <div className="font-display text-lg font-bold text-ink">{t('nav.sandbox')}</div>

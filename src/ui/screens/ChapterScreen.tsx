@@ -57,7 +57,7 @@ export function ChapterScreen({ chapter }: { chapter: number }) {
               key={level.id}
               disabled={!unlocked}
               onClick={() => navigate({ name: 'level', levelId: level.id })}
-              className={`cv-auto flex flex-col gap-1.5 rounded-panel border p-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw ${
+              className={`cv-auto flex flex-col gap-1.5 rounded-panel border p-3 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw ${
                 isBoss ? 'border-warn/60' : 'border-line'
               } ${
                 unlocked
