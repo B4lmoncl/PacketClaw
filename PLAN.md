@@ -174,3 +174,16 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Log-Ansicht wie Original), #18-Rest (Chips in RulesetWorkbench, Popover-
   Randkollision), #22 lange verworrene Challenge-Regelwerke (+ Workbench-
   Filter, IP-Containment-Suche), #19 Endlos-Modus.
+- 2026-07-12: Großer FortiGate-GUI-Schub. ERLEDIGT: Policy-Tabelle als
+  echtes Spaltenlayout (Desktop, #26); FortiGate-Filter — Objekt-Auswahl
+  statt Freitext (#25) UND Spaltenkopf-Dropdown pro Spalte mit Trefferzahl
+  in aktueller Auswahl (#27, Portal-gerendert); CK3-Tooltips fertig
+  (Hover→Lock, verschachtelte Member-Inspektion, #18 Kern); Maskottchen ist
+  jetzt das QuestHall-Wächter-Portrait statt Krebs (#28); Endlos-/Survival-
+  Modus komplett (#19). OFFEN: #18-Rest (Objekt-Chips auch im Regelwerk-
+  Editor RulesetWorkbench; Popover-Randkollision rechts via Portal), #22
+  Challenge-Level mit langen/verworrenen Regelwerken (+ Workbench-Filter,
+  IP-Containment-Suche 'Filter 10.0.1.5 findet Regeln deren Objekt die IP
+  enthält'). Weitere FortiGate-Nähe als Folge-Ideen: linke FortiOS-Navi als
+  Spielnavigation, Forward-Traffic-Log im Incident-Modus mit Original-
+  Spalten. Tests: 189 grün.
