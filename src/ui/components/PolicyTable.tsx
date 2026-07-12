@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { MatchField, NetworkConfig, Policy } from '../../engine';
 import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
@@ -172,7 +173,133 @@ function PolicyRow({
 const COLS =
   'grid grid-cols-[2.75rem_minmax(120px,1.4fr)_minmax(64px,0.8fr)_minmax(64px,0.8fr)_minmax(110px,1.3fr)_minmax(110px,1.3fr)_minmax(74px,0.8fr)_minmax(90px,1fr)_minmax(74px,0.7fr)_minmax(50px,0.55fr)] items-center gap-2';
 
-function ColumnHeader() {
+/** Welche Kopf-Spalte welchen Filter-Feldtyp bekommt (FortiGate-Spaltenfilter). */
+const HEAD_FIELD: Partial<Record<string, FilterField>> = {
+  srcintf: 'srcintf',
+  dstintf: 'dstintf',
+  srcaddr: 'srcaddr',
+  dstaddr: 'dstaddr',
+  service: 'service',
+  action: 'action',
+};
+
+/**
+ * Spaltenkopf-Filter wie in FortiOS: Klick oeffnet ein Dropdown mit den Werten
+ * dieser Spalte samt Trefferzahl INNERHALB der aktuellen Auswahl (also unter
+ * den bereits aktiven Filtern der anderen Spalten). Werte einer Spalte sind
+ * ODER-verknuepft, Klick toggelt. Das Dropdown wird per Portal gerendert,
+ * damit der horizontale Scroll-Container es nicht abschneidet.
+ */
+function HeaderFilter({
+  label,
+  field,
+  network,
+  filters,
+  baseFor,
+  onToggle,
+}: {
+  label: string;
+  field: FilterField;
+  network: NetworkConfig;
+  filters: FieldFilter[];
+  baseFor: (field: FilterField) => Policy[];
+  onToggle: (field: FilterField, value: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const activeValues = filters.filter((f) => f.field === field).map((f) => f.value);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: PointerEvent) => {
+      const tgt = e.target as Node;
+      if (btnRef.current?.contains(tgt) || popRef.current?.contains(tgt)) return;
+      setOpen(false);
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [open]);
+
+  const toggleOpen = () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    const r = btnRef.current?.getBoundingClientRect();
+    if (r) setPos({ left: r.left, top: r.bottom + 4 });
+    setOpen(true);
+  };
+
+  const base = open ? baseFor(field) : [];
+  const options = valueOptions(field, network);
+
+  return (
+    <span className="inline-flex items-center">
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggleOpen}
+        className={`inline-flex items-center gap-0.5 font-mono uppercase tracking-wide focus-visible:outline focus-visible:outline-1 focus-visible:outline-claw ${
+          activeValues.length ? 'text-claw' : 'text-dim hover:text-ink'
+        }`}
+        aria-label={`${label} — ${t('policyTable.filterField')}`}
+      >
+        {label}
+        <span aria-hidden className="text-[9px]">
+          {activeValues.length ? '▾●' : '▾'}
+        </span>
+      </button>
+      {open &&
+        pos &&
+        createPortal(
+          <div
+            ref={popRef}
+            style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
+            className="max-h-64 w-max min-w-[150px] max-w-[240px] overflow-auto rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+          >
+            {options.map((v) => {
+              const count = base.filter((p) => policyPassesFilter(p, { field, value: v })).length;
+              const sel = activeValues.includes(v);
+              const shown =
+                field === 'action' || field === 'status' ? t(`policyTable.val.${v}`) : v;
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => onToggle(field, v)}
+                  className={`flex w-full items-center justify-between gap-3 rounded-row px-2 py-1 text-left font-mono text-[11px] normal-case ${
+                    sel ? 'bg-claw/15 text-claw' : 'text-ink/90 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="truncate">
+                    {sel ? '✓ ' : ''}
+                    {shown}
+                  </span>
+                  <span className="shrink-0 tabular-nums text-dim">{count}</span>
+                </button>
+              );
+            })}
+          </div>,
+          document.body,
+        )}
+    </span>
+  );
+}
+
+function ColumnHeader({
+  network,
+  filters,
+  baseFor,
+  onToggle,
+}: {
+  network: NetworkConfig;
+  filters: FieldFilter[];
+  baseFor: (field: FilterField) => Policy[];
+  onToggle: (field: FilterField, value: string) => void;
+}) {
   const { t } = useTranslation();
   const heads = [
     'id',
@@ -191,11 +318,25 @@ function ColumnHeader() {
       role="row"
       className={`${COLS} border-b border-line px-2 py-1.5 text-[9px] uppercase tracking-wide text-dim`}
     >
-      {heads.map((h) => (
-        <span role="columnheader" key={h} className="font-mono">
-          {t(`policyTable.${h}`)}
-        </span>
-      ))}
+      {heads.map((h) => {
+        const field = HEAD_FIELD[h];
+        return (
+          <span role="columnheader" key={h} className="font-mono">
+            {field ? (
+              <HeaderFilter
+                label={t(`policyTable.${h}`)}
+                field={field}
+                network={network}
+                filters={filters}
+                baseFor={baseFor}
+                onToggle={onToggle}
+              />
+            ) : (
+              t(`policyTable.${h}`)
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 }
@@ -397,7 +538,17 @@ function policyPassesFilter(policy: Policy, { field, value }: FieldFilter): bool
 }
 
 function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
-  return filters.every((f) => policyPassesFilter(policy, f));
+  // Werte derselben Spalte sind ODER-verknuepft (wie FortiGate), Spalten UND.
+  const byField = new Map<FilterField, string[]>();
+  for (const f of filters) {
+    const arr = byField.get(f.field);
+    if (arr) arr.push(f.value);
+    else byField.set(f.field, [f.value]);
+  }
+  for (const [field, values] of byField) {
+    if (!values.some((value) => policyPassesFilter(policy, { field, value }))) return false;
+  }
+  return true;
 }
 
 /** Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen. */
@@ -445,6 +596,19 @@ export function PolicyTable({
       f.some((x) => x.field === draftField && x.value === draftValueOrFirst)
         ? f
         : [...f, { field: draftField, value: draftValueOrFirst }],
+    );
+  };
+  // Spaltenkopf-Filter: Wert togglen; Trefferzahl gegen die anderen aktiven Filter
+  const toggleFilter = (field: FilterField, value: string) =>
+    setFilters((fs) =>
+      fs.some((f) => f.field === field && f.value === value)
+        ? fs.filter((f) => !(f.field === field && f.value === value))
+        : [...fs, { field, value }],
+    );
+  const baseFor = (field: FilterField) => {
+    const others = filters.filter((f) => f.field !== field);
+    return network.policies.filter(
+      (p) => policyMatches(p, tokens) && matchesFieldFilters(p, others),
     );
   };
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
@@ -592,7 +756,12 @@ export function PolicyTable({
       <div className="hidden lg:block">
         <div role="table" className="overflow-x-auto">
           <div className="min-w-[820px]">
-            <ColumnHeader />
+            <ColumnHeader
+              network={network}
+              filters={filters}
+              baseFor={baseFor}
+              onToggle={toggleFilter}
+            />
             <div className="flex flex-col gap-1 pt-1">
               {visiblePolicies.map((policy) => (
                 <PolicyColumnsRow
