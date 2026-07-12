@@ -229,3 +229,21 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   ext-/mapped-IP), EXACT = ist genau das Gesuchte (HTTPS bei 443,
   Host-Objekt bei exakter IP). Badge zeigt SPALTE ⊇ wert. 10 neue
   Unit-Tests, E2E contains=8 vs exact=6. Tests: 206 gruen.
+- 2026-07-12 (Forts. 5): GUI-Runde visuell+funktional (#33/#34/#35):
+  (a) Globale Freitextsuche versteht jetzt Contains-Semantik ueber alle
+  fuenf Felder (Token "443" findet WEB/ALL/Portranges, IPs finden
+  Subnetze/Gruppen, Interfaces ihre Zonen, Hosts ihre Adressgruppen) —
+  IP-Sonderfall entfiel. (b) Rechtsklick-Kontextmenue auf Policy-Zeilen
+  in der Werkbank wie FortiOS (PolicyContextMenu.tsx: Edit, Insert
+  Empty Policy Above/Below, Clone = deaktivierte Kopie unterm Original,
+  Enable/Disable, Move, Delete; Portal an Cursorposition, Escape/
+  Aussenklick, Viewport-Klemmung, Hinweiszeile auf Desktop).
+  (c) QuestHall-Polish: ParticleBurst.tsx (Konfetti in DonePanels von
+  Verdict/Audit/Incident/Architect, gruene Funken im Debrief bei
+  richtiger Antwort), XpGain.tsx (+N XP schwebt ein, Rang-Balken fuellt
+  animiert, Rangaufstieg mit Feder-Pop) in allen vier DonePanels,
+  sanfte Einblendungen fuer Spaltenfilter-Dropdown + Objekt-Tooltips,
+  FortiOS-Zeilen-Hover auch ausserhalb des Auswahlmodus. Alles mit
+  Reduced-Motion-Gate ueber die Spieleinstellung. Tests: 206 gruen,
+  Playwright-Smokes: Kontextmenue (Menue/Clone/Escape) + Debrief-Lauf
+  ch1-l01 in beiden Motion-Modi ohne Konsolenfehler.
