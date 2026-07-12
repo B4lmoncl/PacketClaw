@@ -197,3 +197,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   auch im RulesetWorkbench-Editor; Popover-Randkollision via Portal);
   Folge-Ideen: linke FortiOS-Navi, Endlos-Bestwert im Profil, IP-
   Containment-Suche im Filter. Tests: 189 grün, 30 Commits gepusht.
+- 2026-07-12 (Forts. 2): #22 Challenge-Modus fertig (Generator 16/26/38
+  Regeln mit toten/OLD_-Duplikaten + Größenwahl-Screen + Home-Kachel);
+  #18 KOMPLETT (Objekt-Popover portal-gerendert/scrollfest, Workbench-
+  Integration via PolicyTable verifiziert); IP-Containment-Suche im
+  Freitextfilter ('10.0.1.5' matcht Regeln, deren Adressobjekte die IP
+  enthalten, via createResolver). Damit sind ALLE Tasks der Liste
+  abgearbeitet. Tests: 196 grün. Nächste Kandidaten (nicht begonnen):
+  linke FortiOS-Navi als Spielnavigation; Endlos-/Challenge-Bestwerte im
+  ProfileScreen; Audit-Challenge (find-shadowed über 30+ Regeln);
+  Roadmap v1.1 (Security Profiles, cert vs. deep inspection), v1.2
+  (HA-Cluster, Perimeter-Placement, Routing-Vertiefung).
