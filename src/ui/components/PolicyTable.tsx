@@ -24,6 +24,8 @@ interface PolicyTableProps {
   selectable?: boolean;
   selectedId?: number | null;
   onSelect?: (policyId: number) => void;
+  /** Rechtsklick auf eine Policy-Zeile (FortiOS-Kontextmenü in der Werkbank) */
+  onRowContextMenu?: (policyId: number, e: React.MouseEvent) => void;
 }
 
 const ROW_STATE_CLASSES: Record<RowState, string> = {
@@ -55,6 +57,7 @@ function PolicyRow({
   selectable,
   selected,
   onSelect,
+  onContextMenu,
 }: {
   policy: Policy;
   network: NetworkConfig;
@@ -63,6 +66,7 @@ function PolicyRow({
   selectable: boolean;
   selected: boolean;
   onSelect?: (id: number) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }) {
   const { t } = useTranslation();
   const failed = (field: MatchField) =>
@@ -154,6 +158,7 @@ function PolicyRow({
       <button
         type="button"
         onClick={() => onSelect?.(policy.id)}
+        onContextMenu={onContextMenu}
         aria-pressed={selected}
         className={`block w-full rounded-row border px-2 py-1.5 text-left transition-colors ${rowClasses} ${selectClasses} ${selectedClasses}`}
       >
@@ -162,7 +167,10 @@ function PolicyRow({
     );
   }
   return (
-    <div className={`rounded-row border px-2 py-1.5 transition-colors ${rowClasses}`}>
+    <div
+      onContextMenu={onContextMenu}
+      className={`rounded-row border px-2 py-1.5 transition-colors ${rowClasses}`}
+    >
       {content}
     </div>
   );
@@ -457,6 +465,7 @@ function PolicyColumnsRow({
   selectable,
   selected,
   onSelect,
+  onContextMenu,
 }: {
   policy: Policy;
   network: NetworkConfig;
@@ -465,6 +474,7 @@ function PolicyColumnsRow({
   selectable: boolean;
   selected: boolean;
   onSelect?: (id: number) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }) {
   const { t } = useTranslation();
   const failed = (field: MatchField) =>
@@ -542,6 +552,7 @@ function PolicyColumnsRow({
         tabIndex={0}
         aria-selected={selected}
         onClick={() => onSelect?.(policy.id)}
+        onContextMenu={onContextMenu}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -555,7 +566,7 @@ function PolicyColumnsRow({
     );
   }
   return (
-    <div role="row" className={rowClasses}>
+    <div role="row" onContextMenu={onContextMenu} className={rowClasses}>
       {cells}
     </div>
   );
@@ -707,6 +718,7 @@ export function PolicyTable({
   selectable = false,
   selectedId = null,
   onSelect,
+  onRowContextMenu,
 }: PolicyTableProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
@@ -720,6 +732,12 @@ export function PolicyTable({
   const resolver = useMemo(() => createResolver(network), [network]);
   const ctx: FilterCtx = useMemo(() => ({ network, resolver }), [network, resolver]);
   const filtering = tokens.length > 0 || filters.length > 0;
+  const rowMenu = onRowContextMenu
+    ? (id: number) => (e: React.MouseEvent) => {
+        e.preventDefault();
+        onRowContextMenu(id, e);
+      }
+    : undefined;
   const visiblePolicies = !filtering
     ? network.policies
     : network.policies.filter(
@@ -891,6 +909,7 @@ export function PolicyTable({
               selectable={selectable}
               selected={selectedId === policy.id}
               onSelect={onSelect}
+              onContextMenu={rowMenu?.(policy.id)}
             />
           </div>
         ))}
@@ -960,6 +979,7 @@ export function PolicyTable({
                       selectable={selectable}
                       selected={selectedId === policy.id}
                       onSelect={onSelect}
+                      onContextMenu={rowMenu?.(policy.id)}
                     />
                   ))
                 : pairGroups.map((group) => (
@@ -984,6 +1004,7 @@ export function PolicyTable({
                             selectable={selectable}
                             selected={selectedId === policy.id}
                             onSelect={onSelect}
+                            onContextMenu={rowMenu?.(policy.id)}
                           />
                         ))}
                     </div>

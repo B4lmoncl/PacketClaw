@@ -342,5 +342,11 @@
     "invalid": "Provide source interface, valid IPs and a port.",
     "matched": "Matches policy #{{id}} — {{action}}",
     "implicit": "No match — implicit deny (policy 0)"
+  },
+  "policyMenu": {
+    "insertAbove": "Insert Empty Policy Above",
+    "insertBelow": "Insert Empty Policy Below",
+    "clone": "Clone (disabled copy)",
+    "hint": "Tip: right-click a policy row for actions — just like on a real firewall."
   }
 }

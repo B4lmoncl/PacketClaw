@@ -342,5 +342,11 @@
     "invalid": "Quell-Interface, gültige IPs und Port angeben.",
     "matched": "Matcht Policy #{{id}} — {{action}}",
     "implicit": "Kein Match — Implicit Deny (Policy 0)"
+  },
+  "policyMenu": {
+    "insertAbove": "Leere Policy oberhalb einfügen",
+    "insertBelow": "Leere Policy unterhalb einfügen",
+    "clone": "Klonen (deaktivierte Kopie)",
+    "hint": "Tipp: Rechtsklick auf eine Policy-Zeile öffnet Aktionen — wie auf einer echten Firewall."
   }
 }

@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
+import { PolicyContextMenu, type ContextMenuState } from './PolicyContextMenu';
 import { PolicyEditor } from './PolicyEditor';
 import { PolicyLookup } from './PolicyLookup';
 import { PolicyTable, type RowHighlight } from './PolicyTable';
@@ -38,6 +39,9 @@ export function RulesetWorkbench({
 }: RulesetWorkbenchProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState<Policy | 'new' | null>(null);
+  // Einfüge-Index für "Insert Empty Policy Above/Below" aus dem Kontextmenü
+  const [insertAt, setInsertAt] = useState<number | null>(null);
+  const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const [lookupHighlights, setLookupHighlights] = useState<Map<number, RowHighlight> | undefined>();
   const config: NetworkConfig = { ...network, policies };
   const suggestedId = policies.reduce((max, p) => Math.max(max, p.id), 0) + 1;
@@ -67,6 +71,25 @@ export function RulesetWorkbench({
     );
   }
 
+  // Clone wie FortiOS: Kopie direkt unter dem Original, standardmäßig deaktiviert
+  function clone(id: number) {
+    const index = policies.findIndex((p) => p.id === id);
+    const original = policies[index];
+    if (!original) return;
+    const copy: Policy = {
+      ...original,
+      id: suggestedId,
+      name: `${original.name}_copy`,
+      enabled: false,
+    };
+    const next = [...policies];
+    next.splice(index + 1, 0, copy);
+    onChange(next, 1);
+  }
+
+  const menuPolicy = menu ? policies.find((p) => p.id === menu.policyId) : undefined;
+  const menuIndex = menu ? policies.findIndex((p) => p.id === menu.policyId) : -1;
+
   return (
     <div className="flex flex-col gap-2">
       <PolicyTable
@@ -75,9 +98,88 @@ export function RulesetWorkbench({
         selectable={selectMode}
         selectedId={selectedId}
         onSelect={onSelect}
+        onRowContextMenu={
+          !readonly && !selectMode
+            ? (policyId, e) => setMenu({ policyId, x: e.clientX, y: e.clientY })
+            : undefined
+        }
       />
+      {/* FortiOS-Kontextmenü: Rechtsklick auf eine Policy-Zeile */}
+      {menu && menuPolicy && (
+        <PolicyContextMenu
+          state={menu}
+          onClose={() => setMenu(null)}
+          items={[
+            {
+              key: 'edit',
+              icon: '✎',
+              label: t('architect.edit'),
+              onClick: () => setEditing(menuPolicy),
+            },
+            {
+              key: 'insertAbove',
+              icon: '↥',
+              label: t('policyMenu.insertAbove'),
+              onClick: () => {
+                setInsertAt(menuIndex);
+                setEditing('new');
+              },
+            },
+            {
+              key: 'insertBelow',
+              icon: '↧',
+              label: t('policyMenu.insertBelow'),
+              onClick: () => {
+                setInsertAt(menuIndex + 1);
+                setEditing('new');
+              },
+            },
+            {
+              key: 'clone',
+              icon: '⧉',
+              label: t('policyMenu.clone'),
+              onClick: () => clone(menuPolicy.id),
+            },
+            {
+              key: 'status',
+              icon: menuPolicy.enabled ? '⏻' : '⏼',
+              label: menuPolicy.enabled ? t('audit.disable') : t('audit.enable'),
+              divider: true,
+              onClick: () => toggleEnabled(menuPolicy.id),
+            },
+            {
+              key: 'moveUp',
+              icon: '↑',
+              label: t('architect.moveUp'),
+              disabled: menuIndex <= 0,
+              onClick: () => move(menuPolicy.id, -1),
+            },
+            {
+              key: 'moveDown',
+              icon: '↓',
+              label: t('architect.moveDown'),
+              disabled: menuIndex >= policies.length - 1,
+              onClick: () => move(menuPolicy.id, 1),
+            },
+            {
+              key: 'delete',
+              icon: '🗑',
+              label: t('architect.delete'),
+              danger: true,
+              divider: true,
+              onClick: () => remove(menuPolicy.id),
+            },
+          ]}
+        />
+      )}
       {/* Policy Lookup wie im FortiOS-GUI: pruefen, welche Regel greifen wuerde */}
       <PolicyLookup network={config} onHighlight={setLookupHighlights} />
+
+      {!readonly && !selectMode && (
+        <p className="hidden font-mono text-[10px] text-dim/70 lg:block">
+          💡 {t('policyMenu.hint')}
+        </p>
+      )}
 
       {!readonly && !selectMode && (
         <div className="flex flex-col gap-1">
@@ -128,15 +230,23 @@ export function RulesetWorkbench({
           suggestedId={suggestedId}
           onSave={(policy) => {
             const exists = policies.some((p) => p.id === policy.id);
-            onChange(
-              exists
-                ? policies.map((p) => (p.id === policy.id ? policy : p))
-                : [...policies, policy],
-              1,
-            );
+            let next: Policy[];
+            if (exists) {
+              next = policies.map((p) => (p.id === policy.id ? policy : p));
+            } else if (insertAt !== null) {
+              next = [...policies];
+              next.splice(insertAt, 0, policy);
+            } else {
+              next = [...policies, policy];
+            }
+            onChange(next, 1);
             setEditing(null);
+            setInsertAt(null);
           }}
-          onCancel={() => setEditing(null)}
+          onCancel={() => {
+            setEditing(null);
+            setInsertAt(null);
+          }}
         />
       ) : (
         !readonly &&
