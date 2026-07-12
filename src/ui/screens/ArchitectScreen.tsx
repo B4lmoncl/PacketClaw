@@ -20,6 +20,7 @@ import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { PolicyEditor } from '../components/PolicyEditor';
 import { PolicyTable } from '../components/PolicyTable';
+import { ParticleBurst } from '../components/ParticleBurst';
 import { StarBar } from '../components/StarBar';
 
 interface FailedTest {
@@ -102,7 +103,8 @@ export function ArchitectScreen({ level }: { level: ArchitectLevel }) {
   if (done) {
     return (
       <div className="mx-auto w-full max-w-2xl px-3 pt-6">
-        <section className="flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+        <section className="relative flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+          <ParticleBurst variant="celebration" />
           <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
           <StarBar stars={done.stars} size={36} animated />
           <div className="font-mono text-sm">{t('score.points', { points: done.score })}</div>

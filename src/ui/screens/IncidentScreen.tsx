@@ -10,6 +10,7 @@ import type { IncidentLevel } from '../../game/levels';
 import { modeBaseScore, starsFor } from '../../game/scoring';
 import { useGame } from '../../game/store';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
+import { ParticleBurst } from '../components/ParticleBurst';
 import { StarBar } from '../components/StarBar';
 
 function serviceLabel(packet: { protocol: string; dstPort?: number; icmpType?: number }): string {
@@ -79,7 +80,8 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
   if (done) {
     return (
       <div className="mx-auto w-full max-w-2xl px-3 pt-6">
-        <section className="flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+        <section className="relative flex flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+          <ParticleBurst variant="celebration" />
           <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
           <StarBar stars={done.stars} size={36} animated />
           <div className="font-mono text-sm">{t('score.points', { points: done.score })}</div>

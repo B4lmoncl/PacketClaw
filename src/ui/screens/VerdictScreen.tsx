@@ -9,6 +9,7 @@ import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { ObjectBrowser } from '../components/ObjectBrowser';
+import { ParticleBurst } from '../components/ParticleBurst';
 import { PolicyTable } from '../components/PolicyTable';
 import { StarBar } from '../components/StarBar';
 import { playChime } from '../../game/sound';
@@ -373,7 +374,8 @@ function DonePanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <section className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+    <section className="relative mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-panel border border-trace/50 bg-panel px-6 py-8 text-center">
+      {stars > 0 && <ParticleBurst variant="celebration" />}
       <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
       <StarBar stars={stars} size={36} animated />
       <div className="font-mono text-sm text-ink">{t('score.points', { points: score })}</div>

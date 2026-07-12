@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import type { Verdict } from '../../engine';
 import { playAccept, playSnip, playWrong } from '../../game/sound';
 import { Mascot } from './Mascot';
+import { ParticleBurst } from './ParticleBurst';
 
 export interface UserAnswer {
   action: 'accept' | 'deny';
@@ -83,11 +84,12 @@ export function Debrief({
     <motion.section
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-panel border px-4 py-3 ${
+      className={`relative rounded-panel border px-4 py-3 ${
         correct ? 'border-trace/60 bg-trace/5' : 'border-deny/60 bg-deny/5'
       }`}
       aria-live="polite"
     >
+      {correct && <ParticleBurst variant="sparks" />}
       <div className="flex items-center gap-3">
         <Mascot pose={correct ? 'happy' : 'facepalm'} size={48} />
         <div>
