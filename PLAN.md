@@ -187,3 +187,13 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   enthält'). Weitere FortiGate-Nähe als Folge-Ideen: linke FortiOS-Navi als
   Spielnavigation, Forward-Traffic-Log im Incident-Modus mit Original-
   Spalten. Tests: 189 grün.
+- 2026-07-12 (Forts.): Endlos-Modus fertig (#19); Objekt-Browser
+  „Policy & Objects" in Verdict/Endless/Sandbox (#29); Forward-Traffic-Log
+  im FortiOS-Stil im Incident-Modus (#30). Damit deckt AetherGate den
+  FortiGate-Kernworkflow ab: Policy-Spaltentabelle + Spaltenkopf-Filter,
+  Objekt-Inspektion (Hover/Lock) + Objekt-Browser, Traffic-Log lesen,
+  Regelwerk bauen/reparieren. OFFEN: #22 lange/verworrene Challenge-
+  Regelwerke (nutzt Filter+Browser am meisten); #18-Rest (Objekt-Chips
+  auch im RulesetWorkbench-Editor; Popover-Randkollision via Portal);
+  Folge-Ideen: linke FortiOS-Navi, Endlos-Bestwert im Profil, IP-
+  Containment-Suche im Filter. Tests: 189 grün, 30 Commits gepusht.
