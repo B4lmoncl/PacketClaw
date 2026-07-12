@@ -97,7 +97,9 @@
       "service": "port or service name …",
       "srcintf": "interface name …",
       "dstintf": "interface name …"
-    }
+    },
+    "configureTable": "Configure table",
+    "resetColumns": "Reset to default"
   },
   "debrief": {
     "title": "Debrief",

@@ -97,7 +97,9 @@
       "service": "Port oder Servicename …",
       "srcintf": "Interface-Name …",
       "dstintf": "Interface-Name …"
-    }
+    },
+    "configureTable": "Tabelle anpassen",
+    "resetColumns": "Standard wiederherstellen"
   },
   "debrief": {
     "title": "Debrief",

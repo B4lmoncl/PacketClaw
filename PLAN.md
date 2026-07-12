@@ -247,3 +247,10 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Reduced-Motion-Gate ueber die Spieleinstellung. Tests: 206 gruen,
   Playwright-Smokes: Kontextmenue (Menue/Clone/Escape) + Debrief-Lauf
   ch1-l01 in beiden Motion-Modi ohne Konsolenfehler.
+- 2026-07-12 (Forts. 6): Gear-Spaltenkonfiguration (#36) wie "Configure
+  Table" in FortiOS: Zahnrad neben den Policy-View-Buttons oeffnet eine
+  Checkbox-Liste aller Spalten (Name fix), Grid-Template wird dynamisch
+  aus den sichtbaren Spalten gebaut (Kopf, Zeilen, Implicit-Deny-Zeile),
+  Auswahl persistiert in localStorage ('packetclaw-columns'), Reset
+  stellt den Standard wieder her. Playwright-Smoke: NAT ausblenden,
+  Reload-Persistenz, Reset. Tests: 206 gruen.

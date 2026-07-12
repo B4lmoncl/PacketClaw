@@ -180,9 +180,65 @@ function PolicyRow({
 // ---------------------------------------------------------------------------
 // Desktop: echtes FortiGate-Spaltenlayout (ID | Name | From | To | Source |
 // Destination | Schedule | Service | Action | NAT). Mobile bleibt Karten.
+// Welche Spalten sichtbar sind, konfiguriert das Zahnrad (wie "Configure
+// Table" in FortiOS); die Auswahl ueberlebt Reloads per localStorage.
 // ---------------------------------------------------------------------------
-const COLS =
-  'grid grid-cols-[2.75rem_minmax(120px,1.4fr)_minmax(64px,0.8fr)_minmax(64px,0.8fr)_minmax(110px,1.3fr)_minmax(110px,1.3fr)_minmax(74px,0.8fr)_minmax(90px,1fr)_minmax(74px,0.7fr)_minmax(50px,0.55fr)] items-center gap-2';
+type ColKey =
+  | 'id'
+  | 'name'
+  | 'srcintf'
+  | 'dstintf'
+  | 'srcaddr'
+  | 'dstaddr'
+  | 'schedule'
+  | 'service'
+  | 'action'
+  | 'nat';
+
+const ALL_COLS: ColKey[] = [
+  'id',
+  'name',
+  'srcintf',
+  'dstintf',
+  'srcaddr',
+  'dstaddr',
+  'schedule',
+  'service',
+  'action',
+  'nat',
+];
+
+const COL_TMPL: Record<ColKey, string> = {
+  id: '2.75rem',
+  name: 'minmax(120px,1.4fr)',
+  srcintf: 'minmax(64px,0.8fr)',
+  dstintf: 'minmax(64px,0.8fr)',
+  srcaddr: 'minmax(110px,1.3fr)',
+  dstaddr: 'minmax(110px,1.3fr)',
+  schedule: 'minmax(74px,0.8fr)',
+  service: 'minmax(90px,1fr)',
+  action: 'minmax(74px,0.7fr)',
+  nat: 'minmax(50px,0.55fr)',
+};
+
+const GRID_BASE = 'grid items-center gap-2';
+const COLUMNS_STORE_KEY = 'packetclaw-columns';
+
+function loadHiddenCols(): ReadonlySet<ColKey> {
+  try {
+    const raw = localStorage.getItem(COLUMNS_STORE_KEY);
+    if (!raw) return new Set();
+    const arr: unknown = JSON.parse(raw);
+    if (!Array.isArray(arr)) return new Set();
+    return new Set(arr.filter((k): k is ColKey => ALL_COLS.includes(k as ColKey) && k !== 'name'));
+  } catch {
+    return new Set();
+  }
+}
+
+function gridStyleFor(visible: ColKey[]): React.CSSProperties {
+  return { gridTemplateColumns: visible.map((k) => COL_TMPL[k]).join(' ') };
+}
 
 /** Welche Kopf-Spalte welchen Filter-Feldtyp bekommt (FortiGate-Spaltenfilter). */
 const HEAD_FIELD: Partial<Record<string, FilterField>> = {
@@ -405,31 +461,24 @@ function ColumnHeader({
   filters,
   baseFor,
   onToggle,
+  visibleCols,
+  gridStyle,
 }: {
   ctx: FilterCtx;
   filters: FieldFilter[];
   baseFor: (field: FilterField) => Policy[];
   onToggle: (field: FilterField, value: string, negate?: boolean, mode?: FilterMode) => void;
+  visibleCols: ColKey[];
+  gridStyle: React.CSSProperties;
 }) {
   const { t } = useTranslation();
-  const heads = [
-    'id',
-    'name',
-    'srcintf',
-    'dstintf',
-    'srcaddr',
-    'dstaddr',
-    'schedule',
-    'service',
-    'action',
-    'nat',
-  ] as const;
   return (
     <div
       role="row"
-      className={`${COLS} border-b border-line px-2 py-1.5 text-[9px] uppercase tracking-wide text-dim`}
+      style={gridStyle}
+      className={`${GRID_BASE} border-b border-line px-2 py-1.5 text-[9px] uppercase tracking-wide text-dim`}
     >
-      {heads.map((h) => {
+      {visibleCols.map((h) => {
         const field = HEAD_FIELD[h];
         return (
           <span role="columnheader" key={h} className="font-mono">
@@ -449,6 +498,107 @@ function ColumnHeader({
         );
       })}
     </div>
+  );
+}
+
+/**
+ * Zahnrad-Menue wie "Configure Table" in FortiOS: Spalten ein-/ausblenden.
+ * Name bleibt immer sichtbar; Reset stellt den Standard wieder her.
+ */
+function ColumnConfig({
+  hidden,
+  onToggle,
+  onReset,
+}: {
+  hidden: ReadonlySet<ColKey>;
+  onToggle: (col: ColKey) => void;
+  onReset: () => void;
+}) {
+  const { t } = useTranslation();
+  const reducedMotion = useReducedMotionPref();
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (btnRef.current?.contains(target) || popRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [open]);
+
+  const toggleOpen = () => {
+    if (open) {
+      setOpen(false);
+      return;
+    }
+    const r = btnRef.current?.getBoundingClientRect();
+    if (r) setPos({ left: Math.max(4, r.right - 200), top: r.bottom + 4 });
+    setOpen(true);
+  };
+
+  return (
+    <span className="inline-flex items-center">
+      <button
+        ref={btnRef}
+        type="button"
+        onClick={toggleOpen}
+        aria-expanded={open}
+        aria-label={t('policyTable.configureTable')}
+        title={t('policyTable.configureTable')}
+        className="rounded-row border border-line px-2 py-1 text-dim hover:text-ink"
+      >
+        ⚙
+      </button>
+      {open &&
+        pos &&
+        createPortal(
+          <motion.div
+            ref={popRef}
+            initial={reducedMotion ? false : { opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
+            className="w-[200px] rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+          >
+            <div className="px-2 py-1 font-mono text-[9px] uppercase tracking-wide text-dim">
+              {t('policyTable.configureTable')}
+            </div>
+            {ALL_COLS.map((col) => (
+              <label
+                key={col}
+                className={`flex w-full items-center gap-2 rounded-row px-2 py-1 font-mono text-[11px] ${
+                  col === 'name'
+                    ? 'cursor-not-allowed text-dim/50'
+                    : 'cursor-pointer text-ink/90 hover:bg-white/5'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={!hidden.has(col)}
+                  disabled={col === 'name'}
+                  onChange={() => onToggle(col)}
+                  className="accent-[#FF5A3C]"
+                />
+                {t(`policyTable.${col}`)}
+              </label>
+            ))}
+            <button
+              type="button"
+              onClick={onReset}
+              className="mt-1 w-full rounded-row border-t border-line/60 px-2 py-1.5 text-left font-mono text-[11px] text-dim hover:text-ink"
+            >
+              ↺ {t('policyTable.resetColumns')}
+            </button>
+          </motion.div>,
+          document.body,
+        )}
+    </span>
   );
 }
 
@@ -474,6 +624,8 @@ function PolicyColumnsRow({
   selected,
   onSelect,
   onContextMenu,
+  visibleCols,
+  gridStyle,
 }: {
   policy: Policy;
   network: NetworkConfig;
@@ -483,76 +635,94 @@ function PolicyColumnsRow({
   selected: boolean;
   onSelect?: (id: number) => void;
   onContextMenu?: (e: React.MouseEvent) => void;
+  visibleCols: ColKey[];
+  gridStyle: React.CSSProperties;
 }) {
   const { t } = useTranslation();
   const failed = (field: MatchField) =>
     highlight.state === 'failed' && highlight.failedField === field;
   // FortiOS hebt Zeilen unter dem Cursor immer leicht hervor
-  const rowClasses = `${COLS} rounded-row border px-2 py-1.5 transition-colors hover:bg-white/[0.03] ${
+  const rowClasses = `${GRID_BASE} rounded-row border px-2 py-1.5 transition-colors hover:bg-white/[0.03] ${
     ROW_STATE_CLASSES[highlight.state]
   } ${selectable ? 'cursor-pointer' : ''} ${
     selected ? 'ring-2 ring-claw' : ''
   } ${!policy.enabled ? 'opacity-55' : ''}`;
 
-  const cells = (
-    <>
-      <div role="cell" className="flex items-center gap-1.5 font-mono text-xs text-dim">
-        {hasChip && <PacketChip />}
-        {policy.id}
-      </div>
-      <div role="cell" className="min-w-0 truncate font-mono text-xs text-ink">
-        {policy.name}
-        {!policy.enabled && (
-          <span className="ml-1 rounded-row bg-line/50 px-1 text-[9px] uppercase text-dim">
-            {t('policyTable.disabled')}
-          </span>
-        )}
-      </div>
-      <Cell failed={failed('srcintf')}>
-        <ObjectValues values={policy.srcintf} field="srcintf" network={network} />
-      </Cell>
-      <Cell failed={failed('dstintf')}>
-        <ObjectValues values={policy.dstintf} field="dstintf" network={network} />
-      </Cell>
-      <Cell failed={failed('srcaddr')}>
-        <ObjectValues values={policy.srcaddr} field="srcaddr" network={network} />
-      </Cell>
-      <Cell failed={failed('dstaddr')}>
-        <ObjectValues values={policy.dstaddr} field="dstaddr" network={network} />
-      </Cell>
-      <Cell failed={failed('schedule')}>
-        {policy.schedule === 'always' ? (
-          <span className="text-dim">{policy.schedule}</span>
-        ) : (
-          <InfoChip
-            label=""
-            value={policy.schedule}
-            failed={failed('schedule')}
-            infoKey="objectInfo.schedule"
-          />
-        )}
-      </Cell>
-      <Cell failed={failed('service')}>
-        <ObjectValues values={policy.service} field="service" network={network} />
-      </Cell>
-      <div role="cell">
-        <span
-          className={`inline-block rounded-row px-1.5 py-0.5 font-mono text-[10px] font-bold ${
-            policy.action === 'accept' ? 'bg-trace/15 text-trace' : 'bg-deny/15 text-deny'
-          }`}
-        >
-          {policy.action === 'accept' ? '✓ ACCEPT' : '✕ DENY'}
-        </span>
-      </div>
-      <div role="cell" className="font-mono text-[10px]">
-        {policy.nat ? (
-          <InfoChip label="" value="SNAT" failed={false} infoKey="objectInfo.nat" />
-        ) : (
-          <span className="text-dim/50">—</span>
-        )}
-      </div>
-    </>
-  );
+  const cellFor = (col: ColKey) => {
+    switch (col) {
+      case 'id':
+        return (
+          <div
+            key={col}
+            role="cell"
+            className="flex items-center gap-1.5 font-mono text-xs text-dim"
+          >
+            {hasChip && <PacketChip />}
+            {policy.id}
+          </div>
+        );
+      case 'name':
+        return (
+          <div key={col} role="cell" className="min-w-0 truncate font-mono text-xs text-ink">
+            {policy.name}
+            {!policy.enabled && (
+              <span className="ml-1 rounded-row bg-line/50 px-1 text-[9px] uppercase text-dim">
+                {t('policyTable.disabled')}
+              </span>
+            )}
+          </div>
+        );
+      case 'srcintf':
+      case 'dstintf':
+      case 'srcaddr':
+      case 'dstaddr':
+      case 'service':
+        return (
+          <Cell key={col} failed={failed(col)}>
+            <ObjectValues values={policy[col]} field={col} network={network} />
+          </Cell>
+        );
+      case 'schedule':
+        return (
+          <Cell key={col} failed={failed('schedule')}>
+            {policy.schedule === 'always' ? (
+              <span className="text-dim">{policy.schedule}</span>
+            ) : (
+              <InfoChip
+                label=""
+                value={policy.schedule}
+                failed={failed('schedule')}
+                infoKey="objectInfo.schedule"
+              />
+            )}
+          </Cell>
+        );
+      case 'action':
+        return (
+          <div key={col} role="cell">
+            <span
+              className={`inline-block rounded-row px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+                policy.action === 'accept' ? 'bg-trace/15 text-trace' : 'bg-deny/15 text-deny'
+              }`}
+            >
+              {policy.action === 'accept' ? '✓ ACCEPT' : '✕ DENY'}
+            </span>
+          </div>
+        );
+      case 'nat':
+        return (
+          <div key={col} role="cell" className="font-mono text-[10px]">
+            {policy.nat ? (
+              <InfoChip label="" value="SNAT" failed={false} infoKey="objectInfo.nat" />
+            ) : (
+              <span className="text-dim/50">—</span>
+            )}
+          </div>
+        );
+    }
+  };
+
+  const cells = <>{visibleCols.map(cellFor)}</>;
 
   if (selectable) {
     return (
@@ -568,6 +738,7 @@ function PolicyColumnsRow({
             onSelect?.(policy.id);
           }
         }}
+        style={gridStyle}
         className={`${rowClasses} text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw`}
       >
         {cells}
@@ -575,7 +746,7 @@ function PolicyColumnsRow({
     );
   }
   return (
-    <div role="row" onContextMenu={onContextMenu} className={rowClasses}>
+    <div role="row" onContextMenu={onContextMenu} style={gridStyle} className={rowClasses}>
       {cells}
     </div>
   );
@@ -735,6 +906,25 @@ export function PolicyTable({
   // FortiOS-Policy-Views: Interface Pair View gruppiert nach srcintf→dstintf
   const [view, setView] = useState<'sequence' | 'pairs'>('sequence');
   const [collapsedPairs, setCollapsedPairs] = useState<ReadonlySet<string>>(new Set());
+  // Spaltenkonfiguration (Zahnrad wie FortiOS) — ueberlebt Reloads
+  const [hiddenCols, setHiddenCols] = useState<ReadonlySet<ColKey>>(loadHiddenCols);
+  const visibleCols = useMemo(() => ALL_COLS.filter((c) => !hiddenCols.has(c)), [hiddenCols]);
+  const gridStyle = useMemo(() => gridStyleFor(visibleCols), [visibleCols]);
+  const setAndStoreHidden = (next: ReadonlySet<ColKey>) => {
+    setHiddenCols(next);
+    try {
+      localStorage.setItem(COLUMNS_STORE_KEY, JSON.stringify([...next]));
+    } catch {
+      /* Speicher voll/blockiert — Auswahl gilt dann nur fuer diese Sitzung */
+    }
+  };
+  const toggleCol = (col: ColKey) => {
+    if (col === 'name') return;
+    const next = new Set(hiddenCols);
+    if (next.has(col)) next.delete(col);
+    else next.add(col);
+    setAndStoreHidden(next);
+  };
   const [draftField, setDraftField] = useState<FilterField>('srcaddr');
   const [draftValue, setDraftValue] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -972,10 +1162,22 @@ export function PolicyTable({
           >
             {t('policyTable.view.sequence')}
           </button>
+          <ColumnConfig
+            hidden={hiddenCols}
+            onToggle={toggleCol}
+            onReset={() => setAndStoreHidden(new Set())}
+          />
         </div>
         <div role="table" className="overflow-x-auto">
           <div className="min-w-[820px]">
-            <ColumnHeader ctx={ctx} filters={filters} baseFor={baseFor} onToggle={toggleFilter} />
+            <ColumnHeader
+              ctx={ctx}
+              filters={filters}
+              baseFor={baseFor}
+              onToggle={toggleFilter}
+              visibleCols={visibleCols}
+              gridStyle={gridStyle}
+            />
             <div className="flex flex-col gap-1 pt-1">
               {view === 'sequence'
                 ? visiblePolicies.map((policy) => (
@@ -989,6 +1191,8 @@ export function PolicyTable({
                       selected={selectedId === policy.id}
                       onSelect={onSelect}
                       onContextMenu={rowMenu?.(policy.id)}
+                      visibleCols={visibleCols}
+                      gridStyle={gridStyle}
                     />
                   ))
                 : pairGroups.map((group) => (
@@ -1014,6 +1218,8 @@ export function PolicyTable({
                             selected={selectedId === policy.id}
                             onSelect={onSelect}
                             onContextMenu={rowMenu?.(policy.id)}
+                            visibleCols={visibleCols}
+                            gridStyle={gridStyle}
                           />
                         ))}
                     </div>
@@ -1034,7 +1240,8 @@ export function PolicyTable({
                       }
                     : undefined
                 }
-                className={`${COLS} rounded-row border border-dashed px-2 py-1.5 transition-colors ${
+                style={gridStyle}
+                className={`${GRID_BASE} rounded-row border border-dashed px-2 py-1.5 transition-colors ${
                   ROW_STATE_CLASSES[implicitHighlight.state]
                 } ${
                   selectable
@@ -1042,26 +1249,39 @@ export function PolicyTable({
                     : ''
                 } ${implicitSelected ? 'ring-2 ring-claw' : ''}`}
               >
-                <div role="cell" className="flex items-center gap-1.5 font-mono text-xs text-dim">
-                  {chipRow === 0 && <PacketChip />}0
-                </div>
-                <div role="cell" className="font-mono text-xs text-dim">
-                  {t('policyTable.implicitDeny')}
-                </div>
-                <div role="cell" />
-                <div role="cell" />
-                <div role="cell" />
-                <div role="cell" />
-                <div role="cell" />
-                <div role="cell" />
-                <div role="cell">
-                  <span className="inline-block rounded-row bg-deny/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-deny">
-                    ✕ DENY
-                  </span>
-                </div>
-                <div role="cell" className="text-dim/50">
-                  —
-                </div>
+                {visibleCols.map((col) => {
+                  if (col === 'id')
+                    return (
+                      <div
+                        key={col}
+                        role="cell"
+                        className="flex items-center gap-1.5 font-mono text-xs text-dim"
+                      >
+                        {chipRow === 0 && <PacketChip />}0
+                      </div>
+                    );
+                  if (col === 'name')
+                    return (
+                      <div key={col} role="cell" className="font-mono text-xs text-dim">
+                        {t('policyTable.implicitDeny')}
+                      </div>
+                    );
+                  if (col === 'action')
+                    return (
+                      <div key={col} role="cell">
+                        <span className="inline-block rounded-row bg-deny/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-deny">
+                          ✕ DENY
+                        </span>
+                      </div>
+                    );
+                  if (col === 'nat')
+                    return (
+                      <div key={col} role="cell" className="text-dim/50">
+                        —
+                      </div>
+                    );
+                  return <div key={col} role="cell" />;
+                })}
               </div>
             </div>
           </div>
