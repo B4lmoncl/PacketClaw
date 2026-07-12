@@ -11,6 +11,7 @@ import { useGame } from '../../game/store';
 import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
+import { ObjectBrowser } from '../components/ObjectBrowser';
 import { PolicyTable } from '../components/PolicyTable';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
 import { useDescent } from '../hooks/useDescent';
@@ -238,6 +239,7 @@ export function SandboxScreen() {
       {firedPacket && <PacketCard packet={firedPacket} />}
 
       <PolicyTable network={network} highlights={descent.highlights} chipRow={descent.chipRow} />
+      <ObjectBrowser network={network} />
 
       {verdict && showTrace && (
         <Debrief

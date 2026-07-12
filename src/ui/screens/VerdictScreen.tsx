@@ -8,6 +8,7 @@ import { useGame } from '../../game/store';
 import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
+import { ObjectBrowser } from '../components/ObjectBrowser';
 import { PolicyTable } from '../components/PolicyTable';
 import { StarBar } from '../components/StarBar';
 import { playChime } from '../../game/sound';
@@ -246,6 +247,7 @@ export function VerdictScreen({
               selectedId={userPolicyId}
               onSelect={(id) => submit(id)}
             />
+            <ObjectBrowser network={level.network} />
           </div>
 
           <div className="flex flex-col gap-3 lg:sticky lg:top-16">

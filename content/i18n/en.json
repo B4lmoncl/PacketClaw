@@ -272,5 +272,16 @@
     "roundsSurvived": "rounds survived",
     "newBest": "New best! 🎉",
     "again": "Play again"
+  },
+  "objectBrowser": {
+    "title": "Objects (Policy & Objects)",
+    "interfaces": "Interfaces",
+    "zones": "Zones",
+    "addresses": "Addresses",
+    "addressGroups": "Address Groups",
+    "services": "Services",
+    "serviceGroups": "Service Groups",
+    "vips": "Virtual IPs",
+    "routes": "Routes"
   }
 }

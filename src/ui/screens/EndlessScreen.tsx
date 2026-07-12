@@ -14,6 +14,7 @@ import { Debrief } from '../components/Debrief';
 import { Mascot } from '../components/Mascot';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
+import { ObjectBrowser } from '../components/ObjectBrowser';
 import { PolicyTable } from '../components/PolicyTable';
 import { useDescent } from '../hooks/useDescent';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
@@ -190,6 +191,7 @@ export function EndlessScreen() {
             selectedId={userPolicyId}
             onSelect={(id) => submit(id)}
           />
+          <ObjectBrowser network={data.network} />
         </div>
 
         <div className="flex flex-col gap-3 lg:sticky lg:top-16">
