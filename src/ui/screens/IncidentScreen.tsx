@@ -11,6 +11,7 @@ import { modeBaseScore, starsFor } from '../../game/scoring';
 import { useGame } from '../../game/store';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
 import { ParticleBurst } from '../components/ParticleBurst';
+import { XpGain } from '../components/XpGain';
 import { StarBar } from '../components/StarBar';
 
 function serviceLabel(packet: { protocol: string; dstPort?: number; icmpType?: number }): string {
@@ -85,6 +86,7 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
           <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
           <StarBar stars={done.stars} size={36} animated />
           <div className="font-mono text-sm">{t('score.points', { points: done.score })}</div>
+          <XpGain gained={done.score} />
           <button
             onClick={() => navigate({ name: 'chapter', chapter: level.chapter })}
             className="rounded-panel bg-claw px-6 py-3 font-display font-bold text-bg"

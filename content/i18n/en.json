@@ -128,7 +128,9 @@
     "underTarget": "under target time",
     "toChapter": "Back to level select",
     "again": "Play again",
-    "totalTime": "Total time: {{seconds}}s"
+    "totalTime": "Total time: {{seconds}}s",
+    "rankProgress": "Rank progress",
+    "rankUp": "Rank up: {{rank}}!"
   },
   "network": {
     "diagram": "Network overview",

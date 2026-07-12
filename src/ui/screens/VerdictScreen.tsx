@@ -10,6 +10,7 @@ import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { ObjectBrowser } from '../components/ObjectBrowser';
 import { ParticleBurst } from '../components/ParticleBurst';
+import { XpGain } from '../components/XpGain';
 import { PolicyTable } from '../components/PolicyTable';
 import { StarBar } from '../components/StarBar';
 import { playChime } from '../../game/sound';
@@ -379,6 +380,7 @@ function DonePanel({
       <div className="font-display text-2xl font-bold text-trace">{t('score.levelDone')}</div>
       <StarBar stars={stars} size={36} animated />
       <div className="font-mono text-sm text-ink">{t('score.points', { points: score })}</div>
+      <XpGain gained={score} />
       <div className="font-mono text-xs text-dim">
         {t('score.totalTime', { seconds: totalSeconds })}
       </div>
