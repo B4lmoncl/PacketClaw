@@ -319,5 +319,18 @@
         "sub": "38 rules · hopeless without filters"
       }
     }
+  },
+  "policyLookup": {
+    "title": "Policy Lookup",
+    "srcintf": "Source interface",
+    "protocol": "Protocol",
+    "srcIp": "Source IP",
+    "dstIp": "Destination IP",
+    "dstPort": "Dest port",
+    "search": "Search",
+    "clear": "Clear",
+    "invalid": "Provide source interface, valid IPs and a port.",
+    "matched": "Matches policy #{{id}} — {{action}}",
+    "implicit": "No match — implicit deny (policy 0)"
   }
 }

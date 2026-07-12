@@ -319,5 +319,18 @@
         "sub": "38 Regeln · ohne Filter chancenlos"
       }
     }
+  },
+  "policyLookup": {
+    "title": "Policy Lookup",
+    "srcintf": "Quell-Interface",
+    "protocol": "Protokoll",
+    "srcIp": "Quell-IP",
+    "dstIp": "Ziel-IP",
+    "dstPort": "Ziel-Port",
+    "search": "Suchen",
+    "clear": "Leeren",
+    "invalid": "Quell-Interface, gültige IPs und Port angeben.",
+    "matched": "Matcht Policy #{{id}} — {{action}}",
+    "implicit": "Kein Match — Implicit Deny (Policy 0)"
   }
 }

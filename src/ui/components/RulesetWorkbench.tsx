@@ -7,7 +7,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
 import { PolicyEditor } from './PolicyEditor';
-import { PolicyTable } from './PolicyTable';
+import { PolicyLookup } from './PolicyLookup';
+import { PolicyTable, type RowHighlight } from './PolicyTable';
 
 export interface WorkbenchState {
   policies: Policy[];
@@ -37,6 +38,7 @@ export function RulesetWorkbench({
 }: RulesetWorkbenchProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState<Policy | 'new' | null>(null);
+  const [lookupHighlights, setLookupHighlights] = useState<Map<number, RowHighlight> | undefined>();
   const config: NetworkConfig = { ...network, policies };
   const suggestedId = policies.reduce((max, p) => Math.max(max, p.id), 0) + 1;
 
@@ -69,10 +71,13 @@ export function RulesetWorkbench({
     <div className="flex flex-col gap-2">
       <PolicyTable
         network={config}
+        highlights={lookupHighlights}
         selectable={selectMode}
         selectedId={selectedId}
         onSelect={onSelect}
       />
+      {/* Policy Lookup wie im FortiOS-GUI: pruefen, welche Regel greifen wuerde */}
+      <PolicyLookup network={config} onHighlight={setLookupHighlights} />
 
       {!readonly && !selectMode && (
         <div className="flex flex-col gap-1">
