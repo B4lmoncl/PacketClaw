@@ -87,6 +87,16 @@
     "view": {
       "pairs": "Interface-Paar-Ansicht",
       "sequence": "Nach Sequenz"
+    },
+    "modeContains": "Enthält",
+    "modeExact": "Exakt",
+    "apply": "Anwenden",
+    "queryHint": {
+      "srcaddr": "IP oder Objektname …",
+      "dstaddr": "IP oder Objektname …",
+      "service": "Port oder Servicename …",
+      "srcintf": "Interface-Name …",
+      "dstintf": "Interface-Name …"
     }
   },
   "debrief": {

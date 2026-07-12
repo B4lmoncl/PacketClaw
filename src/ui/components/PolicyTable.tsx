@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { createResolver } from '../../engine';
 import type { MatchField, NetworkConfig, Policy, Resolver } from '../../engine';
+import { fieldMatchesQuery, type FilterMode } from '../../game/filterMatch';
 import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
 
 export type RowState =
@@ -194,26 +195,41 @@ const HEAD_FIELD: Partial<Record<string, FilterField>> = {
 function HeaderFilter({
   label,
   field,
-  network,
+  ctx,
   filters,
   baseFor,
   onToggle,
 }: {
   label: string;
   field: FilterField;
-  network: NetworkConfig;
+  ctx: FilterCtx;
   filters: FieldFilter[];
   baseFor: (field: FilterField) => Policy[];
-  onToggle: (field: FilterField, value: string, negate?: boolean) => void;
+  onToggle: (field: FilterField, value: string, negate?: boolean, mode?: FilterMode) => void;
 }) {
   const { t } = useTranslation();
+  const network = ctx.network;
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+  // FortiGate-Filterdialog: Wert tippen + Modus (Contains ist der Default)
+  const [query, setQuery] = useState('');
+  const [mode, setMode] = useState<FilterMode>('contains');
+  const [negate, setNegate] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const activeFor = (value: string, negate: boolean) =>
     filters.some((f) => f.field === field && f.value === value && !!f.negate === negate);
   const hasActive = filters.some((f) => f.field === field);
+  // Fuer action/status gibt es nichts semantisch aufzuloesen — nur Werteliste
+  const semantic = field !== 'action' && field !== 'status';
+
+  const apply = () => {
+    const q = query.trim();
+    if (!q) return;
+    onToggle(field, q, negate, mode);
+    setQuery('');
+    setNegate(false);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -261,10 +277,71 @@ function HeaderFilter({
           <div
             ref={popRef}
             style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
-            className="max-h-64 w-max min-w-[150px] max-w-[240px] overflow-auto rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+            className="max-h-72 w-max min-w-[190px] max-w-[260px] overflow-auto rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
           >
+            {semantic && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  apply();
+                }}
+                className="mb-1 flex flex-col gap-1.5 border-b border-line/60 p-1.5"
+              >
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t(`policyTable.queryHint.${field}`)}
+                  aria-label={t('policyTable.filterValue')}
+                  className="w-full rounded-row border border-line bg-panel px-2 py-1 font-mono text-[11px] normal-case text-ink placeholder:text-dim/50 focus:border-claw/60 focus:outline-none"
+                />
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode('contains')}
+                    aria-pressed={mode === 'contains'}
+                    className={`rounded-row border px-1.5 py-0.5 font-mono text-[10px] normal-case ${
+                      mode === 'contains'
+                        ? 'border-claw/60 bg-claw/10 text-claw'
+                        : 'border-line text-dim hover:text-ink'
+                    }`}
+                  >
+                    {t('policyTable.modeContains')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode('exact')}
+                    aria-pressed={mode === 'exact'}
+                    className={`rounded-row border px-1.5 py-0.5 font-mono text-[10px] normal-case ${
+                      mode === 'exact'
+                        ? 'border-claw/60 bg-claw/10 text-claw'
+                        : 'border-line text-dim hover:text-ink'
+                    }`}
+                  >
+                    {t('policyTable.modeExact')}
+                  </button>
+                  <label className="ml-auto inline-flex cursor-pointer items-center gap-1 font-mono text-[10px] text-dim">
+                    <input
+                      type="checkbox"
+                      checked={negate}
+                      onChange={(e) => setNegate(e.target.checked)}
+                      className="accent-[#FF3B5C]"
+                    />
+                    NOT
+                  </label>
+                </div>
+                <button
+                  type="submit"
+                  disabled={!query.trim()}
+                  className="rounded-row bg-claw px-2 py-1 font-display text-[11px] font-bold normal-case text-bg hover:brightness-110 disabled:opacity-40"
+                >
+                  {t('policyTable.apply')}
+                </button>
+              </form>
+            )}
             {options.map((v) => {
-              const count = base.filter((p) => policyPassesFilter(p, { field, value: v })).length;
+              const count = base.filter((p) =>
+                policyPassesFilter(p, { field, value: v }, ctx),
+              ).length;
               const sel = activeFor(v, false);
               const selNot = activeFor(v, true);
               const shown =
@@ -308,15 +385,15 @@ function HeaderFilter({
 }
 
 function ColumnHeader({
-  network,
+  ctx,
   filters,
   baseFor,
   onToggle,
 }: {
-  network: NetworkConfig;
+  ctx: FilterCtx;
   filters: FieldFilter[];
   baseFor: (field: FilterField) => Policy[];
-  onToggle: (field: FilterField, value: string) => void;
+  onToggle: (field: FilterField, value: string, negate?: boolean, mode?: FilterMode) => void;
 }) {
   const { t } = useTranslation();
   const heads = [
@@ -344,7 +421,7 @@ function ColumnHeader({
               <HeaderFilter
                 label={t(`policyTable.${h}`)}
                 field={field}
-                network={network}
+                ctx={ctx}
                 filters={filters}
                 baseFor={baseFor}
                 onToggle={onToggle}
@@ -507,6 +584,13 @@ interface FieldFilter {
   value: string;
   /** true = NOT-Filter (not equals), wie im FortiOS-Filter-Dialog */
   negate?: boolean;
+  /** exact = ist genau das Gesuchte; contains = enthaelt es (Gruppen, Ranges, all/any) */
+  mode?: FilterMode;
+}
+
+interface FilterCtx {
+  network: NetworkConfig;
+  resolver: Resolver;
 }
 
 /** Auswaehlbare Werte je Spalte: die real in der Config vorhandenen Objekte. */
@@ -546,32 +630,40 @@ function valueOptions(field: FilterField, network: NetworkConfig): string[] {
   }
 }
 
-function policyPassesFilter(policy: Policy, { field, value }: FieldFilter): boolean {
+function policyPassesFilter(policy: Policy, filter: FieldFilter, ctx: FilterCtx): boolean {
+  const { field, value } = filter;
   switch (field) {
     case 'action':
       return policy.action === value;
     case 'status':
       return value === 'enabled' ? policy.enabled : !policy.enabled;
     default:
-      return policy[field].includes(value);
+      return fieldMatchesQuery(
+        ctx.network,
+        ctx.resolver,
+        field,
+        policy[field],
+        value,
+        filter.mode ?? 'exact',
+      );
   }
 }
 
-function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
-  // Positive Werte derselben Spalte sind ODER-verknuepft (wie FortiGate),
+function matchesFieldFilters(policy: Policy, filters: FieldFilter[], ctx: FilterCtx): boolean {
+  // Positive Filter derselben Spalte sind ODER-verknuepft (wie FortiGate),
   // Spalten UND; NOT-Filter schliessen einzeln aus (UND).
-  const byField = new Map<FilterField, string[]>();
+  const byField = new Map<FilterField, FieldFilter[]>();
   for (const f of filters) {
     if (f.negate) {
-      if (policyPassesFilter(policy, f)) return false;
+      if (policyPassesFilter(policy, f, ctx)) return false;
       continue;
     }
     const arr = byField.get(f.field);
-    if (arr) arr.push(f.value);
-    else byField.set(f.field, [f.value]);
+    if (arr) arr.push(f);
+    else byField.set(f.field, [f]);
   }
-  for (const [field, values] of byField) {
-    if (!values.some((value) => policyPassesFilter(policy, { field, value }))) return false;
+  for (const fieldFilters of byField.values()) {
+    if (!fieldFilters.some((f) => policyPassesFilter(policy, f, ctx))) return false;
   }
   return true;
 }
@@ -627,11 +719,12 @@ export function PolicyTable({
   const [draftValue, setDraftValue] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
   const resolver = useMemo(() => createResolver(network), [network]);
+  const ctx: FilterCtx = useMemo(() => ({ network, resolver }), [network, resolver]);
   const filtering = tokens.length > 0 || filters.length > 0;
   const visiblePolicies = !filtering
     ? network.policies
     : network.policies.filter(
-        (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, filters),
+        (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, filters, ctx),
       );
 
   const draftOptions = valueOptions(draftField, network);
@@ -645,19 +738,19 @@ export function PolicyTable({
     );
   };
   // Spaltenkopf-Filter: Wert togglen; Trefferzahl gegen die anderen aktiven Filter
-  const toggleFilter = (field: FilterField, value: string, negate = false) =>
+  const toggleFilter = (field: FilterField, value: string, negate = false, mode?: FilterMode) =>
     setFilters((fs) =>
       fs.some((f) => f.field === field && f.value === value && !!f.negate === negate)
         ? fs.filter((f) => !(f.field === field && f.value === value && !!f.negate === negate))
         : [
             ...fs.filter((f) => !(f.field === field && f.value === value)),
-            { field, value, negate },
+            { field, value, negate, mode },
           ],
     );
   const baseFor = (field: FilterField) => {
     const others = filters.filter((f) => f.field !== field);
     return network.policies.filter(
-      (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, others),
+      (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, others, ctx),
     );
   };
   // Interface-Paar-Gruppen in Reihenfolge des ersten Auftretens (wie FortiOS)
@@ -761,6 +854,7 @@ export function PolicyTable({
               <span className="text-[8px] uppercase tracking-wide text-claw">
                 {f.negate ? '≠ ' : ''}
                 {t(`policyTable.${f.field}`)}
+                {f.mode === 'contains' ? ' ⊇' : ''}
               </span>
               {f.field === 'action' || f.field === 'status'
                 ? t(`policyTable.val.${f.value}`)
@@ -854,12 +948,7 @@ export function PolicyTable({
         </div>
         <div role="table" className="overflow-x-auto">
           <div className="min-w-[820px]">
-            <ColumnHeader
-              network={network}
-              filters={filters}
-              baseFor={baseFor}
-              onToggle={toggleFilter}
-            />
+            <ColumnHeader ctx={ctx} filters={filters} baseFor={baseFor} onToggle={toggleFilter} />
             <div className="flex flex-col gap-1 pt-1">
               {view === 'sequence'
                 ? visiblePolicies.map((policy) => (
