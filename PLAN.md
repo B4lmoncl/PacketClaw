@@ -220,3 +220,12 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Disabled-Darstellung. OFFEN (niedrig): Gear-Spaltenkonfig, Rechts-
   klick-Menue, Sequence Grouping View, Suche in Filter-Dropdowns.
   Tests: 196 gruen.
+- 2026-07-12 (Forts. 4): Filterdialog auf FortiGate-Niveau (#32,
+  Nutzerwunsch woertlich umgesetzt): Wert tippen + Contains/Exact/NOT +
+  Apply im Spaltenkopf-Dialog; CONTAINS loest SEMANTISCH auf via
+  src/game/filterMatch.ts (Service-Gruppen wie WEB + Portranges + ALL
+  enthalten Port 443; Zonen/any enthalten Interfaces; Subnetze/Ranges/
+  Adressgruppen rekursiv + all enthalten IPs und Host-Objekte; VIPs ueber
+  ext-/mapped-IP), EXACT = ist genau das Gesuchte (HTTPS bei 443,
+  Host-Objekt bei exakter IP). Badge zeigt SPALTE ⊇ wert. 10 neue
+  Unit-Tests, E2E contains=8 vs exact=6. Tests: 206 gruen.
