@@ -351,45 +351,48 @@ function HeaderFilter({
                 </button>
               </form>
             )}
-            {options.map((v) => {
-              const count = base.filter((p) =>
-                policyPassesFilter(p, { field, value: v }, ctx),
-              ).length;
-              const sel = activeFor(v, false);
-              const selNot = activeFor(v, true);
-              const shown =
-                field === 'action' || field === 'status' ? t(`policyTable.val.${v}`) : v;
-              return (
-                <span key={v} className="flex w-full items-stretch gap-0.5">
-                  <button
-                    type="button"
-                    onClick={() => onToggle(field, v)}
-                    className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-row px-2 py-1 text-left font-mono text-[11px] normal-case ${
-                      sel ? 'bg-claw/15 text-claw' : 'text-ink/90 hover:bg-white/5'
-                    }`}
-                  >
-                    <span className="truncate">
-                      {sel ? '✓ ' : ''}
-                      {shown}
-                    </span>
-                    <span className="shrink-0 tabular-nums text-dim">{count}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onToggle(field, v, true)}
-                    title={t('policyTable.filterNot')}
-                    aria-label={`NOT ${shown}`}
-                    className={`shrink-0 rounded-row px-1.5 font-mono text-[11px] ${
-                      selNot
-                        ? 'bg-deny/20 text-deny'
-                        : 'text-dim/60 hover:bg-white/5 hover:text-deny'
-                    }`}
-                  >
-                    ≠
-                  </button>
-                </span>
-              );
-            })}
+            {/* Tippen filtert auch die Werteliste live (Suchfeld wie FortiGate) */}
+            {options
+              .filter((v) => !query.trim() || v.toLowerCase().includes(query.trim().toLowerCase()))
+              .map((v) => {
+                const count = base.filter((p) =>
+                  policyPassesFilter(p, { field, value: v }, ctx),
+                ).length;
+                const sel = activeFor(v, false);
+                const selNot = activeFor(v, true);
+                const shown =
+                  field === 'action' || field === 'status' ? t(`policyTable.val.${v}`) : v;
+                return (
+                  <span key={v} className="flex w-full items-stretch gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => onToggle(field, v)}
+                      className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-row px-2 py-1 text-left font-mono text-[11px] normal-case ${
+                        sel ? 'bg-claw/15 text-claw' : 'text-ink/90 hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="truncate">
+                        {sel ? '✓ ' : ''}
+                        {shown}
+                      </span>
+                      <span className="shrink-0 tabular-nums text-dim">{count}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onToggle(field, v, true)}
+                      title={t('policyTable.filterNot')}
+                      aria-label={`NOT ${shown}`}
+                      className={`shrink-0 rounded-row px-1.5 font-mono text-[11px] ${
+                        selNot
+                          ? 'bg-deny/20 text-deny'
+                          : 'text-dim/60 hover:bg-white/5 hover:text-deny'
+                      }`}
+                    >
+                      ≠
+                    </button>
+                  </span>
+                );
+              })}
           </motion.div>,
           document.body,
         )}
