@@ -174,6 +174,28 @@ function ObjectValue({
   );
 }
 
+/** Nackte, komma-getrennte inspizierbare Objektnamen — fuer Tabellenzellen. */
+export function ObjectValues({
+  values,
+  field,
+  network,
+}: {
+  values: string[];
+  field: ObjectField;
+  network: NetworkConfig;
+}) {
+  return (
+    <>
+      {values.map((value, i) => (
+        <span key={value} className="inline-flex items-baseline">
+          {i > 0 && <span className="mr-1 font-mono text-[11px] text-dim">,</span>}
+          <ObjectValue network={network} field={field} name={value} />
+        </span>
+      ))}
+    </>
+  );
+}
+
 /** Feld-Chip (SOURCE, SERVICE, …) mit inspizierbaren Objektnamen. */
 export function ObjectChip({
   label,
@@ -195,12 +217,7 @@ export function ObjectChip({
       }`}
     >
       <span className="text-[8px] uppercase tracking-wide text-dim">{label}</span>
-      {values.map((value, i) => (
-        <span key={value} className="inline-flex items-baseline">
-          {i > 0 && <span className="mr-1 font-mono text-[11px] text-dim">,</span>}
-          <ObjectValue network={network} field={field} name={value} />
-        </span>
-      ))}
+      <ObjectValues values={values} field={field} network={network} />
       {failed && (
         <span aria-hidden className="text-[10px]">
           ✕

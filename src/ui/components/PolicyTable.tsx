@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MatchField, NetworkConfig, Policy } from '../../engine';
-import { InfoChip, ObjectChip } from './ObjectChip';
+import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
 
 export type RowState =
   'idle' | 'active' | 'failed' | 'skipped' | 'matched-accept' | 'matched-deny' | 'implicit-hit';
@@ -161,6 +161,166 @@ function PolicyRow({
   return (
     <div className={`rounded-row border px-2 py-1.5 transition-colors ${rowClasses}`}>
       {content}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Desktop: echtes FortiGate-Spaltenlayout (ID | Name | From | To | Source |
+// Destination | Schedule | Service | Action | NAT). Mobile bleibt Karten.
+// ---------------------------------------------------------------------------
+const COLS =
+  'grid grid-cols-[2.75rem_minmax(120px,1.4fr)_minmax(64px,0.8fr)_minmax(64px,0.8fr)_minmax(110px,1.3fr)_minmax(110px,1.3fr)_minmax(74px,0.8fr)_minmax(90px,1fr)_minmax(74px,0.7fr)_minmax(50px,0.55fr)] items-center gap-2';
+
+function ColumnHeader() {
+  const { t } = useTranslation();
+  const heads = [
+    'id',
+    'name',
+    'srcintf',
+    'dstintf',
+    'srcaddr',
+    'dstaddr',
+    'schedule',
+    'service',
+    'action',
+    'nat',
+  ] as const;
+  return (
+    <div
+      role="row"
+      className={`${COLS} border-b border-line px-2 py-1.5 text-[9px] uppercase tracking-wide text-dim`}
+    >
+      {heads.map((h) => (
+        <span role="columnheader" key={h} className="font-mono">
+          {t(`policyTable.${h}`)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function Cell({ failed, children }: { failed?: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      role="cell"
+      className={`min-w-0 break-words font-mono text-[11px] ${
+        failed ? 'rounded-row bg-deny/20 px-1 text-deny' : 'text-ink/90'
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function PolicyColumnsRow({
+  policy,
+  network,
+  highlight,
+  hasChip,
+  selectable,
+  selected,
+  onSelect,
+}: {
+  policy: Policy;
+  network: NetworkConfig;
+  highlight: RowHighlight;
+  hasChip: boolean;
+  selectable: boolean;
+  selected: boolean;
+  onSelect?: (id: number) => void;
+}) {
+  const { t } = useTranslation();
+  const failed = (field: MatchField) =>
+    highlight.state === 'failed' && highlight.failedField === field;
+  const rowClasses = `${COLS} rounded-row border px-2 py-1.5 transition-colors ${
+    ROW_STATE_CLASSES[highlight.state]
+  } ${selectable ? 'cursor-pointer hover:bg-white/[0.03]' : ''} ${
+    selected ? 'ring-2 ring-claw' : ''
+  } ${!policy.enabled ? 'opacity-55' : ''}`;
+
+  const cells = (
+    <>
+      <div role="cell" className="flex items-center gap-1.5 font-mono text-xs text-dim">
+        {hasChip && <PacketChip />}
+        {policy.id}
+      </div>
+      <div role="cell" className="min-w-0 truncate font-mono text-xs text-ink">
+        {policy.name}
+        {!policy.enabled && (
+          <span className="ml-1 rounded-row bg-line/50 px-1 text-[9px] uppercase text-dim">
+            {t('policyTable.disabled')}
+          </span>
+        )}
+      </div>
+      <Cell failed={failed('srcintf')}>
+        <ObjectValues values={policy.srcintf} field="srcintf" network={network} />
+      </Cell>
+      <Cell failed={failed('dstintf')}>
+        <ObjectValues values={policy.dstintf} field="dstintf" network={network} />
+      </Cell>
+      <Cell failed={failed('srcaddr')}>
+        <ObjectValues values={policy.srcaddr} field="srcaddr" network={network} />
+      </Cell>
+      <Cell failed={failed('dstaddr')}>
+        <ObjectValues values={policy.dstaddr} field="dstaddr" network={network} />
+      </Cell>
+      <Cell failed={failed('schedule')}>
+        {policy.schedule === 'always' ? (
+          <span className="text-dim">{policy.schedule}</span>
+        ) : (
+          <InfoChip
+            label=""
+            value={policy.schedule}
+            failed={failed('schedule')}
+            infoKey="objectInfo.schedule"
+          />
+        )}
+      </Cell>
+      <Cell failed={failed('service')}>
+        <ObjectValues values={policy.service} field="service" network={network} />
+      </Cell>
+      <div role="cell">
+        <span
+          className={`inline-block rounded-row px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+            policy.action === 'accept' ? 'bg-trace/15 text-trace' : 'bg-deny/15 text-deny'
+          }`}
+        >
+          {policy.action === 'accept' ? '✓ ACCEPT' : '✕ DENY'}
+        </span>
+      </div>
+      <div role="cell" className="font-mono text-[10px]">
+        {policy.nat ? (
+          <InfoChip label="" value="SNAT" failed={false} infoKey="objectInfo.nat" />
+        ) : (
+          <span className="text-dim/50">—</span>
+        )}
+      </div>
+    </>
+  );
+
+  if (selectable) {
+    return (
+      <div
+        role="row"
+        tabIndex={0}
+        aria-selected={selected}
+        onClick={() => onSelect?.(policy.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.(policy.id);
+          }
+        }}
+        className={`${rowClasses} text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw`}
+      >
+        {cells}
+      </div>
+    );
+  }
+  return (
+    <div role="row" className={rowClasses}>
+      {cells}
     </div>
   );
 }
@@ -389,40 +549,111 @@ export function PolicyTable({
           {t('policyTable.filterNoMatch')}
         </p>
       )}
-      {visiblePolicies.map((policy) => (
-        <div role="listitem" key={policy.id}>
-          <PolicyRow
-            policy={policy}
-            network={network}
-            highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
-            hasChip={chipRow === policy.id}
-            selectable={selectable}
-            selected={selectedId === policy.id}
-            onSelect={onSelect}
-          />
-        </div>
-      ))}
-      <div role="listitem">
-        {selectable ? (
-          <button
-            type="button"
-            onClick={() => onSelect?.(0)}
-            aria-pressed={implicitSelected}
-            className={`block w-full rounded-row border border-dashed px-2 py-1.5 text-left transition-colors ${
-              ROW_STATE_CLASSES[implicitHighlight.state]
-            } cursor-pointer hover:bg-white/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw ${
-              implicitSelected ? 'ring-2 ring-claw' : ''
-            }`}
-          >
-            {implicitContent}
-          </button>
-        ) : (
-          <div
-            className={`rounded-row border border-dashed px-2 py-1.5 transition-colors ${ROW_STATE_CLASSES[implicitHighlight.state]}`}
-          >
-            {implicitContent}
+      {/* Mobile: kompakte Karten (einhaendig) */}
+      <div className="flex flex-col gap-1 lg:hidden">
+        {visiblePolicies.map((policy) => (
+          <div role="listitem" key={policy.id}>
+            <PolicyRow
+              policy={policy}
+              network={network}
+              highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
+              hasChip={chipRow === policy.id}
+              selectable={selectable}
+              selected={selectedId === policy.id}
+              onSelect={onSelect}
+            />
           </div>
-        )}
+        ))}
+        <div role="listitem">
+          {selectable ? (
+            <button
+              type="button"
+              onClick={() => onSelect?.(0)}
+              aria-pressed={implicitSelected}
+              className={`block w-full rounded-row border border-dashed px-2 py-1.5 text-left transition-colors ${
+                ROW_STATE_CLASSES[implicitHighlight.state]
+              } cursor-pointer hover:bg-white/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw ${
+                implicitSelected ? 'ring-2 ring-claw' : ''
+              }`}
+            >
+              {implicitContent}
+            </button>
+          ) : (
+            <div
+              className={`rounded-row border border-dashed px-2 py-1.5 transition-colors ${ROW_STATE_CLASSES[implicitHighlight.state]}`}
+            >
+              {implicitContent}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop: echtes FortiGate-Spaltenlayout */}
+      <div className="hidden lg:block">
+        <div role="table" className="overflow-x-auto">
+          <div className="min-w-[820px]">
+            <ColumnHeader />
+            <div className="flex flex-col gap-1 pt-1">
+              {visiblePolicies.map((policy) => (
+                <PolicyColumnsRow
+                  key={policy.id}
+                  policy={policy}
+                  network={network}
+                  highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
+                  hasChip={chipRow === policy.id}
+                  selectable={selectable}
+                  selected={selectedId === policy.id}
+                  onSelect={onSelect}
+                />
+              ))}
+              {/* Implicit Deny als Spaltenzeile */}
+              <div
+                role="row"
+                tabIndex={selectable ? 0 : undefined}
+                aria-selected={selectable ? implicitSelected : undefined}
+                onClick={selectable ? () => onSelect?.(0) : undefined}
+                onKeyDown={
+                  selectable
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelect?.(0);
+                        }
+                      }
+                    : undefined
+                }
+                className={`${COLS} rounded-row border border-dashed px-2 py-1.5 transition-colors ${
+                  ROW_STATE_CLASSES[implicitHighlight.state]
+                } ${
+                  selectable
+                    ? 'cursor-pointer hover:bg-white/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-claw'
+                    : ''
+                } ${implicitSelected ? 'ring-2 ring-claw' : ''}`}
+              >
+                <div role="cell" className="flex items-center gap-1.5 font-mono text-xs text-dim">
+                  {chipRow === 0 && <PacketChip />}0
+                </div>
+                <div role="cell" className="font-mono text-xs text-dim">
+                  {t('policyTable.implicitDeny')}
+                </div>
+                <div role="cell" />
+                <div role="cell" />
+                <div role="cell" />
+                <div role="cell" />
+                <div role="cell" />
+                <div role="cell" />
+                <div role="cell">
+                  <span className="inline-block rounded-row bg-deny/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-deny">
+                    ✕ DENY
+                  </span>
+                </div>
+                <div role="cell" className="text-dim/50">
+                  —
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
