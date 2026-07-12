@@ -208,3 +208,15 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   ProfileScreen; Audit-Challenge (find-shadowed über 30+ Regeln);
   Roadmap v1.1 (Security Profiles, cert vs. deep inspection), v1.2
   (HA-Cluster, Perimeter-Placement, Routing-Vertiefung).
+- 2026-07-12 (Forts. 3): FortiOS-7.6-Doku-Abgleich der Policy-Liste
+  durchgefuehrt (docs.fortinet.com Firewall policy / Policy views and
+  policy lookup / FortiManager Policy search and filter). Nachgebaut:
+  NOT-Filter (not equals) im Spaltenkopf-Dropdown; Policy-Views
+  Interface Pair View (kollabierbare srcintf→dstintf-Sektionen) +
+  By Sequence; Policy Lookup in der Workbench (Pflicht-srcintf,
+  Protokoll, IPs, Port → matchende Regel wird gehighlightet). Bereits
+  vorher abgedeckt: Spaltenfilter+Counts, OR/AND-Semantik, Freitext-
+  suche (+IP-Containment, mehr als Original), Implicit-Deny-Zeile,
+  Disabled-Darstellung. OFFEN (niedrig): Gear-Spaltenkonfig, Rechts-
+  klick-Menue, Sequence Grouping View, Suche in Filter-Dropdowns.
+  Tests: 196 gruen.
