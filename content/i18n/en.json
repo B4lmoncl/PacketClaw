@@ -83,7 +83,11 @@
       "enabled": "enabled",
       "disabled": "disabled"
     },
-    "filterNot": "Filter as NOT (exclude)"
+    "filterNot": "Filter as NOT (exclude)",
+    "view": {
+      "pairs": "Interface Pair View",
+      "sequence": "By Sequence"
+    }
   },
   "debrief": {
     "title": "Debrief",

@@ -83,7 +83,11 @@
       "enabled": "aktiviert",
       "disabled": "deaktiviert"
     },
-    "filterNot": "Als NOT-Filter (ausschließen)"
+    "filterNot": "Als NOT-Filter (ausschließen)",
+    "view": {
+      "pairs": "Interface-Paar-Ansicht",
+      "sequence": "Nach Sequenz"
+    }
   },
   "debrief": {
     "title": "Debrief",

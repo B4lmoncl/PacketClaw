@@ -620,6 +620,9 @@ export function PolicyTable({
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FieldFilter[]>([]);
+  // FortiOS-Policy-Views: Interface Pair View gruppiert nach srcintf→dstintf
+  const [view, setView] = useState<'sequence' | 'pairs'>('sequence');
+  const [collapsedPairs, setCollapsedPairs] = useState<ReadonlySet<string>>(new Set());
   const [draftField, setDraftField] = useState<FilterField>('srcaddr');
   const [draftValue, setDraftValue] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
@@ -657,6 +660,29 @@ export function PolicyTable({
       (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, others),
     );
   };
+  // Interface-Paar-Gruppen in Reihenfolge des ersten Auftretens (wie FortiOS)
+  const pairGroups = useMemo(() => {
+    const groups: Array<{ key: string; label: string; policies: Policy[] }> = [];
+    const byKey = new Map<string, Policy[]>();
+    for (const policy of visiblePolicies) {
+      const label = `${policy.srcintf.join(', ')} → ${policy.dstintf.join(', ')}`;
+      let arr = byKey.get(label);
+      if (!arr) {
+        arr = [];
+        byKey.set(label, arr);
+        groups.push({ key: label, label, policies: arr });
+      }
+      arr.push(policy);
+    }
+    return groups;
+  }, [visiblePolicies]);
+  const togglePair = (key: string) =>
+    setCollapsedPairs((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
   const implicitSelected = selectedId === 0;
 
@@ -801,6 +827,31 @@ export function PolicyTable({
 
       {/* Desktop: echtes FortiGate-Spaltenlayout */}
       <div className="hidden lg:block">
+        {/* Policy-Views wie FortiOS: Interface Pair View | By Sequence */}
+        <div className="mb-1 flex items-center justify-end gap-1 font-mono text-[10px]">
+          <button
+            onClick={() => setView('pairs')}
+            aria-pressed={view === 'pairs'}
+            className={`rounded-row border px-2 py-1 ${
+              view === 'pairs'
+                ? 'border-claw/60 bg-claw/10 text-claw'
+                : 'border-line text-dim hover:text-ink'
+            }`}
+          >
+            {t('policyTable.view.pairs')}
+          </button>
+          <button
+            onClick={() => setView('sequence')}
+            aria-pressed={view === 'sequence'}
+            className={`rounded-row border px-2 py-1 ${
+              view === 'sequence'
+                ? 'border-claw/60 bg-claw/10 text-claw'
+                : 'border-line text-dim hover:text-ink'
+            }`}
+          >
+            {t('policyTable.view.sequence')}
+          </button>
+        </div>
         <div role="table" className="overflow-x-auto">
           <div className="min-w-[820px]">
             <ColumnHeader
@@ -810,18 +861,45 @@ export function PolicyTable({
               onToggle={toggleFilter}
             />
             <div className="flex flex-col gap-1 pt-1">
-              {visiblePolicies.map((policy) => (
-                <PolicyColumnsRow
-                  key={policy.id}
-                  policy={policy}
-                  network={network}
-                  highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
-                  hasChip={chipRow === policy.id}
-                  selectable={selectable}
-                  selected={selectedId === policy.id}
-                  onSelect={onSelect}
-                />
-              ))}
+              {view === 'sequence'
+                ? visiblePolicies.map((policy) => (
+                    <PolicyColumnsRow
+                      key={policy.id}
+                      policy={policy}
+                      network={network}
+                      highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
+                      hasChip={chipRow === policy.id}
+                      selectable={selectable}
+                      selected={selectedId === policy.id}
+                      onSelect={onSelect}
+                    />
+                  ))
+                : pairGroups.map((group) => (
+                    <div key={group.key} className="flex flex-col gap-1">
+                      <button
+                        onClick={() => togglePair(group.key)}
+                        aria-expanded={!collapsedPairs.has(group.key)}
+                        className="flex items-center gap-2 rounded-row border border-line/60 bg-panel/80 px-2 py-1 text-left font-mono text-[11px] text-dim hover:text-ink"
+                      >
+                        <span aria-hidden>{collapsedPairs.has(group.key) ? '▸' : '▾'}</span>
+                        <span className="text-ink">{group.label}</span>
+                        <span className="text-dim/60">({group.policies.length})</span>
+                      </button>
+                      {!collapsedPairs.has(group.key) &&
+                        group.policies.map((policy) => (
+                          <PolicyColumnsRow
+                            key={policy.id}
+                            policy={policy}
+                            network={network}
+                            highlight={highlights?.get(policy.id) ?? { state: 'idle' }}
+                            hasChip={chipRow === policy.id}
+                            selectable={selectable}
+                            selected={selectedId === policy.id}
+                            onSelect={onSelect}
+                          />
+                        ))}
+                    </div>
+                  ))}
               {/* Implicit Deny als Spaltenzeile */}
               <div
                 role="row"
