@@ -204,14 +204,16 @@ function HeaderFilter({
   network: NetworkConfig;
   filters: FieldFilter[];
   baseFor: (field: FilterField) => Policy[];
-  onToggle: (field: FilterField, value: string) => void;
+  onToggle: (field: FilterField, value: string, negate?: boolean) => void;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
-  const activeValues = filters.filter((f) => f.field === field).map((f) => f.value);
+  const activeFor = (value: string, negate: boolean) =>
+    filters.some((f) => f.field === field && f.value === value && !!f.negate === negate);
+  const hasActive = filters.some((f) => f.field === field);
 
   useEffect(() => {
     if (!open) return;
@@ -244,13 +246,13 @@ function HeaderFilter({
         type="button"
         onClick={toggleOpen}
         className={`inline-flex items-center gap-0.5 font-mono uppercase tracking-wide focus-visible:outline focus-visible:outline-1 focus-visible:outline-claw ${
-          activeValues.length ? 'text-claw' : 'text-dim hover:text-ink'
+          hasActive ? 'text-claw' : 'text-dim hover:text-ink'
         }`}
         aria-label={`${label} — ${t('policyTable.filterField')}`}
       >
         {label}
         <span aria-hidden className="text-[9px]">
-          {activeValues.length ? '▾●' : '▾'}
+          {hasActive ? '▾●' : '▾'}
         </span>
       </button>
       {open &&
@@ -263,24 +265,39 @@ function HeaderFilter({
           >
             {options.map((v) => {
               const count = base.filter((p) => policyPassesFilter(p, { field, value: v })).length;
-              const sel = activeValues.includes(v);
+              const sel = activeFor(v, false);
+              const selNot = activeFor(v, true);
               const shown =
                 field === 'action' || field === 'status' ? t(`policyTable.val.${v}`) : v;
               return (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => onToggle(field, v)}
-                  className={`flex w-full items-center justify-between gap-3 rounded-row px-2 py-1 text-left font-mono text-[11px] normal-case ${
-                    sel ? 'bg-claw/15 text-claw' : 'text-ink/90 hover:bg-white/5'
-                  }`}
-                >
-                  <span className="truncate">
-                    {sel ? '✓ ' : ''}
-                    {shown}
-                  </span>
-                  <span className="shrink-0 tabular-nums text-dim">{count}</span>
-                </button>
+                <span key={v} className="flex w-full items-stretch gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => onToggle(field, v)}
+                    className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-row px-2 py-1 text-left font-mono text-[11px] normal-case ${
+                      sel ? 'bg-claw/15 text-claw' : 'text-ink/90 hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="truncate">
+                      {sel ? '✓ ' : ''}
+                      {shown}
+                    </span>
+                    <span className="shrink-0 tabular-nums text-dim">{count}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onToggle(field, v, true)}
+                    title={t('policyTable.filterNot')}
+                    aria-label={`NOT ${shown}`}
+                    className={`shrink-0 rounded-row px-1.5 font-mono text-[11px] ${
+                      selNot
+                        ? 'bg-deny/20 text-deny'
+                        : 'text-dim/60 hover:bg-white/5 hover:text-deny'
+                    }`}
+                  >
+                    ≠
+                  </button>
+                </span>
               );
             })}
           </div>,
@@ -488,6 +505,8 @@ const FILTER_FIELDS: FilterField[] = [
 interface FieldFilter {
   field: FilterField;
   value: string;
+  /** true = NOT-Filter (not equals), wie im FortiOS-Filter-Dialog */
+  negate?: boolean;
 }
 
 /** Auswaehlbare Werte je Spalte: die real in der Config vorhandenen Objekte. */
@@ -539,9 +558,14 @@ function policyPassesFilter(policy: Policy, { field, value }: FieldFilter): bool
 }
 
 function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
-  // Werte derselben Spalte sind ODER-verknuepft (wie FortiGate), Spalten UND.
+  // Positive Werte derselben Spalte sind ODER-verknuepft (wie FortiGate),
+  // Spalten UND; NOT-Filter schliessen einzeln aus (UND).
   const byField = new Map<FilterField, string[]>();
   for (const f of filters) {
+    if (f.negate) {
+      if (policyPassesFilter(policy, f)) return false;
+      continue;
+    }
     const arr = byField.get(f.field);
     if (arr) arr.push(f.value);
     else byField.set(f.field, [f.value]);
@@ -618,11 +642,14 @@ export function PolicyTable({
     );
   };
   // Spaltenkopf-Filter: Wert togglen; Trefferzahl gegen die anderen aktiven Filter
-  const toggleFilter = (field: FilterField, value: string) =>
+  const toggleFilter = (field: FilterField, value: string, negate = false) =>
     setFilters((fs) =>
-      fs.some((f) => f.field === field && f.value === value)
-        ? fs.filter((f) => !(f.field === field && f.value === value))
-        : [...fs, { field, value }],
+      fs.some((f) => f.field === field && f.value === value && !!f.negate === negate)
+        ? fs.filter((f) => !(f.field === field && f.value === value && !!f.negate === negate))
+        : [
+            ...fs.filter((f) => !(f.field === field && f.value === value)),
+            { field, value, negate },
+          ],
     );
   const baseFor = (field: FilterField) => {
     const others = filters.filter((f) => f.field !== field);
@@ -706,6 +733,7 @@ export function PolicyTable({
               title={t('policyTable.filterClear')}
             >
               <span className="text-[8px] uppercase tracking-wide text-claw">
+                {f.negate ? '≠ ' : ''}
                 {t(`policyTable.${f.field}`)}
               </span>
               {f.field === 'action' || f.field === 'status'

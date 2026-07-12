@@ -82,7 +82,8 @@
       "deny": "DENY",
       "enabled": "aktiviert",
       "disabled": "deaktiviert"
-    }
+    },
+    "filterNot": "Als NOT-Filter (ausschließen)"
   },
   "debrief": {
     "title": "Debrief",
