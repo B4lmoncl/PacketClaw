@@ -3,9 +3,10 @@
  * Insert Empty Policy Above/Below, Clone, Status, Delete). Portal an der
  * Cursorposition, an den Viewport geklemmt, Escape/Klick-außerhalb schließt.
  */
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
 export interface ContextMenuItem {
   key: string;
@@ -34,7 +35,7 @@ export function PolicyContextMenu({
   items: ContextMenuItem[];
   onClose: () => void;
 }) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotionPref();
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ left: state.x, top: state.y });
 

@@ -7,11 +7,13 @@
  * Das Popover wird per Portal (fixed, an der Chip-Position) gerendert, damit
  * scrollende/overflow-Container (Spaltentabelle) es nicht abschneiden.
  */
+import { motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig } from '../../engine';
 import { resolveObjectInfo, type ObjectField, type ObjectInfo } from '../../game/objectInfo';
+import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
 type OpenState = 'closed' | 'hover' | 'locked';
 type Pos = { left: number; top: number };
@@ -32,10 +34,14 @@ function PortalPopover({
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const reducedMotion = useReducedMotionPref();
   return createPortal(
-    <div
+    <motion.div
       ref={popRef}
       role="tooltip"
+      initial={reducedMotion ? false : { opacity: 0, y: 3 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
       className={`${POPOVER_BASE} ${locked ? 'border-claw/60' : 'border-line'}`}
     >
@@ -52,7 +58,7 @@ function PortalPopover({
         </button>
       )}
       {children}
-    </div>,
+    </motion.div>,
     document.body,
   );
 }

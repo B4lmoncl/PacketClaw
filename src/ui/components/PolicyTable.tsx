@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { createResolver } from '../../engine';
 import type { MatchField, NetworkConfig, Policy, Resolver } from '../../engine';
 import { fieldMatchesQuery, type FilterMode, type SemanticField } from '../../game/filterMatch';
+import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
 
 export type RowState =
@@ -216,6 +217,7 @@ function HeaderFilter({
   onToggle: (field: FilterField, value: string, negate?: boolean, mode?: FilterMode) => void;
 }) {
   const { t } = useTranslation();
+  const reducedMotion = useReducedMotionPref();
   const network = ctx.network;
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -282,10 +284,13 @@ function HeaderFilter({
       {open &&
         pos &&
         createPortal(
-          <div
+          <motion.div
             ref={popRef}
+            initial={reducedMotion ? false : { opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
             style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
-            className="max-h-72 w-max min-w-[190px] max-w-[260px] overflow-auto rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+            className="max-h-72 w-max min-w-[190px] max-w-[260px] overflow-auto rounded-panel border border-line bg-bg p-1 shadow-[0_8px_24px_rgba(0,0,0,0.5)] motion-reduce:transition-none"
           >
             {semantic && (
               <form
@@ -385,7 +390,7 @@ function HeaderFilter({
                 </span>
               );
             })}
-          </div>,
+          </motion.div>,
           document.body,
         )}
     </span>
@@ -479,9 +484,10 @@ function PolicyColumnsRow({
   const { t } = useTranslation();
   const failed = (field: MatchField) =>
     highlight.state === 'failed' && highlight.failedField === field;
-  const rowClasses = `${COLS} rounded-row border px-2 py-1.5 transition-colors ${
+  // FortiOS hebt Zeilen unter dem Cursor immer leicht hervor
+  const rowClasses = `${COLS} rounded-row border px-2 py-1.5 transition-colors hover:bg-white/[0.03] ${
     ROW_STATE_CLASSES[highlight.state]
-  } ${selectable ? 'cursor-pointer hover:bg-white/[0.03]' : ''} ${
+  } ${selectable ? 'cursor-pointer' : ''} ${
     selected ? 'ring-2 ring-claw' : ''
   } ${!policy.enabled ? 'opacity-55' : ''}`;
 
