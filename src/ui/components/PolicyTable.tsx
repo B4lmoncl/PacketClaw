@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { createResolver } from '../../engine';
 import type { MatchField, NetworkConfig, Policy, Resolver } from '../../engine';
-import { fieldMatchesQuery, type FilterMode } from '../../game/filterMatch';
+import { fieldMatchesQuery, type FilterMode, type SemanticField } from '../../game/filterMatch';
 import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
 
 export type RowState =
@@ -593,6 +593,8 @@ interface FilterCtx {
   resolver: Resolver;
 }
 
+const SEMANTIC_FIELDS: SemanticField[] = ['srcaddr', 'dstaddr', 'service', 'srcintf', 'dstintf'];
+
 /** Auswaehlbare Werte je Spalte: die real in der Config vorhandenen Objekte. */
 function valueOptions(field: FilterField, network: NetworkConfig): string[] {
   const uniq = (xs: string[]) => Array.from(new Set(xs));
@@ -668,14 +670,14 @@ function matchesFieldFilters(policy: Policy, filters: FieldFilter[], ctx: Filter
   return true;
 }
 
-const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
-
 /**
  * Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen.
- * IP-Tokens (z. B. "10.0.1.5") matchen zusaetzlich per CONTAINMENT: Regeln,
- * deren Adressobjekte/Gruppen die IP enthalten — nicht nur Namens-Substring.
+ * Neben dem Namens-Substring matcht jedes Token zusaetzlich SEMANTISCH im
+ * Contains-Modus ueber alle fuenf Felder: "443" findet WEB/ALL/Portranges,
+ * "10.0.1.5" findet Subnetze/Ranges/Gruppen mit dieser IP, "port1" findet
+ * Zonen mit diesem Member, "SRV_WEB01" findet Gruppen mit diesem Host.
  */
-export function policyMatches(policy: Policy, tokens: string[], resolver?: Resolver): boolean {
+export function policyMatches(policy: Policy, tokens: string[], ctx?: FilterCtx): boolean {
   const haystack = [
     String(policy.id),
     policy.name,
@@ -691,13 +693,10 @@ export function policyMatches(policy: Policy, tokens: string[], resolver?: Resol
   ].map((v) => v.toLowerCase());
   return tokens.every((token) => {
     if (haystack.some((v) => v.includes(token))) return true;
-    if (resolver && IPV4_RE.test(token)) {
-      const entries = [...policy.srcaddr, ...policy.dstaddr];
-      return entries.some(
-        (entry) => entry === 'all' || resolver.addressEntryMatchesIp(entry, token),
-      );
-    }
-    return false;
+    if (!ctx) return false;
+    return SEMANTIC_FIELDS.some((field) =>
+      fieldMatchesQuery(ctx.network, ctx.resolver, field, policy[field], token, 'contains'),
+    );
   });
 }
 
@@ -724,7 +723,7 @@ export function PolicyTable({
   const visiblePolicies = !filtering
     ? network.policies
     : network.policies.filter(
-        (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, filters, ctx),
+        (p) => policyMatches(p, tokens, ctx) && matchesFieldFilters(p, filters, ctx),
       );
 
   const draftOptions = valueOptions(draftField, network);
@@ -750,7 +749,7 @@ export function PolicyTable({
   const baseFor = (field: FilterField) => {
     const others = filters.filter((f) => f.field !== field);
     return network.policies.filter(
-      (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, others, ctx),
+      (p) => policyMatches(p, tokens, ctx) && matchesFieldFilters(p, others, ctx),
     );
   };
   // Interface-Paar-Gruppen in Reihenfolge des ersten Auftretens (wie FortiOS)
