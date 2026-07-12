@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import type { MatchField, NetworkConfig, Policy } from '../../engine';
+import { createResolver } from '../../engine';
+import type { MatchField, NetworkConfig, Policy, Resolver } from '../../engine';
 import { InfoChip, ObjectChip, ObjectValues } from './ObjectChip';
 
 export type RowState =
@@ -551,8 +552,14 @@ function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
   return true;
 }
 
-/** Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen. */
-function policyMatches(policy: Policy, tokens: string[]): boolean {
+const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
+
+/**
+ * Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen.
+ * IP-Tokens (z. B. "10.0.1.5") matchen zusaetzlich per CONTAINMENT: Regeln,
+ * deren Adressobjekte/Gruppen die IP enthalten — nicht nur Namens-Substring.
+ */
+export function policyMatches(policy: Policy, tokens: string[], resolver?: Resolver): boolean {
   const haystack = [
     String(policy.id),
     policy.name,
@@ -566,7 +573,16 @@ function policyMatches(policy: Policy, tokens: string[]): boolean {
     ...policy.dstaddr,
     ...policy.service,
   ].map((v) => v.toLowerCase());
-  return tokens.every((token) => haystack.some((v) => v.includes(token)));
+  return tokens.every((token) => {
+    if (haystack.some((v) => v.includes(token))) return true;
+    if (resolver && IPV4_RE.test(token)) {
+      const entries = [...policy.srcaddr, ...policy.dstaddr];
+      return entries.some(
+        (entry) => entry === 'all' || resolver.addressEntryMatchesIp(entry, token),
+      );
+    }
+    return false;
+  });
 }
 
 export function PolicyTable({
@@ -583,10 +599,13 @@ export function PolicyTable({
   const [draftField, setDraftField] = useState<FilterField>('srcaddr');
   const [draftValue, setDraftValue] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const resolver = useMemo(() => createResolver(network), [network]);
   const filtering = tokens.length > 0 || filters.length > 0;
   const visiblePolicies = !filtering
     ? network.policies
-    : network.policies.filter((p) => policyMatches(p, tokens) && matchesFieldFilters(p, filters));
+    : network.policies.filter(
+        (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, filters),
+      );
 
   const draftOptions = valueOptions(draftField, network);
   const draftValueOrFirst = draftValue || draftOptions[0] || '';
@@ -608,7 +627,7 @@ export function PolicyTable({
   const baseFor = (field: FilterField) => {
     const others = filters.filter((f) => f.field !== field);
     return network.policies.filter(
-      (p) => policyMatches(p, tokens) && matchesFieldFilters(p, others),
+      (p) => policyMatches(p, tokens, resolver) && matchesFieldFilters(p, others),
     );
   };
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
