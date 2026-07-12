@@ -15,16 +15,16 @@ export interface DailyRun {
   packets: Packet[];
 }
 
-const INTERFACES = [
+export const INTERFACES = [
   { id: 'if-p1', name: 'port1' },
   { id: 'if-v20', name: 'vlan20' },
   { id: 'if-p2', name: 'port2' },
   { id: 'if-w1', name: 'wan1' },
 ];
 
-const ZONES = [{ id: 'z-in', name: 'inside', members: ['if-p1', 'if-v20'] }];
+export const ZONES = [{ id: 'z-in', name: 'inside', members: ['if-p1', 'if-v20'] }];
 
-const ADDRESSES = [
+export const ADDRESSES = [
   { id: 'LAN_NET', name: 'LAN_NET', type: 'subnet' as const, subnet: '10.0.1.0/24' },
   { id: 'GUEST_NET', name: 'GUEST_NET', type: 'subnet' as const, subnet: '10.0.20.0/24' },
   { id: 'DMZ_NET', name: 'DMZ_NET', type: 'subnet' as const, subnet: '172.16.0.0/24' },
@@ -38,7 +38,7 @@ const ADDRESSES = [
   },
 ];
 
-const SERVICES = [
+export const SERVICES = [
   { id: 'HTTPS', name: 'HTTPS', protocol: 'tcp' as const, dstPorts: [{ from: 443, to: 443 }] },
   { id: 'HTTP', name: 'HTTP', protocol: 'tcp' as const, dstPorts: [{ from: 80, to: 80 }] },
   { id: 'DNS', name: 'DNS', protocol: 'udp' as const, dstPorts: [{ from: 53, to: 53 }] },
@@ -47,19 +47,19 @@ const SERVICES = [
   { id: 'PING', name: 'PING', protocol: 'icmp' as const, icmpType: 8 },
 ];
 
-const ROUTES = [
+export const ROUTES = [
   { dst: '10.0.1.0/24', iface: 'port1' },
   { dst: '10.0.20.0/24', iface: 'vlan20' },
   { dst: '172.16.0.0/24', iface: 'port2' },
   { dst: '0.0.0.0/0', iface: 'wan1' },
 ];
 
-const ADDRESS_GROUPS = [
+export const ADDRESS_GROUPS = [
   { id: 'INTERNAL', name: 'INTERNAL', members: ['LAN_NET', 'MGMT_RANGE'] },
   { id: 'WEB_TIER', name: 'WEB_TIER', members: ['SRV_WEB01', 'DMZ_NET'] },
 ];
 
-const SERVICE_GROUPS = [{ id: 'WEB', name: 'WEB', members: ['HTTPS', 'HTTP'] }];
+export const SERVICE_GROUPS = [{ id: 'WEB', name: 'WEB', members: ['HTTPS', 'HTTP'] }];
 
 const SRC_IPS = [
   '10.0.1.5',
@@ -74,10 +74,10 @@ const SRC_IPS = [
 const DST_IPS = ['203.0.113.50', '9.9.9.9', '172.16.0.10', '10.0.1.5', '198.51.100.20'];
 
 /** Tages-Thema: prägt Feld-Gewichtung und Regelwerk-Charakter. */
-type Theme = 'egress' | 'dmz' | 'lockdown';
-const THEMES: Theme[] = ['egress', 'dmz', 'lockdown'];
+export type Theme = 'egress' | 'dmz' | 'lockdown';
+export const THEMES: Theme[] = ['egress', 'dmz', 'lockdown'];
 
-interface ThemeShape {
+export interface ThemeShape {
   src: string[];
   dst: string[];
   svc: string[];
@@ -86,7 +86,7 @@ interface ThemeShape {
   acceptBias: number; // Wahrscheinlichkeit fuer action=accept
 }
 
-const SHAPES: Record<Theme, ThemeShape> = {
+export const SHAPES: Record<Theme, ThemeShape> = {
   // Ausgehender Traffic: wer darf womit ins Internet?
   egress: {
     src: ['LAN_NET', 'GUEST_NET', 'INTERNAL', 'ADMIN_PC', 'MGMT_RANGE'],
@@ -126,7 +126,7 @@ function pickField(rng: Rng, pool: string[], multiChance = 0.2): string[] {
   return [first];
 }
 
-function themedPolicy(rng: Rng, id: number, shape: ThemeShape): Policy {
+export function themedPolicy(rng: Rng, id: number, shape: ThemeShape): Policy {
   return makePolicy({
     id,
     name: `daily-${id}`,
@@ -141,7 +141,7 @@ function themedPolicy(rng: Rng, id: number, shape: ThemeShape): Policy {
   });
 }
 
-function randomPacket(rng: Rng): Packet {
+export function randomPacket(rng: Rng): Packet {
   const srcintf = rng.pick(['port1', 'vlan20', 'port2', 'wan1']);
   const protocol = rng.pick(['tcp', 'tcp', 'udp', 'icmp'] as const);
   const packet: Packet = {
@@ -158,9 +158,9 @@ function randomPacket(rng: Rng): Packet {
   return packet;
 }
 
-type Outcome = 'accept' | 'deny' | 'implicit';
+export type Outcome = 'accept' | 'deny' | 'implicit';
 
-function outcomeOf(packet: Packet, network: NetworkConfig): Outcome | null {
+export function outcomeOf(packet: Packet, network: NetworkConfig): Outcome | null {
   const verdict = evaluate(packet, network);
   // Aufgabe muss mindestens eine Policy beruehren (no-route langweilt im Daily)
   if (!verdict.trace.some((s) => s.kind.startsWith('policy'))) return null;
