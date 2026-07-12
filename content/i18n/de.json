@@ -154,7 +154,18 @@
   "incident": {
     "ticket": "Incident-Ticket",
     "log": "Forward-Traffic-Log",
-    "fixIt": "Regelwerk reparieren"
+    "fixIt": "Regelwerk reparieren",
+    "forwardTraffic": "Forward Traffic",
+    "implicit": "0 (implizit)",
+    "col": {
+      "dateTime": "Datum/Zeit",
+      "srcintf": "Quell-Interface",
+      "source": "Quelle",
+      "destination": "Ziel",
+      "service": "Service",
+      "result": "Ergebnis",
+      "policyId": "Policy-ID"
+    }
   },
   "daily": {
     "result": "Daily {{date}}",

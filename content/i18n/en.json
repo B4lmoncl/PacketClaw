@@ -154,7 +154,18 @@
   "incident": {
     "ticket": "Incident ticket",
     "log": "Forward traffic log",
-    "fixIt": "Repair the ruleset"
+    "fixIt": "Repair the ruleset",
+    "forwardTraffic": "Forward Traffic",
+    "implicit": "0 (implicit)",
+    "col": {
+      "dateTime": "Date/Time",
+      "srcintf": "Src Interface",
+      "source": "Source",
+      "destination": "Destination",
+      "service": "Service",
+      "result": "Result",
+      "policyId": "Policy ID"
+    }
   },
   "daily": {
     "result": "Daily {{date}}",

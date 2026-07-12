@@ -23,9 +23,13 @@ function useForwardLog(level: IncidentLevel) {
     const base = new Date('2026-01-05T09:12:00');
     return level.logPackets.map((packet, i) => {
       const verdict = evaluate(packet, level.network);
-      const time = new Date(base.getTime() + i * 47000);
+      const d = new Date(base.getTime() + i * 47000);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const dateTime = `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${d
+        .toTimeString()
+        .slice(0, 8)}`;
       return {
-        time: time.toTimeString().slice(0, 8),
+        dateTime,
         srcintf: packet.srcintf,
         src: packet.srcIp,
         dst: packet.dstIp,
@@ -101,40 +105,59 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
         <p className="text-sm leading-relaxed text-ink">{level.ticket[locale]}</p>
       </section>
 
-      {/* Forward-Traffic-Log */}
+      {/* Forward-Traffic-Log (nachempfunden dem FortiOS-Log & Report → Forward Traffic) */}
       <section className="rounded-panel border border-line bg-panel px-2 py-2">
-        <div className="mb-1 px-1 font-mono text-[10px] uppercase tracking-widest text-dim">
-          {t('incident.log')}
+        <div className="mb-1 flex items-center gap-2 px-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-dim">
+            {t('incident.log')}
+          </span>
+          <span className="rounded-row bg-line/40 px-1.5 py-0.5 font-mono text-[9px] uppercase text-dim">
+            {t('incident.forwardTraffic')}
+          </span>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full font-mono text-[11px]">
+          <table className="w-full min-w-[640px] border-collapse font-mono text-[11px]">
             <thead>
-              <tr className="text-left text-dim">
-                <th className="px-1 py-0.5 font-normal">time</th>
-                <th className="px-1 py-0.5 font-normal">srcintf</th>
-                <th className="px-1 py-0.5 font-normal">src</th>
-                <th className="px-1 py-0.5 font-normal">dst</th>
-                <th className="px-1 py-0.5 font-normal">service</th>
-                <th className="px-1 py-0.5 font-normal">policyid</th>
-                <th className="px-1 py-0.5 font-normal">action</th>
+              <tr className="border-b border-line text-left text-[9px] uppercase tracking-wide text-dim">
+                <th className="px-2 py-1 font-normal">{t('incident.col.dateTime')}</th>
+                <th className="px-2 py-1 font-normal">{t('incident.col.srcintf')}</th>
+                <th className="px-2 py-1 font-normal">{t('incident.col.source')}</th>
+                <th className="px-2 py-1 font-normal">{t('incident.col.destination')}</th>
+                <th className="px-2 py-1 font-normal">{t('incident.col.service')}</th>
+                <th className="px-2 py-1 text-center font-normal">{t('incident.col.result')}</th>
+                <th className="px-2 py-1 text-center font-normal">{t('incident.col.policyId')}</th>
               </tr>
             </thead>
             <tbody>
-              {log.map((row, i) => (
-                <tr key={i} className="border-t border-line/40 text-ink/90">
-                  <td className="px-1 py-0.5 text-dim">{row.time}</td>
-                  <td className="px-1 py-0.5">{row.srcintf}</td>
-                  <td className="px-1 py-0.5">{row.src}</td>
-                  <td className="px-1 py-0.5">{row.dst}</td>
-                  <td className="px-1 py-0.5">{row.service}</td>
-                  <td className="px-1 py-0.5 text-center">{row.policyId}</td>
-                  <td
-                    className={`px-1 py-0.5 font-bold ${row.action === 'accept' ? 'text-trace' : 'text-deny'}`}
+              {log.map((row, i) => {
+                const denied = row.action === 'deny';
+                return (
+                  <tr
+                    key={i}
+                    className={`border-b border-line/30 text-ink/90 odd:bg-white/[0.015] hover:bg-white/[0.03] ${
+                      denied ? 'border-l-2 border-l-deny' : 'border-l-2 border-l-transparent'
+                    }`}
                   >
-                    {row.action}
-                  </td>
-                </tr>
-              ))}
+                    <td className="whitespace-nowrap px-2 py-1 text-dim">{row.dateTime}</td>
+                    <td className="px-2 py-1">{row.srcintf}</td>
+                    <td className="px-2 py-1">{row.src}</td>
+                    <td className="px-2 py-1">{row.dst}</td>
+                    <td className="px-2 py-1">{row.service}</td>
+                    <td className="px-2 py-1 text-center">
+                      <span
+                        className={`inline-block rounded-row px-1.5 py-0.5 text-[10px] font-bold ${
+                          denied ? 'bg-deny/15 text-deny' : 'bg-trace/15 text-trace'
+                        }`}
+                      >
+                        {denied ? '✕ DENY' : '✓ ACCEPT'}
+                      </span>
+                    </td>
+                    <td className="px-2 py-1 text-center text-dim">
+                      {row.policyId === 0 ? t('incident.implicit') : row.policyId}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
