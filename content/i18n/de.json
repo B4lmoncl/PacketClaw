@@ -20,7 +20,9 @@
     "mainMenu": "Hauptmenü",
     "chapters": "Kapitel",
     "endless": "Endlos",
-    "endlessSub": "Survival · 3 Leben · Highscore"
+    "endlessSub": "Survival · 3 Leben · Highscore",
+    "challenge": "Challenge",
+    "challengeSub": "Große Regelwerke auswerten · Filter üben"
   },
   "level": {
     "boss": "Boss",
@@ -294,5 +296,23 @@
     "serviceGroups": "Service-Gruppen",
     "vips": "Virtual IPs",
     "routes": "Routen"
+  },
+  "challenge": {
+    "title": "Challenge",
+    "intro": "Ein großes, gewachsenes Regelwerk mit Altlasten — tote und doppelte Regeln inklusive. Nutze Spaltenfilter und Objekt-Browser, um die schuldige Regel zu finden.",
+    "size": {
+      "small": {
+        "name": "Klein",
+        "sub": "16 Regeln · zum Aufwärmen"
+      },
+      "medium": {
+        "name": "Mittel",
+        "sub": "26 Regeln · Filter helfen"
+      },
+      "large": {
+        "name": "Groß",
+        "sub": "38 Regeln · ohne Filter chancenlos"
+      }
+    }
   }
 }

@@ -20,7 +20,9 @@
     "mainMenu": "Main menu",
     "chapters": "Chapters",
     "endless": "Endless",
-    "endlessSub": "Survival · 3 lives · highscore"
+    "endlessSub": "Survival · 3 lives · highscore",
+    "challenge": "Challenge",
+    "challengeSub": "Read large rulesets · practice filters"
   },
   "level": {
     "boss": "Boss",
@@ -294,5 +296,23 @@
     "serviceGroups": "Service Groups",
     "vips": "Virtual IPs",
     "routes": "Routes"
+  },
+  "challenge": {
+    "title": "Challenge",
+    "intro": "A large ruleset that grew over time — legacy, dead and duplicate rules included. Use the column filters and object browser to find the deciding rule.",
+    "size": {
+      "small": {
+        "name": "Small",
+        "sub": "16 rules · warm-up"
+      },
+      "medium": {
+        "name": "Medium",
+        "sub": "26 rules · filters help"
+      },
+      "large": {
+        "name": "Large",
+        "sub": "38 rules · hopeless without filters"
+      }
+    }
   }
 }

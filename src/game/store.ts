@@ -31,6 +31,7 @@ export type Screen =
   | { name: 'level'; levelId: string }
   | { name: 'daily' }
   | { name: 'endless' }
+  | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
   | { name: 'settings' };

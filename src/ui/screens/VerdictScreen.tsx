@@ -222,7 +222,11 @@ export function VerdictScreen({
           wrongAttempts={wrongAttempts}
           underTarget={allUnderTarget}
           totalSeconds={Math.round(totalSecondsRef.current)}
-          onBack={() => navigate({ name: 'chapter', chapter: level.chapter })}
+          onBack={() =>
+            navigate(
+              level.chapter === 0 ? { name: 'home' } : { name: 'chapter', chapter: level.chapter },
+            )
+          }
         />
       ) : (
         // Desktop (QuestHall-Breite): links Netz + Policy-Tabelle,
