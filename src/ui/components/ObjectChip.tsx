@@ -3,41 +3,41 @@
  * Hover/Fokus zeigt das Popover, Klick/Tap LOCKT es (bleibt offen, bekommt ✕;
  * Escape oder Klick außerhalb schließt). Im gelockten Popover sind Gruppen-
  * Mitglieder selbst hoverbar — verschachtelte Inspektion bis zum Wert.
+ *
+ * Das Popover wird per Portal (fixed, an der Chip-Position) gerendert, damit
+ * scrollende/overflow-Container (Spaltentabelle) es nicht abschneiden.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig } from '../../engine';
 import { resolveObjectInfo, type ObjectField, type ObjectInfo } from '../../game/objectInfo';
 
 type OpenState = 'closed' | 'hover' | 'locked';
+type Pos = { left: number; top: number };
 
-/** Schliesst bei Klick/Tap ausserhalb des Elements. */
-function useClickOutside(active: boolean, ref: React.RefObject<HTMLElement>, close: () => void) {
-  useEffect(() => {
-    if (!active) return;
-    const handler = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) close();
-    };
-    document.addEventListener('pointerdown', handler);
-    return () => document.removeEventListener('pointerdown', handler);
-  }, [active, ref, close]);
-}
+const POPOVER_BASE =
+  'block w-max max-w-[300px] cursor-default rounded-panel border bg-bg px-3 py-2 text-left shadow-[0_8px_24px_rgba(0,0,0,0.5)]';
 
-function InfoPopover({
+function PortalPopover({
+  pos,
   locked,
+  popRef,
   onClose,
   children,
 }: {
+  pos: Pos;
   locked: boolean;
+  popRef: React.RefObject<HTMLDivElement>;
   onClose: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <span
+  return createPortal(
+    <div
+      ref={popRef}
       role="tooltip"
-      className={`absolute left-0 top-full z-40 mt-1 block w-max max-w-[300px] cursor-default rounded-panel border bg-bg px-3 py-2 text-left shadow-[0_8px_24px_rgba(0,0,0,0.5)] ${
-        locked ? 'border-claw/60' : 'border-line'
-      }`}
+      style={{ position: 'fixed', left: pos.left, top: pos.top, zIndex: 60 }}
+      className={`${POPOVER_BASE} ${locked ? 'border-claw/60' : 'border-line'}`}
     >
       {locked && (
         <button
@@ -52,8 +52,28 @@ function InfoPopover({
         </button>
       )}
       {children}
-    </span>
+    </div>,
+    document.body,
   );
+}
+
+/** Klick/Tap ausserhalb von Anker UND Popover schliesst. */
+function useLockedClickOutside(
+  active: boolean,
+  anchor: React.RefObject<HTMLElement>,
+  pop: React.RefObject<HTMLElement>,
+  close: () => void,
+) {
+  useEffect(() => {
+    if (!active) return;
+    const handler = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (anchor.current?.contains(t) || pop.current?.contains(t)) return;
+      close();
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [active, anchor, pop, close]);
 }
 
 function ObjectInfoBody({
@@ -125,25 +145,32 @@ function ObjectValue({
   name: string;
 }) {
   const [state, setState] = useState<OpenState>('closed');
-  const wrapRef = useRef<HTMLSpanElement>(null);
-  useClickOutside(state === 'locked', wrapRef, () => setState('closed'));
+  const [pos, setPos] = useState<Pos | null>(null);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  useLockedClickOutside(state === 'locked', anchorRef, popRef, () => setState('closed'));
+
   const open = state !== 'closed';
   const info = useMemo(
     () => (open ? resolveObjectInfo(network, field, name) : null),
     [open, network, field, name],
   );
   const inspectable = !(field === 'srcintf' || field === 'dstintf') || name !== 'any';
-
   if (!inspectable) return <span className="font-mono text-[11px]">{name}</span>;
+
+  const openAt = (next: OpenState) => {
+    const r = anchorRef.current?.getBoundingClientRect();
+    if (r) setPos({ left: r.left, top: r.bottom + 4 });
+    setState(next);
+  };
 
   return (
     <span
-      ref={wrapRef}
       className="relative inline-block"
-      onMouseEnter={() => setState((s) => (s === 'closed' ? 'hover' : s))}
-      onMouseLeave={() => setState((s) => (s === 'hover' ? 'closed' : s))}
-      onFocus={() => setState((s) => (s === 'closed' ? 'hover' : s))}
-      onBlur={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onMouseEnter={() => state === 'closed' && openAt('hover')}
+      onMouseLeave={() => state === 'hover' && setState('closed')}
+      onFocus={() => state === 'closed' && openAt('hover')}
+      onBlur={() => state === 'hover' && setState('closed')}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           e.stopPropagation();
@@ -152,6 +179,7 @@ function ObjectValue({
       }}
     >
       <span
+        ref={anchorRef}
         tabIndex={0}
         className={`cursor-help font-mono text-[11px] underline decoration-dotted underline-offset-2 focus-visible:outline focus-visible:outline-1 focus-visible:outline-claw ${
           state === 'locked' ? 'decoration-claw text-ink' : 'decoration-line hover:decoration-ink'
@@ -160,15 +188,21 @@ function ObjectValue({
           // Klick/Tap: locken bzw. wieder loesen — waehlt NICHT die Zeile aus
           e.stopPropagation();
           e.preventDefault();
-          setState((s) => (s === 'locked' ? 'closed' : 'locked'));
+          if (state === 'locked') setState('closed');
+          else openAt('locked');
         }}
       >
         {name}
       </span>
-      {open && info && (
-        <InfoPopover locked={state === 'locked'} onClose={() => setState('closed')}>
+      {open && info && pos && (
+        <PortalPopover
+          pos={pos}
+          locked={state === 'locked'}
+          popRef={popRef}
+          onClose={() => setState('closed')}
+        >
           <ObjectInfoBody info={info} network={network} field={field} nested={state === 'locked'} />
-        </InfoPopover>
+        </PortalPopover>
       )}
     </span>
   );
@@ -241,28 +275,38 @@ export function InfoChip({
 }) {
   const { t } = useTranslation();
   const [state, setState] = useState<OpenState>('closed');
-  const wrapRef = useRef<HTMLSpanElement>(null);
-  useClickOutside(state === 'locked', wrapRef, () => setState('closed'));
+  const [pos, setPos] = useState<Pos | null>(null);
+  const anchorRef = useRef<HTMLSpanElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  useLockedClickOutside(state === 'locked', anchorRef, popRef, () => setState('closed'));
+
+  const openAt = (next: OpenState) => {
+    const r = anchorRef.current?.getBoundingClientRect();
+    if (r) setPos({ left: r.left, top: r.bottom + 4 });
+    setState(next);
+  };
+
   return (
     <span
-      ref={wrapRef}
-      className={`relative inline-flex items-baseline gap-1 rounded-row border px-1.5 py-0.5 transition-colors ${
+      className={`inline-flex items-baseline gap-1 rounded-row border px-1.5 py-0.5 transition-colors ${
         failed ? 'border-deny bg-deny/20 text-deny' : 'border-line/60 text-ink/90'
       }`}
-      onMouseEnter={() => setState((s) => (s === 'closed' ? 'hover' : s))}
-      onMouseLeave={() => setState((s) => (s === 'hover' ? 'closed' : s))}
-      onFocus={() => setState((s) => (s === 'closed' ? 'hover' : s))}
-      onBlur={() => setState((s) => (s === 'hover' ? 'closed' : s))}
+      onMouseEnter={() => state === 'closed' && openAt('hover')}
+      onMouseLeave={() => state === 'hover' && setState('closed')}
+      onFocus={() => state === 'closed' && openAt('hover')}
+      onBlur={() => state === 'hover' && setState('closed')}
       onKeyDown={(e) => e.key === 'Escape' && setState('closed')}
     >
-      <span className="text-[8px] uppercase tracking-wide text-dim">{label}</span>
+      {label && <span className="text-[8px] uppercase tracking-wide text-dim">{label}</span>}
       <span
+        ref={anchorRef}
         tabIndex={0}
         className="cursor-help font-mono text-[11px] underline decoration-dotted decoration-line underline-offset-2"
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          setState((s) => (s === 'locked' ? 'closed' : 'locked'));
+          if (state === 'locked') setState('closed');
+          else openAt('locked');
         }}
       >
         {value}
@@ -272,12 +316,17 @@ export function InfoChip({
           ✕
         </span>
       )}
-      {state !== 'closed' && (
-        <InfoPopover locked={state === 'locked'} onClose={() => setState('closed')}>
+      {state !== 'closed' && pos && (
+        <PortalPopover
+          pos={pos}
+          locked={state === 'locked'}
+          popRef={popRef}
+          onClose={() => setState('closed')}
+        >
           <span className="block max-w-[240px] pr-3 text-[10px] leading-snug text-dim">
             {t(infoKey)}
           </span>
-        </InfoPopover>
+        </PortalPopover>
       )}
     </span>
   );
