@@ -71,7 +71,14 @@
     "filterNoMatch": "Keine Policy passt auf den Filter — Implicit Deny bleibt sichtbar.",
     "filterField": "Filter-Feld",
     "filterValue": "Wert …",
-    "addFilter": "Feld-Filter hinzufügen"
+    "addFilter": "Feld-Filter hinzufügen",
+    "status": "Status",
+    "val": {
+      "accept": "ACCEPT",
+      "deny": "DENY",
+      "enabled": "aktiviert",
+      "disabled": "deaktiviert"
+    }
   },
   "debrief": {
     "title": "Debrief",

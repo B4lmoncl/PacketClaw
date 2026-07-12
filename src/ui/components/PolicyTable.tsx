@@ -165,8 +165,13 @@ function PolicyRow({
   );
 }
 
-/** Spaltenfilter wie im FortiGate-GUI: Feld + Wert, additiv (UND-verknuepft). */
-type FilterField = 'srcaddr' | 'dstaddr' | 'service' | 'srcintf' | 'dstintf' | 'action' | 'name';
+/**
+ * Spaltenfilter wie im FortiGate-GUI: erst die Spalte waehlen, dann ein
+ * KONKRETES Objekt aus der Config (Dropdown, kein Freitext). Mehrere Filter
+ * sind additiv (UND) und matchen exakt auf den Objektnamen in der Policy —
+ * genau wie der "Add Filter"-Builder in FortiOS.
+ */
+type FilterField = 'srcaddr' | 'dstaddr' | 'service' | 'srcintf' | 'dstintf' | 'action' | 'status';
 
 const FILTER_FIELDS: FilterField[] = [
   'srcaddr',
@@ -175,29 +180,64 @@ const FILTER_FIELDS: FilterField[] = [
   'srcintf',
   'dstintf',
   'action',
-  'name',
+  'status',
 ];
 
 interface FieldFilter {
   field: FilterField;
-  q: string;
+  value: string;
 }
 
-function fieldValues(policy: Policy, field: FilterField): string[] {
+/** Auswaehlbare Werte je Spalte: die real in der Config vorhandenen Objekte. */
+function valueOptions(field: FilterField, network: NetworkConfig): string[] {
+  const uniq = (xs: string[]) => Array.from(new Set(xs));
   switch (field) {
-    case 'name':
-      return [policy.name, String(policy.id)];
+    case 'srcaddr':
+      return uniq([
+        'all',
+        ...network.addresses.map((a) => a.name),
+        ...network.addressGroups.map((g) => g.name),
+      ]);
+    case 'dstaddr':
+      return uniq([
+        'all',
+        ...network.addresses.map((a) => a.name),
+        ...network.addressGroups.map((g) => g.name),
+        ...network.vips.map((v) => v.name),
+      ]);
+    case 'service':
+      return uniq([
+        'ALL',
+        ...network.services.map((s) => s.name),
+        ...network.serviceGroups.map((g) => g.name),
+      ]);
+    case 'srcintf':
+    case 'dstintf':
+      return uniq([
+        'any',
+        ...network.interfaces.map((i) => i.name),
+        ...network.zones.map((z) => z.name),
+      ]);
     case 'action':
-      return [policy.action];
+      return ['accept', 'deny'];
+    case 'status':
+      return ['enabled', 'disabled'];
+  }
+}
+
+function policyPassesFilter(policy: Policy, { field, value }: FieldFilter): boolean {
+  switch (field) {
+    case 'action':
+      return policy.action === value;
+    case 'status':
+      return value === 'enabled' ? policy.enabled : !policy.enabled;
     default:
-      return policy[field];
+      return policy[field].includes(value);
   }
 }
 
 function matchesFieldFilters(policy: Policy, filters: FieldFilter[]): boolean {
-  return filters.every(({ field, q }) =>
-    fieldValues(policy, field).some((v) => v.toLowerCase().includes(q)),
-  );
+  return filters.every((f) => policyPassesFilter(policy, f));
 }
 
 /** Freitext-Filter wie im FortiGate-GUI: alle Tokens muessen irgendwo passen. */
@@ -230,18 +270,22 @@ export function PolicyTable({
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FieldFilter[]>([]);
   const [draftField, setDraftField] = useState<FilterField>('srcaddr');
-  const [draftQ, setDraftQ] = useState('');
+  const [draftValue, setDraftValue] = useState('');
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
   const filtering = tokens.length > 0 || filters.length > 0;
   const visiblePolicies = !filtering
     ? network.policies
     : network.policies.filter((p) => policyMatches(p, tokens) && matchesFieldFilters(p, filters));
 
+  const draftOptions = valueOptions(draftField, network);
+  const draftValueOrFirst = draftValue || draftOptions[0] || '';
   const addFilter = () => {
-    const q = draftQ.trim().toLowerCase();
-    if (!q) return;
-    setFilters((f) => [...f, { field: draftField, q }]);
-    setDraftQ('');
+    if (!draftValueOrFirst) return;
+    setFilters((f) =>
+      f.some((x) => x.field === draftField && x.value === draftValueOrFirst)
+        ? f
+        : [...f, { field: draftField, value: draftValueOrFirst }],
+    );
   };
   const implicitHighlight = highlights?.get(0) ?? { state: 'idle' as RowState };
   const implicitSelected = selectedId === 0;
@@ -270,7 +314,10 @@ export function PolicyTable({
           />
           <select
             value={draftField}
-            onChange={(e) => setDraftField(e.target.value as FilterField)}
+            onChange={(e) => {
+              setDraftField(e.target.value as FilterField);
+              setDraftValue('');
+            }}
             aria-label={t('policyTable.filterField')}
             className="shrink-0 rounded-row border border-line bg-bg px-1.5 py-1.5 font-mono text-[11px] text-dim"
           >
@@ -280,21 +327,24 @@ export function PolicyTable({
               </option>
             ))}
           </select>
-          <input
-            value={draftQ}
-            onChange={(e) => setDraftQ(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addFilter()}
-            placeholder={t('policyTable.filterValue')}
+          <select
+            value={draftValueOrFirst}
+            onChange={(e) => setDraftValue(e.target.value)}
             aria-label={t('policyTable.filterValue')}
-            className="w-28 shrink-0 rounded-row border border-line bg-bg px-2 py-1.5 font-mono text-xs text-ink placeholder:text-dim/60 focus:border-claw/60 focus:outline-none"
-          />
+            className="w-32 shrink-0 rounded-row border border-line bg-bg px-1.5 py-1.5 font-mono text-[11px] text-ink"
+          >
+            {draftOptions.map((v) => (
+              <option key={v} value={v}>
+                {draftField === 'action' || draftField === 'status' ? t(`policyTable.val.${v}`) : v}
+              </option>
+            ))}
+          </select>
           <button
             onClick={addFilter}
-            disabled={!draftQ.trim()}
-            className="shrink-0 rounded-row border border-line px-2 py-1 text-xs text-dim hover:text-ink disabled:opacity-40"
+            className="shrink-0 rounded-row border border-line px-2 py-1 text-xs text-dim hover:text-ink"
             aria-label={t('policyTable.addFilter')}
           >
-            +
+            {t('policyTable.addFilter')}
           </button>
           {filtering && (
             <span className="shrink-0 font-mono text-[10px] tabular-nums text-dim">
@@ -307,7 +357,7 @@ export function PolicyTable({
         <div className="mb-1 flex flex-wrap items-center gap-1.5">
           {filters.map((f, i) => (
             <button
-              key={`${f.field}-${f.q}-${i}`}
+              key={`${f.field}-${f.value}-${i}`}
               onClick={() => setFilters((all) => all.filter((_, j) => j !== i))}
               className="inline-flex items-baseline gap-1 rounded-row border border-claw/50 bg-claw/10 px-1.5 py-0.5 font-mono text-[11px] text-ink hover:bg-claw/20"
               title={t('policyTable.filterClear')}
@@ -315,7 +365,9 @@ export function PolicyTable({
               <span className="text-[8px] uppercase tracking-wide text-claw">
                 {t(`policyTable.${f.field}`)}
               </span>
-              {f.q}
+              {f.field === 'action' || f.field === 'status'
+                ? t(`policyTable.val.${f.value}`)
+                : f.value}
               <span aria-hidden className="text-dim">
                 ✕
               </span>
