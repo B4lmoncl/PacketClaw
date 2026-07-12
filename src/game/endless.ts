@@ -81,7 +81,8 @@ export function generateEndlessRound(seed: string, round: number): EndlessRound 
     policies,
   });
 
-  const wanted: Outcome = (['accept', 'deny', 'implicit'] as const)[(round - 1) % 3];
+  const rotation: Outcome[] = ['accept', 'deny', 'implicit'];
+  const wanted: Outcome = rotation[(round - 1) % 3] ?? 'accept';
   let packet: Packet | null = null;
   const seen: Partial<Record<Outcome, Packet>> = {};
   for (let attempt = 0; attempt < 200 && !packet; attempt++) {

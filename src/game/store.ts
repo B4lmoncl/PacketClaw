@@ -30,9 +30,16 @@ export type Screen =
   | { name: 'chapter'; chapter: number }
   | { name: 'level'; levelId: string }
   | { name: 'daily' }
+  | { name: 'endless' }
   | { name: 'sandbox' }
   | { name: 'profile' }
   | { name: 'settings' };
+
+/** Bestwert im Endlos-Modus (überstandene Runden + Score). */
+export interface EndlessBest {
+  rounds: number;
+  score: number;
+}
 
 interface GameState {
   // --- persistiert (Savegame) ---
@@ -42,6 +49,7 @@ interface GameState {
   bestScores: Record<string, number>;
   /** Daily-Historie: Datum → Ergebnis pro Paket */
   dailyHistory: Record<string, boolean[]>;
+  endlessBest: EndlessBest;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -57,6 +65,7 @@ interface GameState {
   navigate(screen: Screen): void;
   recordLevelResult(levelId: string, stars: number, score: number): void;
   recordDaily(date: string, results: boolean[], score: number): void;
+  recordEndless(rounds: number, score: number): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -74,6 +83,7 @@ export const useGame = create<GameState>()(
       stars: {},
       bestScores: {},
       dailyHistory: {},
+      endlessBest: { rounds: 0, score: 0 },
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -132,6 +142,23 @@ export const useGame = create<GameState>()(
           };
         }),
 
+      recordEndless: (rounds, score) =>
+        set((state) => {
+          const xp = state.xp + score;
+          const best: EndlessBest =
+            score > state.endlessBest.score ? { rounds, score } : state.endlessBest;
+          const unlocked = evaluateAchievements(
+            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            endlessBest: best,
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
       bumpStats: (increments, maxima = {}) =>
         set((state) => {
           const stats = { ...state.stats };
@@ -171,6 +198,7 @@ export const useGame = create<GameState>()(
           stars,
           bestScores,
           dailyHistory,
+          endlessBest,
           stats,
           achievements,
           streak,
@@ -184,6 +212,7 @@ export const useGame = create<GameState>()(
             stars,
             bestScores,
             dailyHistory,
+            endlessBest,
             stats,
             achievements,
             streak,
@@ -222,6 +251,7 @@ export const useGame = create<GameState>()(
         stars: state.stars,
         bestScores: state.bestScores,
         dailyHistory: state.dailyHistory,
+        endlessBest: state.endlessBest,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -246,6 +276,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   stars: Record<string, number>;
   bestScores: Record<string, number>;
   dailyHistory: Record<string, boolean[]>;
+  endlessBest: EndlessBest;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -259,6 +290,11 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     stars: (save.stars as Record<string, number>) ?? {},
     bestScores: (save.bestScores as Record<string, number>) ?? {},
     dailyHistory: (save.dailyHistory as Record<string, boolean[]>) ?? {},
+    endlessBest: {
+      rounds: 0,
+      score: 0,
+      ...((save.endlessBest as Partial<EndlessBest> | null) ?? {}),
+    },
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

@@ -18,7 +18,9 @@
     "dailySub": "10 packets · seeded · same for everyone",
     "sandboxSub": "Your own network, your own rules, free fire",
     "mainMenu": "Main menu",
-    "chapters": "Chapters"
+    "chapters": "Chapters",
+    "endless": "Endless",
+    "endlessSub": "Survival · 3 lives · highscore"
   },
   "level": {
     "boss": "Boss",
@@ -258,5 +260,17 @@
     "inZone": "Zone: {{zone}}",
     "schedule": "Mon–Fri 08:00–17:59 (wall clock). Outside of that the rule does not match.",
     "nat": "SNAT: the source IP is rewritten to the egress interface IP on the way out."
+  },
+  "endless": {
+    "title": "Endless",
+    "sub": "Survival · rising difficulty · 3 lives",
+    "round": "Round",
+    "lives": "Lives",
+    "score": "Score",
+    "best": "Best",
+    "gameOver": "Game Over",
+    "roundsSurvived": "rounds survived",
+    "newBest": "New best! 🎉",
+    "again": "Play again"
   }
 }
