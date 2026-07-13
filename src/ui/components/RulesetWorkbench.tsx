@@ -26,6 +26,10 @@ interface RulesetWorkbenchProps {
   onSelect?: (policyId: number) => void;
   /** Werkzeuge ausblenden (reine Anzeige, z. B. nach Lösung) */
   readonly?: boolean;
+  /** Externe Zeilen-Highlights (z. B. Packet Descent in der Sandbox);
+   *  ein aktiver Policy Lookup gewinnt, solange er gesetzt ist */
+  highlights?: ReadonlyMap<number, RowHighlight>;
+  chipRow?: number | null;
 }
 
 export function RulesetWorkbench({
@@ -36,6 +40,8 @@ export function RulesetWorkbench({
   selectedId = null,
   onSelect,
   readonly = false,
+  highlights,
+  chipRow = null,
 }: RulesetWorkbenchProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState<Policy | 'new' | null>(null);
@@ -94,7 +100,8 @@ export function RulesetWorkbench({
     <div className="flex flex-col gap-2">
       <PolicyTable
         network={config}
-        highlights={lookupHighlights}
+        highlights={lookupHighlights ?? highlights}
+        chipRow={chipRow}
         selectable={selectMode}
         selectedId={selectedId}
         onSelect={onSelect}

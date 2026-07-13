@@ -12,7 +12,6 @@ import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { ObjectBrowser } from '../components/ObjectBrowser';
-import { PolicyTable } from '../components/PolicyTable';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
 import { useDescent } from '../hooks/useDescent';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
@@ -238,8 +237,19 @@ export function SandboxScreen() {
 
       {firedPacket && <PacketCard packet={firedPacket} />}
 
-      <PolicyTable network={network} highlights={descent.highlights} chipRow={descent.chipRow} />
-      <ObjectBrowser network={network} />
+      {/* Eine Tabelle wie auf der echten FortiGate: Descent-Highlights und
+          Bearbeitung teilen sich dieselbe Werkbank-Tabelle */}
+      <RulesetWorkbench
+        network={network}
+        policies={network.policies}
+        highlights={descent.highlights}
+        chipRow={descent.chipRow}
+        onChange={(policies) => {
+          setNetwork((n) => ({ ...n, policies }));
+          setVerdict(null);
+          descent.reset();
+        }}
+      />
 
       {verdict && showTrace && (
         <Debrief
@@ -259,15 +269,7 @@ export function SandboxScreen() {
         />
       )}
 
-      <RulesetWorkbench
-        network={network}
-        policies={network.policies}
-        onChange={(policies) => {
-          setNetwork((n) => ({ ...n, policies }));
-          setVerdict(null);
-          descent.reset();
-        }}
-      />
+      <ObjectBrowser network={network} />
     </div>
   );
 }

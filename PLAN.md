@@ -254,3 +254,11 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Auswahl persistiert in localStorage ('packetclaw-columns'), Reset
   stellt den Standard wieder her. Playwright-Smoke: NAT ausblenden,
   Reload-Persistenz, Reset. Tests: 206 gruen.
+- 2026-07-13 (Forts. 7): Profil zeigt Endless-Bestwert (Runden+Punkte, 4. Kennzahl-Karte). Sandbox aufgeraeumt: statt zwei Policy-Tabellen
+  (Standalone + Werkbank) gibt es wie auf der echten FortiGate nur noch
+  EINE — RulesetWorkbench nimmt jetzt optionale highlights/chipRow
+  entgegen, die Descent-Animation laeuft in der Werkbank-Tabelle, ein
+  aktiver Policy Lookup gewinnt solange er gesetzt ist. Damit hat die
+  Sandbox auch Lookup + Rechtsklick-Kontextmenue. Playwright-Smoke:
+  genau 1 Tabelle, Lookup sichtbar, Fire ohne Konsolenfehler.
+  Tests: 206 gruen.
