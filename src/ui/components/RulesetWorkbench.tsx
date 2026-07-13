@@ -30,6 +30,8 @@ interface RulesetWorkbenchProps {
    *  ein aktiver Policy Lookup gewinnt, solange er gesetzt ist */
   highlights?: ReadonlyMap<number, RowHighlight>;
   chipRow?: number | null;
+  /** Hit-Zähler je Policy-ID (FortiOS-Hits-Spalte) */
+  hitCounts?: ReadonlyMap<number, number>;
 }
 
 export function RulesetWorkbench({
@@ -42,6 +44,7 @@ export function RulesetWorkbench({
   readonly = false,
   highlights,
   chipRow = null,
+  hitCounts,
 }: RulesetWorkbenchProps) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState<Policy | 'new' | null>(null);
@@ -102,6 +105,7 @@ export function RulesetWorkbench({
         network={config}
         highlights={lookupHighlights ?? highlights}
         chipRow={chipRow}
+        hitCounts={hitCounts}
         selectable={selectMode}
         selectedId={selectedId}
         onSelect={onSelect}

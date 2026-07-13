@@ -101,7 +101,8 @@
     },
     "configureTable": "Configure table",
     "resetColumns": "Reset to default",
-    "noLabel": "No label"
+    "noLabel": "No label",
+    "hits": "Hits"
   },
   "debrief": {
     "title": "Debrief",

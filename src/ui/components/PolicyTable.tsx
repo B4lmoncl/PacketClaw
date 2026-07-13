@@ -27,6 +27,9 @@ interface PolicyTableProps {
   onSelect?: (policyId: number) => void;
   /** Rechtsklick auf eine Policy-Zeile (FortiOS-Kontextmenü in der Werkbank) */
   onRowContextMenu?: (policyId: number, e: React.MouseEvent) => void;
+  /** Hit-Zähler je Policy-ID (0 = Implicit Deny) — blendet die Hits-Spalte ein,
+   *  mit der man wie in FortiOS tote Regeln (0 Hits) aufspürt */
+  hitCounts?: ReadonlyMap<number, number>;
 }
 
 const ROW_STATE_CLASSES: Record<RowState, string> = {
@@ -193,7 +196,8 @@ type ColKey =
   | 'schedule'
   | 'service'
   | 'action'
-  | 'nat';
+  | 'nat'
+  | 'hits';
 
 const ALL_COLS: ColKey[] = [
   'id',
@@ -206,6 +210,7 @@ const ALL_COLS: ColKey[] = [
   'service',
   'action',
   'nat',
+  'hits',
 ];
 
 const COL_TMPL: Record<ColKey, string> = {
@@ -219,6 +224,7 @@ const COL_TMPL: Record<ColKey, string> = {
   service: 'minmax(90px,1fr)',
   action: 'minmax(74px,0.7fr)',
   nat: 'minmax(50px,0.55fr)',
+  hits: 'minmax(44px,0.5fr)',
 };
 
 const GRID_BASE = 'grid items-center gap-2';
@@ -506,10 +512,12 @@ function ColumnHeader({
  * Name bleibt immer sichtbar; Reset stellt den Standard wieder her.
  */
 function ColumnConfig({
+  cols,
   hidden,
   onToggle,
   onReset,
 }: {
+  cols: ColKey[];
   hidden: ReadonlySet<ColKey>;
   onToggle: (col: ColKey) => void;
   onReset: () => void;
@@ -569,7 +577,7 @@ function ColumnConfig({
             <div className="px-2 py-1 font-mono text-[9px] uppercase tracking-wide text-dim">
               {t('policyTable.configureTable')}
             </div>
-            {ALL_COLS.map((col) => (
+            {cols.map((col) => (
               <label
                 key={col}
                 className={`flex w-full items-center gap-2 rounded-row px-2 py-1 font-mono text-[11px] ${
@@ -626,6 +634,7 @@ function PolicyColumnsRow({
   onContextMenu,
   visibleCols,
   gridStyle,
+  hit,
 }: {
   policy: Policy;
   network: NetworkConfig;
@@ -637,6 +646,7 @@ function PolicyColumnsRow({
   onContextMenu?: (e: React.MouseEvent) => void;
   visibleCols: ColKey[];
   gridStyle: React.CSSProperties;
+  hit?: number;
 }) {
   const { t } = useTranslation();
   const failed = (field: MatchField) =>
@@ -717,6 +727,19 @@ function PolicyColumnsRow({
             ) : (
               <span className="text-dim/50">—</span>
             )}
+          </div>
+        );
+      case 'hits':
+        // 0 Hits = Kandidat fuer den Muell — dezent hervorheben wie beim Audit
+        return (
+          <div
+            key={col}
+            role="cell"
+            className={`font-mono text-[11px] tabular-nums ${
+              (hit ?? 0) === 0 ? 'text-warn/80' : 'text-ink/90'
+            }`}
+          >
+            {hit ?? 0}
           </div>
         );
     }
@@ -899,6 +922,7 @@ export function PolicyTable({
   selectedId = null,
   onSelect,
   onRowContextMenu,
+  hitCounts,
 }: PolicyTableProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
@@ -907,9 +931,17 @@ export function PolicyTable({
   // Sequence Grouping View zeigt Abschnitts-Header bei jedem Label-Wechsel
   const [view, setView] = useState<'sequence' | 'pairs' | 'groups'>('sequence');
   const [collapsedPairs, setCollapsedPairs] = useState<ReadonlySet<string>>(new Set());
-  // Spaltenkonfiguration (Zahnrad wie FortiOS) — ueberlebt Reloads
+  // Spaltenkonfiguration (Zahnrad wie FortiOS) — ueberlebt Reloads;
+  // die Hits-Spalte existiert nur, wenn Zaehler geliefert werden
   const [hiddenCols, setHiddenCols] = useState<ReadonlySet<ColKey>>(loadHiddenCols);
-  const visibleCols = useMemo(() => ALL_COLS.filter((c) => !hiddenCols.has(c)), [hiddenCols]);
+  const availableCols = useMemo(
+    () => ALL_COLS.filter((c) => c !== 'hits' || hitCounts !== undefined),
+    [hitCounts],
+  );
+  const visibleCols = useMemo(
+    () => availableCols.filter((c) => !hiddenCols.has(c)),
+    [availableCols, hiddenCols],
+  );
   const gridStyle = useMemo(() => gridStyleFor(visibleCols), [visibleCols]);
   const setAndStoreHidden = (next: ReadonlySet<ColKey>) => {
     setHiddenCols(next);
@@ -1188,6 +1220,7 @@ export function PolicyTable({
             {t('policyTable.view.groups')}
           </button>
           <ColumnConfig
+            cols={availableCols}
             hidden={hiddenCols}
             onToggle={toggleCol}
             onReset={() => setAndStoreHidden(new Set())}
@@ -1218,6 +1251,7 @@ export function PolicyTable({
                       onContextMenu={rowMenu?.(policy.id)}
                       visibleCols={visibleCols}
                       gridStyle={gridStyle}
+                      hit={hitCounts?.get(policy.id) ?? (hitCounts ? 0 : undefined)}
                     />
                   ))
                 : (view === 'pairs'
@@ -1252,6 +1286,7 @@ export function PolicyTable({
                             onContextMenu={rowMenu?.(policy.id)}
                             visibleCols={visibleCols}
                             gridStyle={gridStyle}
+                            hit={hitCounts?.get(policy.id) ?? (hitCounts ? 0 : undefined)}
                           />
                         ))}
                     </div>
@@ -1310,6 +1345,16 @@ export function PolicyTable({
                     return (
                       <div key={col} role="cell" className="text-dim/50">
                         —
+                      </div>
+                    );
+                  if (col === 'hits')
+                    return (
+                      <div
+                        key={col}
+                        role="cell"
+                        className="font-mono text-[11px] tabular-nums text-ink/90"
+                      >
+                        {hitCounts?.get(0) ?? 0}
                       </div>
                     );
                   return <div key={col} role="cell" />;

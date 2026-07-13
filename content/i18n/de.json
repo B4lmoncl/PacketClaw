@@ -101,7 +101,8 @@
     },
     "configureTable": "Tabelle anpassen",
     "resetColumns": "Standard wiederherstellen",
-    "noLabel": "Ohne Label"
+    "noLabel": "Ohne Label",
+    "hits": "Hits"
   },
   "debrief": {
     "title": "Debrief",

@@ -71,6 +71,9 @@ export function SandboxScreen() {
   const [firedPacket, setFiredPacket] = useState<Packet | null>(null);
   const [showTrace, setShowTrace] = useState(false);
   const [importError, setImportError] = useState(false);
+  // Hits-Spalte wie FortiOS: kumuliert ueber alle gefeuerten Pakete;
+  // Regelwerk-Aenderung setzt die Zaehler zurueck (wie nach Config-Change)
+  const [hitCounts, setHitCounts] = useState<ReadonlyMap<number, number>>(new Map());
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Testpaket-Formular
@@ -94,6 +97,11 @@ export function SandboxScreen() {
     try {
       const result = evaluate(packet, network);
       bumpStats({ sandboxFired: 1 });
+      setHitCounts((prev) => {
+        const next = new Map(prev);
+        next.set(result.matchedPolicyId, (next.get(result.matchedPolicyId) ?? 0) + 1);
+        return next;
+      });
       setFiredPacket(packet);
       setVerdict(result);
       setShowTrace(false);
@@ -244,9 +252,11 @@ export function SandboxScreen() {
         policies={network.policies}
         highlights={descent.highlights}
         chipRow={descent.chipRow}
+        hitCounts={hitCounts}
         onChange={(policies) => {
           setNetwork((n) => ({ ...n, policies }));
           setVerdict(null);
+          setHitCounts(new Map());
           descent.reset();
         }}
       />

@@ -59,6 +59,18 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
   const log = useForwardLog(level);
   const config: NetworkConfig = { ...level.network, policies };
 
+  // Hits-Spalte wie FortiOS: wie oft matcht jede Regel den Log-Traffic —
+  // 0 Hits gegen das AKTUELLE Regelwerk = Kandidat fuers Aufraeumen
+  const hitCounts = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const packet of level.logPackets) {
+      const verdict = evaluate(packet, config);
+      counts.set(verdict.matchedPolicyId, (counts.get(verdict.matchedPolicyId) ?? 0) + 1);
+    }
+    return counts;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level, policies]);
+
   function check() {
     const failing = level.suite.filter((tp) => !matchesExpectation(tp, config));
     if (failing.length > 0) {
@@ -175,6 +187,7 @@ export function IncidentScreen({ level }: { level: IncidentLevel }) {
       <RulesetWorkbench
         network={level.network}
         policies={policies}
+        hitCounts={hitCounts}
         onChange={(next, cost) => {
           setPolicies(next);
           setEdits((e) => e + cost);
