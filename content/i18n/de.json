@@ -216,7 +216,8 @@
       "rare": "selten",
       "epic": "episch",
       "legendary": "legendär"
-    }
+    },
+    "endlessBest": "Endlos-Bestwert (Runden)"
   },
   "settings": {
     "title": "Einstellungen",

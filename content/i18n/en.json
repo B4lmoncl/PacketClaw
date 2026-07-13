@@ -216,7 +216,8 @@
       "rare": "rare",
       "epic": "epic",
       "legendary": "legendary"
-    }
+    },
+    "endlessBest": "Endless best (rounds)"
   },
   "settings": {
     "title": "Settings",
