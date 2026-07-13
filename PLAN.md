@@ -300,3 +300,13 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Home-Karte, Profil-Kachel, Done-Panel mit Konfetti + XpGain,
   Timer-Balken, Mobile-Daumen-Buttons. Playwright: volle 60s-Runde
   durchgespielt (Done-Panel, Summary, XP, Restart). Tests: 206 gruen.
+- 2026-07-13 (Forts. 11): Zweiter Casual-Modus MATCH-CHECK: 45
+  Sekunden, pro Frage EINE Regel + EIN Paket — "matcht das?".
+  Wahrheit: evaluate() ueber ein Ein-Regel-Netz; bei "kein Match"
+  liefert der Engine-Trace das scheiternde Feld (policy-no-match →
+  failedField), das im Feedback rot aufleuchtet (vorhandenes
+  failed-Cell-Rendering). Fragen wechseln Match/Kein-Match ab,
+  Pakete ohne Route werden verworfen. matchBest im Save
+  (Store/Migration/Export/Sync), Home-Karte, gleiche Punktelogik wie
+  Blitz. Playwright: 1-Regel-Tabelle, 10 Antworten ohne Fehler.
+  Tests: 206 gruen.

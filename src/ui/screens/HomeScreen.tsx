@@ -65,6 +65,17 @@ export function HomeScreen() {
         </button>
 
         <button
+          onClick={() => navigate({ name: 'matchcheck' })}
+          className="group flex items-center justify-between rounded-panel border border-trace/50 bg-panel px-5 py-4 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:bg-trace/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-trace"
+        >
+          <div>
+            <div className="font-display text-lg font-bold text-ink">🎯 {t('nav.matchcheck')}</div>
+            <div className="font-mono text-xs text-dim">{t('nav.matchcheckSub')}</div>
+          </div>
+          <span className="text-trace transition-transform group-hover:translate-x-1">→</span>
+        </button>
+
+        <button
           onClick={() => navigate({ name: 'challenge' })}
           className="group flex items-center justify-between rounded-panel border border-warn/50 bg-panel px-5 py-4 text-left transition-[background-color,transform] duration-200 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 hover:bg-warn/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-warn"
         >

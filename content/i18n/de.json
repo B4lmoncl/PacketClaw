@@ -24,7 +24,9 @@
     "challenge": "Challenge",
     "challengeSub": "Große Regelwerke auswerten · Filter üben",
     "blitz": "Blitz",
-    "blitzSub": "60 Sekunden — Accept oder Deny, so schnell du kannst"
+    "blitzSub": "60 Sekunden — Accept oder Deny, so schnell du kannst",
+    "matchcheck": "Match-Check",
+    "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?"
   },
   "level": {
     "boss": "Boss",
@@ -375,5 +377,12 @@
     "summary": "{{correct}} von {{total}} richtig",
     "newBest": "Neuer Bestwert",
     "again": "Nochmal"
+  },
+  "matchcheck": {
+    "title": "Match-Check",
+    "intro": "Eine Regel, ein Paket, 45 Sekunden. Entscheide: matcht diese Regel dieses Paket? Wenn nicht, leuchtet nach deiner Antwort das Feld rot, an dem es scheitert — Interfaces, Adressen, Service oder Schedule.",
+    "matches": "Matcht",
+    "noMatch": "Kein Match",
+    "question": "Matcht diese Regel dieses Paket?"
   }
 }

@@ -24,7 +24,9 @@
     "challenge": "Challenge",
     "challengeSub": "Read large rulesets · practice filters",
     "blitz": "Blitz",
-    "blitzSub": "60 seconds — accept or deny, as fast as you can"
+    "blitzSub": "60 seconds — accept or deny, as fast as you can",
+    "matchcheck": "Match Check",
+    "matchcheckSub": "45 seconds — one rule, one packet: does it match?"
   },
   "level": {
     "boss": "Boss",
@@ -375,5 +377,12 @@
     "summary": "{{correct}} of {{total}} correct",
     "newBest": "New best score",
     "again": "Play again"
+  },
+  "matchcheck": {
+    "title": "Match Check",
+    "intro": "One rule, one packet, 45 seconds. Decide: does this rule match this packet? When it does not, the failing field lights up red after your answer — interfaces, addresses, service or schedule.",
+    "matches": "Matches",
+    "noMatch": "No match",
+    "question": "Does this rule match this packet?"
   }
 }
