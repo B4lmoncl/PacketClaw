@@ -22,7 +22,9 @@
     "endless": "Endlos",
     "endlessSub": "Survival · 3 Leben · Highscore",
     "challenge": "Challenge",
-    "challengeSub": "Große Regelwerke auswerten · Filter üben"
+    "challengeSub": "Große Regelwerke auswerten · Filter üben",
+    "blitz": "Blitz",
+    "blitzSub": "60 Sekunden — Accept oder Deny, so schnell du kannst"
   },
   "level": {
     "boss": "Boss",
@@ -220,7 +222,8 @@
       "epic": "episch",
       "legendary": "legendär"
     },
-    "endlessBest": "Endlos-Bestwert (Runden)"
+    "endlessBest": "Endlos-Bestwert (Runden)",
+    "blitzBest": "Blitz-Bestwert"
   },
   "settings": {
     "title": "Einstellungen",
@@ -360,5 +363,17 @@
   "cliView": {
     "title": "CLI: show firewall policy",
     "hint": "Wie im echten CLI unterdrückt `show` Default-Werte — eine Policy ohne `set action`-Zeile ist eine DENY-Regel, kein `set status` heißt aktiviert."
+  },
+  "blitz": {
+    "title": "Blitz",
+    "intro": "Ein kleines Regelwerk, 60 Sekunden auf der Uhr. Entscheide pro Paket: kommt es durch oder nicht? First Match zählt — nach jeder Antwort blitzt die Regel auf, die wirklich gezogen hat. Serien geben Bonuspunkte.",
+    "start": "Start",
+    "best": "Bestwert",
+    "points": "Pkt",
+    "question": "Kommt dieses Paket durch?",
+    "done": "Zeit!",
+    "summary": "{{correct}} von {{total}} richtig",
+    "newBest": "Neuer Bestwert",
+    "again": "Nochmal"
   }
 }

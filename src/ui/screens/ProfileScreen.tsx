@@ -16,6 +16,7 @@ export function ProfileScreen() {
   const stats = useGame((s) => s.stats);
   const streak = useGame((s) => s.streak);
   const endlessBest = useGame((s) => s.endlessBest);
+  const blitzBest = useGame((s) => s.blitzBest);
   const achievements = useGame((s) => s.achievements);
 
   const { rank, next, progress } = rankFor(xp);
@@ -47,7 +48,7 @@ export function ProfileScreen() {
       </section>
 
       {/* Streak + Kennzahlen */}
-      <section className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 lg:grid-cols-5">
         <div className="rounded-panel border border-warn/40 bg-panel px-3 py-2 text-center">
           <div className="font-mono text-2xl font-bold text-warn">{streak.current}</div>
           <div className="font-mono text-[9px] uppercase tracking-wide text-dim">
@@ -76,6 +77,12 @@ export function ProfileScreen() {
           </div>
           <div className="font-mono text-[9px] text-dim">
             {t('score.points', { points: endlessBest.score })}
+          </div>
+        </div>
+        <div className="rounded-panel border border-warn/40 bg-panel px-3 py-2 text-center">
+          <div className="font-mono text-2xl font-bold text-warn">{blitzBest}</div>
+          <div className="font-mono text-[9px] uppercase tracking-wide text-dim">
+            ⚡ {t('profile.blitzBest')}
           </div>
         </div>
       </section>

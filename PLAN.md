@@ -289,3 +289,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Ambient (Canvas da/weg je Motion, Interaktion ok), Hits (Incident-
   Header, Sandbox zaehlt 2 nach 2x Fire), CLI (Syntax-Fragmente, genau
   1 'set action accept' bei ch1-l01). Tests: 206 gruen.
+- 2026-07-13 (Forts. 10, Nutzerwunsch "eigene Casual-Modi"): Neuer
+  Modus BLITZ (#42): 60 Sekunden, EIN kleines 6-Regel-Regelwerk
+  (Daily-Bausteine, seeded), Paket um Paket nur ACCEPT/DENY — kein
+  Policy-Picken, kein Leben-System. 10 Punkte pro Treffer + 2 je
+  Serienstufe (gedeckelt), nach jeder Antwort blitzt 700 ms die Regel
+  auf, die wirklich gezogen hat (First-Match-Training nebenbei).
+  Outcome-Rotation accept→deny→implicit gegen Vorhersagbarkeit.
+  blitzBest im Save (Store+Migration+Export+Sync), XP = Score,
+  Home-Karte, Profil-Kachel, Done-Panel mit Konfetti + XpGain,
+  Timer-Balken, Mobile-Daumen-Buttons. Playwright: volle 60s-Runde
+  durchgespielt (Done-Panel, Summary, XP, Restart). Tests: 206 gruen.

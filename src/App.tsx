@@ -12,6 +12,7 @@ import { AuditScreen } from './ui/screens/AuditScreen';
 import { IncidentScreen } from './ui/screens/IncidentScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
 import { DailyScreen } from './ui/screens/DailyScreen';
+import { BlitzScreen } from './ui/screens/BlitzScreen';
 import { EndlessScreen } from './ui/screens/EndlessScreen';
 import { ChallengeScreen } from './ui/screens/ChallengeScreen';
 import { ProfileScreen } from './ui/screens/ProfileScreen';
@@ -66,6 +67,10 @@ export default function App() {
       break;
     case 'endless':
       content = <EndlessScreen />;
+      onBack = () => navigate({ name: 'home' });
+      break;
+    case 'blitz':
+      content = <BlitzScreen />;
       onBack = () => navigate({ name: 'home' });
       break;
     case 'challenge':

@@ -31,6 +31,7 @@ export type Screen =
   | { name: 'level'; levelId: string }
   | { name: 'daily' }
   | { name: 'endless' }
+  | { name: 'blitz' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -51,6 +52,8 @@ interface GameState {
   /** Daily-Historie: Datum → Ergebnis pro Paket */
   dailyHistory: Record<string, boolean[]>;
   endlessBest: EndlessBest;
+  /** Bester Blitz-Score (60-Sekunden-Runde) */
+  blitzBest: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -67,6 +70,7 @@ interface GameState {
   recordLevelResult(levelId: string, stars: number, score: number): void;
   recordDaily(date: string, results: boolean[], score: number): void;
   recordEndless(rounds: number, score: number): void;
+  recordBlitz(score: number): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -85,6 +89,7 @@ export const useGame = create<GameState>()(
       bestScores: {},
       dailyHistory: {},
       endlessBest: { rounds: 0, score: 0 },
+      blitzBest: 0,
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -160,6 +165,21 @@ export const useGame = create<GameState>()(
           };
         }),
 
+      recordBlitz: (score) =>
+        set((state) => {
+          const xp = state.xp + score;
+          const unlocked = evaluateAchievements(
+            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            blitzBest: Math.max(state.blitzBest, score),
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
       bumpStats: (increments, maxima = {}) =>
         set((state) => {
           const stats = { ...state.stats };
@@ -200,6 +220,7 @@ export const useGame = create<GameState>()(
           bestScores,
           dailyHistory,
           endlessBest,
+          blitzBest,
           stats,
           achievements,
           streak,
@@ -214,6 +235,7 @@ export const useGame = create<GameState>()(
             bestScores,
             dailyHistory,
             endlessBest,
+            blitzBest,
             stats,
             achievements,
             streak,
@@ -253,6 +275,7 @@ export const useGame = create<GameState>()(
         bestScores: state.bestScores,
         dailyHistory: state.dailyHistory,
         endlessBest: state.endlessBest,
+        blitzBest: state.blitzBest,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -278,6 +301,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   bestScores: Record<string, number>;
   dailyHistory: Record<string, boolean[]>;
   endlessBest: EndlessBest;
+  blitzBest: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -296,6 +320,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
       score: 0,
       ...((save.endlessBest as Partial<EndlessBest> | null) ?? {}),
     },
+    blitzBest: typeof save.blitzBest === 'number' ? save.blitzBest : 0,
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

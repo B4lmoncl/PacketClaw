@@ -22,7 +22,9 @@
     "endless": "Endless",
     "endlessSub": "Survival · 3 lives · highscore",
     "challenge": "Challenge",
-    "challengeSub": "Read large rulesets · practice filters"
+    "challengeSub": "Read large rulesets · practice filters",
+    "blitz": "Blitz",
+    "blitzSub": "60 seconds — accept or deny, as fast as you can"
   },
   "level": {
     "boss": "Boss",
@@ -220,7 +222,8 @@
       "epic": "epic",
       "legendary": "legendary"
     },
-    "endlessBest": "Endless best (rounds)"
+    "endlessBest": "Endless best (rounds)",
+    "blitzBest": "Blitz best"
   },
   "settings": {
     "title": "Settings",
@@ -360,5 +363,17 @@
   "cliView": {
     "title": "CLI: show firewall policy",
     "hint": "Like the real CLI, `show` omits defaults — a policy without a `set action` line is a DENY rule, no `set status` means enabled."
+  },
+  "blitz": {
+    "title": "Blitz",
+    "intro": "One small ruleset, 60 seconds on the clock. For each packet, decide: does it get through or not? First match wins — the matching rule flashes after every answer. Streaks earn bonus points.",
+    "start": "Start",
+    "best": "Best score",
+    "points": "pts",
+    "question": "Does this packet get through?",
+    "done": "Time!",
+    "summary": "{{correct}} of {{total}} correct",
+    "newBest": "New best score",
+    "again": "Play again"
   }
 }
