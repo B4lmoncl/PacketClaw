@@ -7,6 +7,7 @@ import { useGame } from './game/store';
 import { Header } from './ui/components/Header';
 import { ArchitectScreen } from './ui/screens/ArchitectScreen';
 import { AchievementToast } from './ui/components/AchievementToast';
+import { AmbientBackground } from './ui/components/AmbientBackground';
 import { AuditScreen } from './ui/screens/AuditScreen';
 import { IncidentScreen } from './ui/screens/IncidentScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
@@ -110,19 +111,23 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-bg font-body text-ink pc-bg-gradient">
-      <Header onBack={onBack} />
-      <AchievementToast />
-      {/* Sanfter Einblend-Uebergang pro Screen (QuestHall-Anleihe) */}
-      <main>
-        <motion.div
-          key={JSON.stringify(screen)}
-          initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-        >
-          {content}
-        </motion.div>
-      </main>
+      {/* Ambient-Partikel hinter allem; Inhalt liegt in eigener Ebene darueber */}
+      <AmbientBackground />
+      <div className="relative z-10">
+        <Header onBack={onBack} />
+        <AchievementToast />
+        {/* Sanfter Einblend-Uebergang pro Screen (QuestHall-Anleihe) */}
+        <main>
+          <motion.div
+            key={JSON.stringify(screen)}
+            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            {content}
+          </motion.div>
+        </main>
+      </div>
       {scanlines && <div className="pc-scanlines" aria-hidden />}
     </div>
   );
