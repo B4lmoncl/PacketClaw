@@ -903,8 +903,9 @@ export function PolicyTable({
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<FieldFilter[]>([]);
-  // FortiOS-Policy-Views: Interface Pair View gruppiert nach srcintf→dstintf
-  const [view, setView] = useState<'sequence' | 'pairs'>('sequence');
+  // FortiOS-Policy-Views: Interface Pair View gruppiert nach srcintf→dstintf,
+  // Sequence Grouping View zeigt Abschnitts-Header bei jedem Label-Wechsel
+  const [view, setView] = useState<'sequence' | 'pairs' | 'groups'>('sequence');
   const [collapsedPairs, setCollapsedPairs] = useState<ReadonlySet<string>>(new Set());
   // Spaltenkonfiguration (Zahnrad wie FortiOS) — ueberlebt Reloads
   const [hiddenCols, setHiddenCols] = useState<ReadonlySet<ColKey>>(loadHiddenCols);
@@ -982,6 +983,19 @@ export function PolicyTable({
         groups.push({ key: label, label, policies: arr });
       }
       arr.push(policy);
+    }
+    return groups;
+  }, [visiblePolicies]);
+  // Sequence Grouping View (FortiOS 7.6): Sequenz bleibt erhalten, bei jedem
+  // Label-Wechsel beginnt ein neuer Abschnitt (gleiches Label nicht
+  // zusammenhaengend = zwei Abschnitte, wie im Original)
+  const labelGroups = useMemo(() => {
+    const groups: Array<{ key: string; label: string | null; policies: Policy[] }> = [];
+    for (const policy of visiblePolicies) {
+      const label = policy.label ?? null;
+      const last = groups[groups.length - 1];
+      if (last && last.label === label) last.policies.push(policy);
+      else groups.push({ key: `${label ?? '∅'}#${groups.length}`, label, policies: [policy] });
     }
     return groups;
   }, [visiblePolicies]);
@@ -1162,6 +1176,17 @@ export function PolicyTable({
           >
             {t('policyTable.view.sequence')}
           </button>
+          <button
+            onClick={() => setView('groups')}
+            aria-pressed={view === 'groups'}
+            className={`rounded-row border px-2 py-1 ${
+              view === 'groups'
+                ? 'border-claw/60 bg-claw/10 text-claw'
+                : 'border-line text-dim hover:text-ink'
+            }`}
+          >
+            {t('policyTable.view.groups')}
+          </button>
           <ColumnConfig
             hidden={hiddenCols}
             onToggle={toggleCol}
@@ -1195,7 +1220,14 @@ export function PolicyTable({
                       gridStyle={gridStyle}
                     />
                   ))
-                : pairGroups.map((group) => (
+                : (view === 'pairs'
+                    ? pairGroups
+                    : labelGroups.map((g) => ({
+                        key: g.key,
+                        label: g.label ?? t('policyTable.noLabel'),
+                        policies: g.policies,
+                      }))
+                  ).map((group) => (
                     <div key={group.key} className="flex flex-col gap-1">
                       <button
                         onClick={() => togglePair(group.key)}

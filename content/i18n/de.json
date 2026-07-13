@@ -86,7 +86,8 @@
     "filterNot": "Als NOT-Filter (ausschließen)",
     "view": {
       "pairs": "Interface-Paar-Ansicht",
-      "sequence": "Nach Sequenz"
+      "sequence": "Nach Sequenz",
+      "groups": "Sequenz-Gruppen"
     },
     "modeContains": "Enthält",
     "modeExact": "Exakt",
@@ -99,7 +100,8 @@
       "dstintf": "Interface-Name …"
     },
     "configureTable": "Tabelle anpassen",
-    "resetColumns": "Standard wiederherstellen"
+    "resetColumns": "Standard wiederherstellen",
+    "noLabel": "Ohne Label"
   },
   "debrief": {
     "title": "Debrief",

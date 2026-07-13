@@ -25,6 +25,7 @@ import {
   THEMES,
   ZONES,
   type Outcome,
+  type Theme,
 } from './daily';
 
 export type ChallengeSize = 'small' | 'medium' | 'large';
@@ -59,6 +60,15 @@ function pick1or2(rng: Rng, pool: string[]): string[] {
   return [first];
 }
 
+// Abschnitts-Labels wie FortiOS global-label — gewachsene Configs haben
+// dieselben Abschnitte oft mehrfach verstreut (Sequence Grouping View zeigt
+// dann mehrere Abschnitte gleichen Namens, genau wie das Original)
+const THEME_LABELS: Record<Theme, string> = {
+  egress: 'Egress',
+  dmz: 'DMZ Publishing',
+  lockdown: 'Lockdown',
+};
+
 function buildPolicy(rng: Rng, id: number, name: string): Policy {
   const theme = rng.pick(THEMES);
   const shape = SHAPES[theme];
@@ -73,6 +83,7 @@ function buildPolicy(rng: Rng, id: number, name: string): Policy {
     service: pick1or2(rng, shape.svc),
     action: rng.next() < shape.acceptBias ? 'accept' : 'deny',
     nat: rng.next() > 0.5,
+    label: THEME_LABELS[theme],
   });
 }
 

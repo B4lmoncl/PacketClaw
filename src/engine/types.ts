@@ -76,6 +76,9 @@ export interface Policy {
   nat: boolean; // SNAT auf Egress-Interface-IP (nur Flag, keine Pools)
   schedule: ScheduleName;
   log: boolean;
+  /** Abschnitts-Label (FortiOS global-label) — rein kosmetisch fuer die
+   *  Sequence Grouping View, keine Auswirkung auf das Matching */
+  label?: string;
 }
 
 export interface Packet {

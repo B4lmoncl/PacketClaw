@@ -262,3 +262,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Sandbox auch Lookup + Rechtsklick-Kontextmenue. Playwright-Smoke:
   genau 1 Tabelle, Lookup sichtbar, Fire ohne Konsolenfehler.
   Tests: 206 gruen.
+- 2026-07-13 (Forts. 8): Sequence Grouping View (FortiOS 7.6, #38):
+  Policy hat jetzt ein optionales label-Feld (global-label, rein
+  kosmetisch, Engine ignoriert es; makePolicy reicht es durch,
+  Validator unveraendert). Dritte Policy-View in der Tabelle: Sequenz
+  bleibt erhalten, bei jedem Label-Wechsel beginnt ein kollabierbarer
+  Abschnitt — nicht zusammenhaengende gleiche Labels ergeben wie im
+  Original mehrere Abschnitte; ohne Label steht "No label". Der
+  Challenge-Generator vergibt Themen-Labels (Egress, DMZ Publishing,
+  Lockdown), der Anker bleibt unlabeled. Playwright-Smoke: Challenge
+  Small → Grouping-View zeigt alle Abschnitte, Zuklappen reduziert
+  Zeilen. Tests: 206 gruen, 80 Level valide.

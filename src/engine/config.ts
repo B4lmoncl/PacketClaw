@@ -29,6 +29,7 @@ export function makePolicy(partial: Partial<Policy> & Pick<Policy, 'id'>): Polic
     nat: partial.nat ?? false,
     schedule: partial.schedule ?? 'always',
     log: partial.log ?? false,
+    ...(partial.label !== undefined && { label: partial.label }),
     id: partial.id,
   };
 }
