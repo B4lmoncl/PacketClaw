@@ -5,6 +5,7 @@ import type { VerdictLevel } from '../../game/levels';
 import { scoreVerdictAnswer } from '../../game/scoring';
 import { starsFor } from '../../game/scoring';
 import { useGame } from '../../game/store';
+import { CliView } from '../components/CliView';
 import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
@@ -254,6 +255,7 @@ export function VerdictScreen({
               onSelect={(id) => submit(id)}
             />
             <ObjectBrowser network={level.network} />
+            <CliView network={level.network} />
           </div>
 
           <div className="flex flex-col gap-3 lg:sticky lg:top-16">

@@ -356,5 +356,9 @@
     "insertBelow": "Leere Policy unterhalb einfügen",
     "clone": "Klonen (deaktivierte Kopie)",
     "hint": "Tipp: Rechtsklick auf eine Policy-Zeile öffnet Aktionen — wie auf einer echten Firewall."
+  },
+  "cliView": {
+    "title": "CLI: show firewall policy",
+    "hint": "Wie im echten CLI unterdrückt `show` Default-Werte — eine Policy ohne `set action`-Zeile ist eine DENY-Regel, kein `set status` heißt aktiviert."
   }
 }

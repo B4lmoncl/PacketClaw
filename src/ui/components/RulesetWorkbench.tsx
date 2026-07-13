@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
+import { CliView } from './CliView';
 import { PolicyContextMenu, type ContextMenuState } from './PolicyContextMenu';
 import { PolicyEditor } from './PolicyEditor';
 import { PolicyLookup } from './PolicyLookup';
@@ -185,6 +186,8 @@ export function RulesetWorkbench({
       )}
       {/* Policy Lookup wie im FortiOS-GUI: pruefen, welche Regel greifen wuerde */}
       <PolicyLookup network={config} onHighlight={setLookupHighlights} />
+      {/* GUI↔CLI-Bruecke: dasselbe Regelwerk als FortiOS-CLI-Ausgabe */}
+      <CliView network={config} />
 
       {!readonly && !selectMode && (
         <p className="hidden font-mono text-[10px] text-dim/70 lg:block">
