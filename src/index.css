@@ -138,6 +138,117 @@ body {
   }
 }
 
+/* Maus-Lichtschein: folgt dem Cursor, leuchtet hinter dem Inhalt durch */
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32rem;
+  height: 32rem;
+  margin: -16rem 0 0 -16rem;
+  z-index: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle,
+    rgba(139, 123, 255, 0.12),
+    rgba(255, 90, 60, 0.05) 45%,
+    transparent 62%
+  );
+  will-change: transform;
+}
+
+/* Hyperdrive-Easter-Egg: Aurora dreht auf, alles wird satter */
+.hyperdrive .aurora-blob {
+  animation-duration: 5s !important;
+  filter: blur(60px) saturate(1.6) brightness(1.3);
+}
+.hyperdrive .pc-bg-gradient {
+  animation-duration: 6s;
+}
+.hyperdrive-toast {
+  position: fixed;
+  left: 50%;
+  top: 4.5rem;
+  z-index: 60;
+  transform: translateX(-50%);
+  animation: hyper-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes hyper-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+/* Boot-Sequenz beim Start */
+.boot-scan {
+  position: relative;
+  height: 2px;
+  width: 14rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgba(138, 151, 173, 0.15);
+}
+.boot-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #ff5a3c, #8b7bff, #3ddc97);
+  transform-origin: left;
+  animation: boot-fill 1.5s ease-out forwards;
+}
+@keyframes boot-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.boot-gate {
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 2px solid #ff5a3c;
+  border-radius: 0.75rem;
+  transform: rotate(45deg);
+  box-shadow:
+    0 0 24px rgba(255, 90, 60, 0.5),
+    inset 0 0 16px rgba(139, 123, 255, 0.4);
+  animation: boot-gate-spin 1.6s ease-in-out;
+}
+@keyframes boot-gate-spin {
+  from {
+    transform: rotate(45deg) scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: rotate(405deg) scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .boot-scan::after,
+  .boot-gate {
+    animation: none;
+  }
+  .boot-scan::after {
+    transform: scaleX(1);
+  }
+  .boot-gate {
+    opacity: 1;
+  }
+}
+
 /* Glasflächen: Panels mit leichter Transluzenz + Innen-Highlight oben */
 .glass {
   background:

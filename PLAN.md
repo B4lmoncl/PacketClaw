@@ -325,3 +325,22 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Sandbox. 4 neue Unit-Tests (SNAT, DNAT, Implicit, Determinismus),
   E2E prueft die Zeilen im ch1-l01-Debrief. Hit-Hunter (#43) und
   Daily-Blitz (#44) als Tasks notiert. Tests: 210 gruen.
+- 2026-07-13 (Forts. 13, Nutzerwunsch "visueller Overhaul, gamifiziert,
+  Effekte/Ambience, mehr Knall, wie ein neues cooles PC-Game"):
+  Design-Fundament (tokens: aura-Violett + panelHi; tailwind: glow-
+  Shadows, float/shimmer/pulse-glow; index.css: Mesh-BG mit radialen
+  Akzent-Glows + Blueprint-Raster, Glass, Aurora-Verlaufstext, Karten-
+  Sheen). Ambient-Layer (wirkt auf ALLEN Screens): 3 driftende Aurora-
+  Glow-Blobs (mix-blend screen) + hellere additive Datenpartikel mit
+  Glow/Flimmern + cursor-folgender Lichtschein (CursorGlow, nur feine
+  Zeiger, Reduced-Motion-aus). HomeScreen neu (Hero+Aura+Float, Spieler-
+  Statusleiste mit XP-Balken, Featured-Kampagne + Modus-Karten mit Icon-
+  Badges/Glow), Header-Premium-Leiste (Rang-Pille+Progress), PacketCard
+  mit Scan-Streifen, ACCEPT/DENY taktil (Glow/Lift), Netzdiagramm mit
+  gluehender Firewall, Collapsible-Panels auf Glas. Boot-Sequenz beim
+  Start (BootSplash: rotierendes Gate, Aurora-Titel, Scan-Balken,
+  getippte Statuszeilen "secure channel established", 1x pro Session,
+  ueberspringbar). Cinematische Screen-Uebergaenge (Zoom + Focus-Pull,
+  Richtung nach Tiefe: eintauchen rein / auftauchen zurueck). Verstecktes
+  Easter-Egg Hyperdrive (Konami-Code → Aurora dreht auf + Toast).
+  Funktion unveraendert (FortiGUI). Tests: 210 gruen.

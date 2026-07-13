@@ -389,5 +389,11 @@
   "debugFlow": {
     "title": "CLI trace: diagnose debug flow",
     "hint": "This is what the same packet looks like in 'diagnose debug flow' on a real firewall — received packet, session, route lookup, then the policy decision."
+  },
+  "boot": {
+    "engine": "initializing packet engine",
+    "ruleset": "loading policy ruleset",
+    "channel": "secure channel established",
+    "hyperdrive": "HYPERDRIVE ENGAGED"
   }
 }

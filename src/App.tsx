@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { setSoundEnabled } from './game/sound';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,9 @@ import { Header } from './ui/components/Header';
 import { ArchitectScreen } from './ui/screens/ArchitectScreen';
 import { AchievementToast } from './ui/components/AchievementToast';
 import { AmbientBackground } from './ui/components/AmbientBackground';
+import { BootSplash } from './ui/components/BootSplash';
+import { CursorGlow } from './ui/components/CursorGlow';
+import { Hyperdrive } from './ui/components/Hyperdrive';
 import { AuditScreen } from './ui/screens/AuditScreen';
 import { IncidentScreen } from './ui/screens/IncidentScreen';
 import { ChapterScreen } from './ui/screens/ChapterScreen';
@@ -33,6 +36,15 @@ export default function App() {
   const navigate = useGame((s) => s.navigate);
   const { i18n } = useTranslation();
   const reducedMotion = useReducedMotionPref();
+
+  // Tiefe für die Übergangs-Richtung: tiefer rein → „eintauchen" (Zoom vor),
+  // zurück → „auftauchen" (Zoom raus). home = 0, Modi = 1, Level = 2.
+  const depth = screen.name === 'home' ? 0 : screen.name === 'level' ? 2 : 1;
+  const prevDepth = useRef(depth);
+  const dir = depth >= prevDepth.current ? 1 : -1;
+  useEffect(() => {
+    prevDepth.current = depth;
+  }, [depth]);
 
   useEffect(() => {
     if (i18n.language !== locale) void i18n.changeLanguage(locale);
@@ -121,18 +133,26 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-bg font-body text-ink pc-bg-gradient">
-      {/* Ambient-Partikel hinter allem; Inhalt liegt in eigener Ebene darueber */}
+      {/* Ambient-Ebenen hinter allem; Inhalt liegt in eigener Ebene darueber */}
       <AmbientBackground />
+      <CursorGlow />
+      <BootSplash />
+      <Hyperdrive />
       <div className="relative z-10">
         <Header onBack={onBack} />
         <AchievementToast />
-        {/* Sanfter Einblend-Uebergang pro Screen (QuestHall-Anleihe) */}
+        {/* Cinematischer Screen-Wechsel: leichtes Zoomen + Focus-Pull, je nach
+            Richtung eintauchen (rein) oder auftauchen (zurück) */}
         <main>
           <motion.div
             key={JSON.stringify(screen)}
-            initial={reducedMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
+            initial={
+              reducedMotion
+                ? false
+                : { opacity: 0, scale: dir === 1 ? 0.96 : 1.04, filter: 'blur(6px)' }
+            }
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             {content}
           </motion.div>
