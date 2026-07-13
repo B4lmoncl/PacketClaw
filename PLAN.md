@@ -273,3 +273,19 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Lockdown), der Anker bleibt unlabeled. Playwright-Smoke: Challenge
   Small → Grouping-View zeigt alle Abschnitte, Zuklappen reduziert
   Zeilen. Tests: 206 gruen, 80 Level valide.
+- 2026-07-13 (Forts. 9, Nutzerwunsch "Features + Ambience + Recherche"):
+  (a) AmbientBackground: Canvas-Partikel driften dezent hinter der App
+  (Spielfarben, Alpha 0.05-0.15, Dichte gedeckelt, Pause bei hidden
+  Tab, Reduced Motion = aus, Inhalt in eigener z-Ebene). (b) Recherche
+  FCP/NSE4-Blueprint 7.6 + Admin-Workflows → ROADMAP-Sektion mit 10
+  Kandidaten nach Lernwert (SNAT/DNAT-Werkstatt, Routing-Modus,
+  Debug-Flow, Session-Tabelle, Auth/FSSO, Cert-Trainer ohne Dumps...).
+  (c) Sofort umgesetzt daraus: Hits-Spalte wie FortiOS (Incident zaehlt
+  Log-Traffic gegen das aktuelle Regelwerk, Sandbox kumuliert gefeuerte
+  Pakete + Reset bei Config-Aenderung, 0 Hits = warnfarben, Spalte nur
+  wenn Zaehler vorhanden, Gear-abwaehlbar) und CLI-Ansicht 'show
+  firewall policy' (FortiOS-Syntax, Defaults unterdrueckt wie im
+  Original + Hinweistext, in Werkbank + Verdict). Playwright-Smokes:
+  Ambient (Canvas da/weg je Motion, Interaktion ok), Hits (Incident-
+  Header, Sandbox zaehlt 2 nach 2x Fire), CLI (Syntax-Fragmente, genau
+  1 'set action accept' bei ch1-l01). Tests: 206 gruen.
