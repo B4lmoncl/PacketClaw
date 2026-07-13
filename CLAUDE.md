@@ -34,11 +34,15 @@ Konsequenzen für jede Design-Entscheidung:
   Level = Daten (`content/levels/`, Validator `npm run validate:levels`).
 - **Deploy:** VPS ohne DNS — `git clone` + `docker compose up -d --build`,
   Port über `AETHERGATE_PORT` (Standard 8090), Bind über `AETHERGATE_BIND`.
-  Details: docs/DEPLOY.md. Repos: B4lmoncl/PacketClaw (primär, main) +
-  B4lmoncl/Automation-script (Spiegel, Branch claude/packetclaw-setup-84nxyb).
+  Details: docs/DEPLOY.md. Repo: **B4lmoncl/Automation-script** (einziges
+  Remote `origin`, Arbeitsbranch `claude/packetclaw-setup-84nxyb`) — dieser
+  Container wird aus genau diesem Repo gesynct. (Historie: früher wurde
+  zusätzlich nach B4lmoncl/PacketClaw gespiegelt; der Spiegel wurde am
+  2026-07-13 auf Nutzerwunsch entfernt, weil er nicht genutzt wird.)
 - **Arbeitsweise (Nutzerwunsch):** kleine Schritte, nach jedem Schritt
-  Commit + Push in BEIDE Remotes; Todos/Task-Liste und PLAN.md-Status-Log
-  aktuell halten, damit Folge-Sessions den Stand ohne Codebase-Lektüre kennen.
+  Commit + Push nach `origin` (Branch `claude/packetclaw-setup-84nxyb`);
+  Todos/Task-Liste und PLAN.md-Status-Log aktuell halten, damit Folge-
+  Sessions den Stand ohne Codebase-Lektüre kennen.
 - **Checks vor jedem Commit:** `npm run lint` (ESLint + Prettier),
   `npx vitest run`, bei UI-Änderungen `npm run build` + Playwright-Smoke
   (Chromium: `/opt/pw-browsers/chromium`, Server: `node server/index.mjs`).
