@@ -65,7 +65,7 @@ export function PolicyLookup({
     'w-28 rounded-row border border-line bg-bg px-2 py-1.5 font-mono text-xs text-ink placeholder:text-dim/50 focus:border-claw/60 focus:outline-none';
 
   return (
-    <details className="rounded-panel border border-line bg-panel/60">
+    <details className="glass rounded-panel">
       <summary className="cursor-pointer select-none px-3 py-2 font-mono text-xs text-dim hover:text-ink">
         🔍 {t('policyLookup.title')}
       </summary>

@@ -40,8 +40,9 @@ export function NetworkDiagram({ network }: { network: NetworkConfig }) {
   }
 
   return (
-    <div className="bg-panel border border-line rounded-panel px-3 py-2 overflow-x-auto">
-      <div className="text-[10px] uppercase tracking-widest text-dim mb-1">
+    <div className="glass overflow-x-auto rounded-panel px-3 py-2">
+      <div className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-dim">
+        <span className="h-3 w-0.5 rounded-full bg-claw" aria-hidden />
         {t('network.diagram')}
       </div>
       <svg
@@ -50,7 +51,16 @@ export function NetworkDiagram({ network }: { network: NetworkConfig }) {
         role="img"
         aria-label={t('network.diagram')}
       >
-        {/* Firewall */}
+        <defs>
+          <filter id="fw-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {/* Firewall — mit weichem Koralle-Glow */}
         <rect
           x={width / 2 - 26}
           y={midY - 22}
@@ -60,7 +70,15 @@ export function NetworkDiagram({ network }: { network: NetworkConfig }) {
           fill="#0B1220"
           stroke="#FF5A3C"
           strokeWidth="1.5"
-        />
+          filter="url(#fw-glow)"
+        >
+          <animate
+            attributeName="stroke-opacity"
+            values="1;0.55;1"
+            dur="3s"
+            repeatCount="indefinite"
+          />
+        </rect>
         {/* Claw-Zangen-Mark + FW-Label (bewusst kein Emoji — Font-unabhängig) */}
         <path d={`M ${width / 2 - 14} ${midY - 8} q -6 -6 2 -10 q -2 8 6 8 Z`} fill="#FF5A3C" />
         <path d={`M ${width / 2 + 14} ${midY - 8} q 6 -6 -2 -10 q 2 8 -6 8 Z`} fill="#FF5A3C" />

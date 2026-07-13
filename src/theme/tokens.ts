@@ -24,6 +24,10 @@ export const colors = {
   line: '#22304A',
   /** QuestHall-Anleihe: violett getönter Gradient-Mittelton für den Seitenhintergrund */
   bgTint: '#151228',
+  /** Iris-Violett — zweiter Akzent für Hero-Aura, Gradients, Glows */
+  aura: '#8B7BFF',
+  /** Leicht erhöhte Panel-Fläche (Karten-Hover, Popovers) */
+  panelHi: '#16223A',
   /** Rarity-Glows für Achievements (QuestHall-Anleihe) */
   rarity: {
     common: '#8A97AD',

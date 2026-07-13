@@ -26,7 +26,8 @@
     "blitz": "Blitz",
     "blitzSub": "60 Sekunden — Accept oder Deny, so schnell du kannst",
     "matchcheck": "Match-Check",
-    "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?"
+    "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?",
+    "startHere": "Hier starten"
   },
   "level": {
     "boss": "Boss",

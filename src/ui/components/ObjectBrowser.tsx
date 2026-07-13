@@ -49,7 +49,7 @@ export function ObjectBrowser({ network }: { network: NetworkConfig }) {
   const { t } = useTranslation();
 
   return (
-    <details className="rounded-panel border border-line bg-panel/60">
+    <details className="glass rounded-panel">
       <summary className="cursor-pointer select-none px-3 py-2 font-mono text-xs text-dim hover:text-ink">
         📁 {t('objectBrowser.title')}
       </summary>

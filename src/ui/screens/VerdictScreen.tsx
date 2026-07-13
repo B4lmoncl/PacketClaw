@@ -187,10 +187,10 @@ export function VerdictScreen({
       <button
         onClick={() => setUserAction('accept')}
         aria-pressed={userAction === 'accept'}
-        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
+        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink motion-reduce:hover:translate-y-0 ${
           userAction === 'accept'
-            ? 'bg-trace text-bg shadow-[0_0_20px_rgba(61,220,151,0.4)]'
-            : 'border border-trace/50 text-trace hover:bg-trace/10'
+            ? 'scale-[1.02] bg-trace text-bg shadow-[0_0_28px_rgba(61,220,151,0.55)]'
+            : 'border border-trace/50 text-trace hover:bg-trace/10 hover:shadow-glow-trace'
         }`}
       >
         ✓ {t('verdict.accept')}
@@ -198,10 +198,10 @@ export function VerdictScreen({
       <button
         onClick={() => setUserAction('deny')}
         aria-pressed={userAction === 'deny'}
-        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink ${
+        className={`h-14 flex-1 rounded-panel font-display text-lg font-bold transition-all duration-150 hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink motion-reduce:hover:translate-y-0 ${
           userAction === 'deny'
-            ? 'bg-deny text-bg shadow-[0_0_20px_rgba(255,59,92,0.4)]'
-            : 'border border-deny/50 text-deny hover:bg-deny/10'
+            ? 'scale-[1.02] bg-deny text-bg shadow-[0_0_28px_rgba(255,59,92,0.55)]'
+            : 'border border-deny/50 text-deny hover:bg-deny/10 hover:shadow-glow-deny'
         }`}
       >
         ✕ {t('verdict.deny')}
@@ -237,7 +237,7 @@ export function VerdictScreen({
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-6">
           <div className="flex min-w-0 flex-col gap-3">
             {packetIndex === 0 && phase === 'answer' && (
-              <p className="rounded-panel border border-line bg-panel/70 px-3 py-2 text-sm leading-relaxed text-dim">
+              <p className="glass rounded-panel border-l-2 border-l-claw/60 px-4 py-3 text-sm leading-relaxed text-dim">
                 {level.briefing[locale]}
               </p>
             )}

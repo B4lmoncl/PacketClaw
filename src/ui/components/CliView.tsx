@@ -38,7 +38,7 @@ export function CliView({ network }: { network: NetworkConfig }) {
   const lines = policyLines(network);
 
   return (
-    <details className="rounded-panel border border-line bg-panel/60">
+    <details className="glass rounded-panel">
       <summary className="cursor-pointer select-none px-3 py-2 font-mono text-xs text-dim hover:text-ink">
         <span className="text-trace">&gt;_</span> {t('cliView.title')}
       </summary>

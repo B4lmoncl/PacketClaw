@@ -11,26 +11,214 @@ body {
   color: #e6edf7;
 }
 
-/* QuestHall-Anleihe: dezenter, langsam wandernder violetter Gradient */
+/* QuestHall-Anleihe: dezenter, langsam wandernder violetter Gradient, dazu
+   weiche radiale Akzent-Glows in den Ecken (Mesh-Tiefe) */
 .pc-bg-gradient {
-  background: linear-gradient(180deg, #0b1220 0%, #151228 50%, #0b1220 100%);
-  background-size: 100% 200%;
+  position: relative;
+  background:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(139, 123, 255, 0.1), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 0%, rgba(255, 90, 60, 0.08), transparent 55%),
+    radial-gradient(55rem 45rem at 50% 120%, rgba(61, 220, 151, 0.07), transparent 60%),
+    linear-gradient(180deg, #0b1220 0%, #141127 50%, #0b1220 100%);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 200%;
   animation: pc-gradient-shift 24s ease infinite;
+}
+
+/* Feines Punkt-Raster über der Grundfläche — Blueprint-Anmutung */
+.pc-bg-gradient::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(138, 151, 173, 0.06) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 40%, transparent 100%);
 }
 
 @keyframes pc-gradient-shift {
   0%,
   100% {
-    background-position: 50% 0%;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      50% 0%;
   }
   50% {
-    background-position: 50% 100%;
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      50% 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pc-bg-gradient {
     animation: none;
+  }
+}
+
+/* Ambient-Aurora: große, weich verwaschene Farbwolken driften langsam hinter
+   dem Inhalt (mix-blend screen = additives Leuchten auf dunklem Grund). */
+.aurora-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(75px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.aurora-blob.b1 {
+  width: 44rem;
+  height: 44rem;
+  top: -14rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(255, 90, 60, 0.5), transparent 62%);
+  animation: aurora-a 26s ease-in-out infinite;
+}
+.aurora-blob.b2 {
+  width: 40rem;
+  height: 40rem;
+  right: -10rem;
+  bottom: -16rem;
+  background: radial-gradient(circle, rgba(139, 123, 255, 0.5), transparent 62%);
+  animation: aurora-b 34s ease-in-out infinite;
+}
+.aurora-blob.b3 {
+  width: 34rem;
+  height: 34rem;
+  top: 26%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(61, 220, 151, 0.42), transparent 64%);
+  animation: aurora-c 30s ease-in-out infinite;
+}
+@keyframes aurora-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(7rem, 5rem) scale(1.18);
+  }
+}
+@keyframes aurora-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate(-6rem, -4rem) scale(0.9);
+  }
+}
+@keyframes aurora-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(0.95);
+  }
+  50% {
+    transform: translate(-5rem, 6rem) scale(1.2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* Glasflächen: Panels mit leichter Transluzenz + Innen-Highlight oben */
+.glass {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 40%),
+    rgba(17, 26, 46, 0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Aurora-Verlaufstext für Titel/Headlines */
+.text-aurora {
+  background-image: linear-gradient(100deg, #ff5a3c 0%, #ff8a5c 30%, #8b7bff 70%, #3ddc97 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: pc-aurora 8s linear infinite;
+}
+@keyframes pc-aurora {
+  to {
+    background-position: 200% center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .text-aurora {
+    animation: none;
+  }
+}
+
+/* Radiale Aura hinter dem Hero-Portrait */
+.hero-aura::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 22rem;
+  height: 22rem;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(139, 123, 255, 0.28),
+    rgba(255, 90, 60, 0.12) 45%,
+    transparent 70%
+  );
+  filter: blur(8px);
+}
+
+/* Interaktive Modus-Karte: Tiefe + gleitender Sheen beim Hover */
+.card-mode {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.25s ease,
+    border-color 0.2s ease;
+}
+.card-mode::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.6s ease;
+}
+.card-mode:hover::after {
+  transform: translateX(120%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-mode:hover {
+    transform: none;
+  }
+  .card-mode::after {
+    display: none;
   }
 }
 
