@@ -234,6 +234,7 @@ export function EndlessScreen() {
               }}
               correct={lastCorrect}
               allowRetry={false}
+              packet={data.packet}
               onNext={advance}
               onRetry={advance}
               onReplay={() => {

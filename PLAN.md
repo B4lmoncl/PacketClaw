@@ -310,3 +310,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   (Store/Migration/Export/Sync), Home-Karte, gleiche Punktelogik wie
   Blitz. Playwright: 1-Regel-Tabelle, 10 Antworten ohne Fehler.
   Tests: 206 gruen.
+- 2026-07-13 (Forts. 12, Nutzerwunsch "debug flow waere hilfreicher"):
+  diagnose debug flow (#45): src/game/debugFlow.ts uebersetzt den
+  Engine-Trace in authentische FortiOS-CLI-Zeilen (id=20085
+  trace_id=... func=print_pkt_detail/init_ip_session_common/
+  fw_pre_route_handler/vf_ip_route_input_common/fw_forward_handler
+  msg="received a packet(...)" / "allocate a new session" / "VIP-x,
+  DNAT a:p->b:q" / "find a route ... via wan1" / "Allowed by
+  Policy-N: SNAT" / "Denied by forward policy check (policy 0)").
+  Wie im Original erscheinen nicht-matchende Policies NICHT; Pseudo-
+  Werte (Session-ID, Quellport, trace_id) deterministisch per FNV-1a
+  aus dem Paket. DebugFlowView (collapsible, Allowed gruen/Denied
+  rot) haengt im Debrief → wirkt in Kampagne, Daily, Endless und
+  Sandbox. 4 neue Unit-Tests (SNAT, DNAT, Implicit, Determinismus),
+  E2E prueft die Zeilen im ch1-l01-Debrief. Hit-Hunter (#43) und
+  Daily-Blitz (#44) als Tasks notiert. Tests: 210 gruen.

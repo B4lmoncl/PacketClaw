@@ -266,6 +266,7 @@ export function SandboxScreen() {
           verdict={verdict}
           answer={{ action: verdict.action, policyId: verdict.matchedPolicyId }}
           correct={true}
+          packet={firedPacket ?? undefined}
           onNext={() => {
             setVerdict(null);
             descent.reset();

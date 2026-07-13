@@ -384,5 +384,9 @@
     "matches": "Matches",
     "noMatch": "No match",
     "question": "Does this rule match this packet?"
+  },
+  "debugFlow": {
+    "title": "CLI trace: diagnose debug flow",
+    "hint": "This is what the same packet looks like in 'diagnose debug flow' on a real firewall — received packet, session, route lookup, then the policy decision."
   }
 }

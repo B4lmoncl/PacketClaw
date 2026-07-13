@@ -323,6 +323,7 @@ export function VerdictScreen({
                 verdict={verdict}
                 answer={{ action: userAction, policyId: userPolicyId }}
                 correct={lastCorrect}
+                packet={packet}
                 allowRetry={!dailyMode}
                 onNext={nextPacket}
                 onRetry={retry}

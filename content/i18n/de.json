@@ -384,5 +384,9 @@
     "matches": "Matcht",
     "noMatch": "Kein Match",
     "question": "Matcht diese Regel dieses Paket?"
+  },
+  "debugFlow": {
+    "title": "CLI-Trace: diagnose debug flow",
+    "hint": "So sieht dasselbe Paket in 'diagnose debug flow' auf einer echten Firewall aus — received packet, Session, Routen-Lookup, dann die Policy-Entscheidung."
   }
 }

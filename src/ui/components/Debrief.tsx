@@ -6,8 +6,9 @@
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Verdict } from '../../engine';
+import type { Packet, Verdict } from '../../engine';
 import { playAccept, playSnip, playWrong } from '../../game/sound';
+import { DebugFlowView } from './DebugFlowView';
 import { Mascot } from './Mascot';
 import { ParticleBurst } from './ParticleBurst';
 
@@ -21,6 +22,7 @@ export function Debrief({
   answer,
   correct,
   allowRetry = true,
+  packet,
   onNext,
   onRetry,
   onReplay,
@@ -30,6 +32,8 @@ export function Debrief({
   correct: boolean;
   /** false (Daily): auch nach Fehlern geht es nur weiter */
   allowRetry?: boolean;
+  /** wenn gesetzt: CLI-Trace (diagnose debug flow) unter dem Debrief */
+  packet?: Packet;
   onNext: () => void;
   onRetry: () => void;
   onReplay: () => void;
@@ -111,6 +115,13 @@ export function Debrief({
           </li>
         ))}
       </ul>
+
+      {/* Derselbe Trace, wie ihn die echte FortiGate ausgeben wuerde */}
+      {packet && (
+        <div className="mt-3">
+          <DebugFlowView packet={packet} verdict={verdict} />
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap gap-2">
         {correct || !allowRetry ? (
