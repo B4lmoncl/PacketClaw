@@ -17,6 +17,7 @@ import { DailyScreen } from './ui/screens/DailyScreen';
 import { BlitzScreen } from './ui/screens/BlitzScreen';
 import { EndlessScreen } from './ui/screens/EndlessScreen';
 import { MatchCheckScreen } from './ui/screens/MatchCheckScreen';
+import { DoctorScreen } from './ui/screens/DoctorScreen';
 import { ChallengeScreen } from './ui/screens/ChallengeScreen';
 import { ProfileScreen } from './ui/screens/ProfileScreen';
 import { SettingsScreen } from './ui/screens/SettingsScreen';
@@ -87,6 +88,10 @@ export default function App() {
       break;
     case 'matchcheck':
       content = <MatchCheckScreen />;
+      onBack = () => navigate({ name: 'home' });
+      break;
+    case 'doctor':
+      content = <DoctorScreen />;
       onBack = () => navigate({ name: 'home' });
       break;
     case 'challenge':

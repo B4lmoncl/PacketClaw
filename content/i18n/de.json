@@ -27,7 +27,9 @@
     "blitzSub": "60 Sekunden — Accept oder Deny, so schnell du kannst",
     "matchcheck": "Match-Check",
     "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?",
-    "startHere": "Hier starten"
+    "startHere": "Hier starten",
+    "doctor": "Config Doctor",
+    "doctorSub": "Ein kaputtes Regelwerk, ein Symptom — finde und fixe den Fehler"
   },
   "level": {
     "boss": "Boss",
@@ -395,5 +397,33 @@
     "ruleset": "Regelwerk wird geladen",
     "channel": "Sichere Verbindung steht",
     "hyperdrive": "HYPERDRIVE AKTIV"
+  },
+  "doctor": {
+    "title": "Config Doctor",
+    "intro": "Ein Regelwerk hat genau eine praxisnahe Fehlkonfiguration und ein Support-Ticket mit dem Symptom. Diagnostiziere mit den Werkbank-Werkzeugen (Policy Lookup, CLI, Regeltabelle), fixe die Regeln und starte dann die Diagnose. Weniger Eingriffe = mehr Punkte.",
+    "start": "Ticket öffnen",
+    "solved": "Gelöste Fälle",
+    "ticket": "Support-Ticket",
+    "hint": "Regelwerk reparieren, dann Diagnose starten zum Prüfen.",
+    "check": "Diagnose starten",
+    "stillFailing": "Diagnose: {{count}} Prüfung(en) noch rot — dranbleiben.",
+    "fixed": "Diagnose grün — Fall gelöst!",
+    "diagnosis": {
+      "nat-missing": "Die Egress-Regel griff, aber SNAT war aus — der Rückweg kam nie an.",
+      "disabled": "Die richtige Regel war da, nur deaktiviert — der Verkehr fiel bis zur Deny durch.",
+      "order": "Eine breite Deny über der Erlauben-Regel hat sie verschattet — First Match gewinnt."
+    },
+    "concept": {
+      "snat": "Konzept: SNAT",
+      "status": "Konzept: Regel-Status",
+      "firstMatch": "Konzept: First Match / Reihenfolge"
+    },
+    "editsUsed": "{{edits}} Eingriff(e)",
+    "next": "Nächster Fall",
+    "symptom": {
+      "nat-missing": "LAN-Nutzer erreichen bei manchen Seiten die erste Seite, die meisten laufen aber in einen Timeout — als käme die Antwort nie zurück.",
+      "disabled": "Seit der letzten Änderung kommt im LAN niemand mehr ins Web. Eine Regel dafür scheint es aber zu geben.",
+      "order": "Es gibt eine Erlauben-Regel für LAN-Webzugriff, aber sie greift nie — alles nach draußen wird geblockt."
+    }
   }
 }

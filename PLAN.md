@@ -351,3 +351,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   DPR-Cap auf 1.5; der ganzseitige Grund-Gradient ist statisch (kein
   animiertes background-position mehr — Bewegung kommt nur noch von den
   Aurora-Blobs), Aurora-Blur 75→64px + translateZ(0)-Layer. Tests: 210.
+- 2026-07-13 (Forts. 15, Nutzerwunsch "erst den Doktor"): Config-Doctor-
+  Casual-Modus (#48). src/game/doctor.ts generiert seeded ein Regelwerk
+  mit GENAU einem realen Praxisfehler (nat-missing = SNAT auf Egress-Regel
+  vergessen; disabled = richtige Regel deaktiviert; order = breite Deny
+  verschattet die Erlauben-Regel) + Symptom-Ticket. Test-Suite
+  (matchesExpectation): Web muss raus (accept+SNAT), RDP muss geblockt
+  bleiben (Kontrolle gegen faules „alles erlauben"). Der Spieler fixt in
+  der vorhandenen RulesetWorkbench (Edit/Move/Enable/NAT/Delete +
+  Kontextmenue + Policy Lookup + CLI) und startet die Diagnose; mehrere
+  gueltige Loesungen (verschieben ODER loeschen ODER narrow). Score sinkt
+  mit Eingriffen/Fehlversuchen, doctorSolved im Save (Store/Migration/
+  Export). Home-Karte, Done-Panel mit Partikeln + Xp + Konzept-Tag
+  (SNAT/Status/First Match). 5 Unit-Tests (jeder Bug startet rot, jeder
+  Fix macht gruen, Kontrolle beisst), E2E-Smoke (Screen/Ticket/Diagnose).
+  Tests: 215 gruen.

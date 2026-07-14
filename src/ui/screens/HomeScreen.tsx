@@ -50,6 +50,7 @@ const MODES: Mode[] = [
   { screen: { name: 'daily' }, key: 'daily', icon: '📅', accent: 'warn' },
   { screen: { name: 'blitz' }, key: 'blitz', icon: '⚡', accent: 'aura' },
   { screen: { name: 'matchcheck' }, key: 'matchcheck', icon: '🎯', accent: 'trace' },
+  { screen: { name: 'doctor' }, key: 'doctor', icon: '🩺', accent: 'deny' },
   { screen: { name: 'endless' }, key: 'endless', icon: '♾️', accent: 'deny' },
   { screen: { name: 'challenge' }, key: 'challenge', icon: '🧩', accent: 'warn' },
   { screen: { name: 'sandbox' }, key: 'sandbox', icon: '🧪', accent: 'trace' },

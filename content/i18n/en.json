@@ -27,7 +27,9 @@
     "blitzSub": "60 seconds — accept or deny, as fast as you can",
     "matchcheck": "Match Check",
     "matchcheckSub": "45 seconds — one rule, one packet: does it match?",
-    "startHere": "Start here"
+    "startHere": "Start here",
+    "doctor": "Config Doctor",
+    "doctorSub": "One broken ruleset, one symptom — find and fix the bug"
   },
   "level": {
     "boss": "Boss",
@@ -395,5 +397,33 @@
     "ruleset": "loading policy ruleset",
     "channel": "secure channel established",
     "hyperdrive": "HYPERDRIVE ENGAGED"
+  },
+  "doctor": {
+    "title": "Config Doctor",
+    "intro": "A ruleset has exactly one real-world misconfiguration and a support ticket describing the symptom. Use the workbench tools (Policy Lookup, CLI, the rule table) to diagnose it, fix the rules, then run the diagnosis. Fewer edits = higher score.",
+    "start": "Open ticket",
+    "solved": "Cases solved",
+    "ticket": "Support ticket",
+    "hint": "Fix the ruleset, then run the diagnosis to verify.",
+    "check": "Run diagnosis",
+    "stillFailing": "Diagnosis: {{count}} check(s) still failing — keep going.",
+    "fixed": "Diagnosis green — case closed!",
+    "diagnosis": {
+      "nat-missing": "The egress rule matched, but SNAT was off — return traffic never came back.",
+      "disabled": "The right rule was there, just disabled — so traffic fell through to the deny.",
+      "order": "A broad deny above the allow rule shadowed it — first match wins."
+    },
+    "concept": {
+      "snat": "Concept: SNAT",
+      "status": "Concept: rule status",
+      "firstMatch": "Concept: first match / order"
+    },
+    "editsUsed": "{{edits}} edit(s)",
+    "next": "Next case",
+    "symptom": {
+      "nat-missing": "LAN users can reach the first page of some sites, but most just time out — as if replies never make it back.",
+      "disabled": "Since the last change, nobody in the LAN can browse the web at all. There does seem to be a rule for it, though.",
+      "order": "There is an allow rule for LAN web access, but it never takes effect — everything outbound gets blocked."
+    }
   }
 }
