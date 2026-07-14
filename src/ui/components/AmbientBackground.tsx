@@ -73,14 +73,14 @@ export function AmbientBackground() {
     let h = 0;
     let motes: Mote[] = [];
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // Dichte an die Flaeche koppeln, aber deckeln (Performance)
-      const target = Math.min(38, Math.floor((w * h) / 42000));
+      // Dichte wie zuvor (Qualität) — die Sprite-Zeichnung ist billig genug
+      const target = Math.min(48, Math.floor((w * h) / 34000));
       motes = Array.from({ length: target }, () => makeMote(w, h, true));
     };
     resize();
@@ -105,7 +105,8 @@ export function AmbientBackground() {
         const x = m.x + Math.sin(t * 0.5 + m.phase) * m.drift;
         // sanftes Flimmern der Helligkeit
         ctx.globalAlpha = m.alpha * (0.7 + 0.3 * Math.sin(t * 1.6 + m.phase));
-        const d = m.size * 4; // Glow-Durchmesser
+        // Glow-Durchmesser wie beim frueheren shadowBlur (~7×Kern)
+        const d = m.size * 7;
         ctx.drawImage(glowSprite(m.color), x - d / 2, m.y - d / 2, d, d);
       }
       ctx.globalAlpha = 1;
