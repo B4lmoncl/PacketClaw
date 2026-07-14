@@ -9,7 +9,6 @@ import { ArchitectScreen } from './ui/screens/ArchitectScreen';
 import { AchievementToast } from './ui/components/AchievementToast';
 import { AmbientBackground } from './ui/components/AmbientBackground';
 import { BootSplash } from './ui/components/BootSplash';
-import { CursorGlow } from './ui/components/CursorGlow';
 import { Hyperdrive } from './ui/components/Hyperdrive';
 import { AuditScreen } from './ui/screens/AuditScreen';
 import { IncidentScreen } from './ui/screens/IncidentScreen';
@@ -135,7 +134,6 @@ export default function App() {
     <div className="min-h-screen bg-bg font-body text-ink pc-bg-gradient">
       {/* Ambient-Ebenen hinter allem; Inhalt liegt in eigener Ebene darueber */}
       <AmbientBackground />
-      <CursorGlow />
       <BootSplash />
       <Hyperdrive />
       <div className="relative z-10">

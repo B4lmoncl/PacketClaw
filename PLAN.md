@@ -344,3 +344,10 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Richtung nach Tiefe: eintauchen rein / auftauchen zurueck). Verstecktes
   Easter-Egg Hyperdrive (Konami-Code → Aurora dreht auf + Toast).
   Funktion unveraendert (FortiGUI). Tests: 210 gruen.
+- 2026-07-13 (Forts. 14, Nutzerwunsch): Maus-Lichtschein (CursorGlow)
+  komplett entfernt (wirkte hektisch). Performance geglaettet:
+  Ambient-Partikel nutzen jetzt vorgerenderte Glow-Sprites (drawImage
+  statt teurem per-Partikel-shadowBlur), Dichte gedeckelt (38) und
+  DPR-Cap auf 1.5; der ganzseitige Grund-Gradient ist statisch (kein
+  animiertes background-position mehr — Bewegung kommt nur noch von den
+  Aurora-Blobs), Aurora-Blur 75→64px + translateZ(0)-Layer. Tests: 210.

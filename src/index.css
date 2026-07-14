@@ -24,8 +24,9 @@ body {
     100% 100%,
     100% 100%,
     100% 100%,
-    100% 200%;
-  animation: pc-gradient-shift 24s ease infinite;
+    100% 100%;
+  /* Bewegung liefern die Aurora-Blobs — der Grund-Gradient bleibt statisch
+     (animiertes background-position auf ganzseitigem Verlauf war teuer). */
 }
 
 /* Feines Punkt-Raster über der Grundfläche — Blueprint-Anmutung */
@@ -76,9 +77,10 @@ body {
 .aurora-blob {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(75px);
+  filter: blur(64px);
   mix-blend-mode: screen;
   will-change: transform;
+  transform: translateZ(0);
 }
 .aurora-blob.b1 {
   width: 44rem;
@@ -136,27 +138,6 @@ body {
     animation: none;
     opacity: 0.6;
   }
-}
-
-/* Maus-Lichtschein: folgt dem Cursor, leuchtet hinter dem Inhalt durch */
-.cursor-glow {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 32rem;
-  height: 32rem;
-  margin: -16rem 0 0 -16rem;
-  z-index: 0;
-  border-radius: 9999px;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  background: radial-gradient(
-    circle,
-    rgba(139, 123, 255, 0.12),
-    rgba(255, 90, 60, 0.05) 45%,
-    transparent 62%
-  );
-  will-change: transform;
 }
 
 /* Hyperdrive-Easter-Egg: Aurora dreht auf, alles wird satter */

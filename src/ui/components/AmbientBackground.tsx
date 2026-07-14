@@ -37,6 +37,28 @@ function makeMote(w: number, h: number, randomY = false): Mote {
   };
 }
 
+// Einmalig pro Farbe einen weichen Glow-Sprite vorrendern — im Frame wird nur
+// noch drawImage aufgerufen (viel billiger als per-Partikel-shadowBlur).
+const SPRITE_R = 32;
+const spriteCache = new Map<string, HTMLCanvasElement>();
+function glowSprite(color: string): HTMLCanvasElement {
+  const cached = spriteCache.get(color);
+  if (cached) return cached;
+  const c = document.createElement('canvas');
+  c.width = c.height = SPRITE_R * 2;
+  const g = c.getContext('2d');
+  if (g) {
+    const grad = g.createRadialGradient(SPRITE_R, SPRITE_R, 0, SPRITE_R, SPRITE_R, SPRITE_R);
+    grad.addColorStop(0, color);
+    grad.addColorStop(0.35, color);
+    grad.addColorStop(1, 'transparent');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, SPRITE_R * 2, SPRITE_R * 2);
+  }
+  spriteCache.set(color, c);
+  return c;
+}
+
 export function AmbientBackground() {
   const reducedMotion = useReducedMotionPref();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,14 +73,14 @@ export function AmbientBackground() {
     let h = 0;
     let motes: Mote[] = [];
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       w = window.innerWidth;
       h = window.innerHeight;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       // Dichte an die Flaeche koppeln, aber deckeln (Performance)
-      const target = Math.min(48, Math.floor((w * h) / 34000));
+      const target = Math.min(38, Math.floor((w * h) / 42000));
       motes = Array.from({ length: target }, () => makeMote(w, h, true));
     };
     resize();
@@ -74,7 +96,7 @@ export function AmbientBackground() {
       last = now;
       ctx.clearRect(0, 0, w, h);
       const t = now / 1000;
-      // Additives Leuchten: Partikel glimmen auf dunklem Grund
+      // Additives Leuchten via vorgerendertem Sprite (drawImage statt shadowBlur)
       ctx.globalCompositeOperation = 'lighter';
       for (let i = 0; i < motes.length; i++) {
         const m = motes[i] as Mote;
@@ -83,14 +105,9 @@ export function AmbientBackground() {
         const x = m.x + Math.sin(t * 0.5 + m.phase) * m.drift;
         // sanftes Flimmern der Helligkeit
         ctx.globalAlpha = m.alpha * (0.7 + 0.3 * Math.sin(t * 1.6 + m.phase));
-        ctx.fillStyle = m.color;
-        ctx.shadowColor = m.color;
-        ctx.shadowBlur = m.size * 3;
-        ctx.beginPath();
-        ctx.arc(x, m.y, m.size / 2, 0, Math.PI * 2);
-        ctx.fill();
+        const d = m.size * 4; // Glow-Durchmesser
+        ctx.drawImage(glowSprite(m.color), x - d / 2, m.y - d / 2, d, d);
       }
-      ctx.shadowBlur = 0;
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
       raf = requestAnimationFrame(frame);
