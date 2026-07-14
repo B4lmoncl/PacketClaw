@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
+import { MatchLogic } from './MatchLogic';
 
 interface PolicyEditorProps {
   network: NetworkConfig;
@@ -158,6 +159,9 @@ export function PolicyEditor({
         value={service}
         onChange={setService}
       />
+
+      {/* FortiOS-7.6-Logik: UND zwischen Feldern, ODER innerhalb — live */}
+      <MatchLogic fields={{ srcintf, dstintf, srcaddr, dstaddr, service }} />
 
       <div className="flex flex-wrap items-center gap-2">
         <div

@@ -425,5 +425,13 @@
       "disabled": "Since the last change, nobody in the LAN can browse the web at all. There does seem to be a rule for it, though.",
       "order": "There is an allow rule for LAN web access, but it never takes effect — everything outbound gets blocked."
     }
+  },
+  "matchLogic": {
+    "title": "Match logic",
+    "anyOf": "Any of",
+    "andAnyOf": "And any of",
+    "or": "or",
+    "notSet": "not set",
+    "explain": "All fields must match (AND). Within a field, any one entry is enough (OR)."
   }
 }

@@ -425,5 +425,13 @@
       "disabled": "Seit der letzten Änderung kommt im LAN niemand mehr ins Web. Eine Regel dafür scheint es aber zu geben.",
       "order": "Es gibt eine Erlauben-Regel für LAN-Webzugriff, aber sie greift nie — alles nach draußen wird geblockt."
     }
+  },
+  "matchLogic": {
+    "title": "Match-Logik",
+    "anyOf": "Eines von",
+    "andAnyOf": "UND eines von",
+    "or": "oder",
+    "notSet": "nicht gesetzt",
+    "explain": "Alle Felder müssen passen (UND). Innerhalb eines Feldes genügt ein Eintrag (ODER)."
   }
 }

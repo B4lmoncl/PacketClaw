@@ -366,3 +366,14 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   (SNAT/Status/First Match). 5 Unit-Tests (jeder Bug startet rot, jeder
   Fix macht gruen, Kontrolle beisst), E2E-Smoke (Screen/Ticket/Diagnose).
   Tests: 215 gruen.
+- 2026-07-13 (Forts. 16): FortiOS-7.6 „Any of / And any of"-Match-Logik
+  (#47, GUI displays logic between policy objects). src/game/matchLogic.ts
+  (pure): matchClauses() bildet die fuenf Match-Felder als geordnete
+  OR-Gruppen ab (UND zwischen Feldern, ODER innerhalb). MatchLogic.tsx
+  rendert sie mit „Any of"/„And any of"-Labels, „or"-Trenner innerhalb
+  eines Feldes, „not set" fuer leere Felder, animiertem Staggered-Reveal
+  (reduced-motion-Gate) und Erklaerzeile „All fields must match (AND).
+  Within a field, any one entry is enough (OR)". Eingebettet im
+  PolicyEditor unter den Feldern — deckt sich beim Bearbeiten LIVE mit
+  den gewaehlten Objekten auf (wirkt in Architect/Audit/Incident/Sandbox/
+  Doctor). 2 Unit-Tests + E2E-Smoke (Labels + Interaktion). Tests: 217.
