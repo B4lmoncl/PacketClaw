@@ -95,6 +95,57 @@ routing-table all`, `diagnose sys session list`.
 10. **HA/FGCP (v1.2, schon geplant):** Exam-Domain "Configure an FGCP HA
     cluster" — deckt sich mit dem Topologie-Kapitel.
 
+## Recherche 2026-07-13 (Durchlauf 2) — GUI-Features, Praxisfehler, Lernwissenschaft
+
+Drei Quellenblöcke: FortiOS-7.6/8.0-GUI-Neuerungen (docs.fortinet.com New
+Features), reale FortiGate-Fehlkonfigurationen (Community/Praxis-Guides),
+Lernwissenschaft zu Retention (Spaced Repetition + Gamification). Ziel
+unverändert: echte FortiGate-Bedienung lernen; Gamification bleibt Rahmen.
+
+### A — FortiOS-7.6-GUI-Features, die noch fehlen (höchster Ziel-Wert)
+
+1. **„Any of / And any of"-Logik-Labels (7.6, GUI displays logic between
+   policy objects):** FortiOS 7.6 zeigt im Policy-Editor/­-Inspektor die
+   UND-Verknüpfung ZWISCHEN Feldern (srcaddr UND dstaddr UND service …) und
+   die ODER-Verknüpfung INNERHALB eines Feldes an („Any of", „And any of").
+   Das ist exakt die First-Match-Semantik sichtbar gemacht — hoher Lernwert,
+   direkt am Original. → Labels in Objekt-Inspektion/Policy-Editor + kleine
+   animierte „so matcht diese Regel"-Erklärung (welche Felder UND-kombinieren).
+2. **Local-In Policy (7.6-GUI-Tab):** Regeln für Verkehr AN die FortiGate
+   selbst (Management: HTTPS/SSH/PING aufs Gerät) — eigener Policy-Typ,
+   getrennt von Forward. Neuer Level-/Modus-Typ „Wer darf ans Management?";
+   braucht Engine-Erweiterung (local-in-Auswertung).
+
+### B — Reale Fehlkonfigurationen → Level-/Modus-Stoff
+
+Häufigste Praxisfehler (Community): any-any-Regel verschattet spezifische
+Regel; NAT auf LAN→WAN vergessen (Regel „erlaubt", Rückweg scheitert);
+Policy-Reihenfolge (breit über spezifisch); versehentlich disabled; fehlende
+Inter-VLAN-Policy; Security-Profil fehlt. → **„Config Doctor"-Casual-Modus:**
+kaputtes Regelwerk + Symptom-Ticket („LAN kommt nicht ins Web") → den EINEN
+Fehler finden und fixen. Deliberate Practice mit Variation, nutzt vorhandene
+Werkbank + Policy-Lookup + Debug-Flow als Diagnose. Zusätzlich mehr
+Audit/Incident-Content aus diesen Mustern.
+
+### C — Lernwissenschaft: Retention-Mechaniken (Gamification als Mittel)
+
+Forschung: Spaced Repetition + Gamification → bis 3× bessere Retention als
+je allein; Deliberate Practice = zielgerichtet + häufiges Feedback +
+Variation; Belohnung besser an den Review-Rhythmus gekoppelt als sofort.
+→ **Konzept-Mastery + Review:** pro FortiOS-Kernkonzept (First Match,
+Implicit Deny, VIP-vor-Policy, SNAT/DNAT, Schedule, Zonen, Routing→dstintf)
+tracken, wo der Spieler patzt (Debrief taggt das falsche Konzept), und
+schwache Konzepte gezielt wieder vorlegen — eigener „Review"-Modus bzw.
+Einstreuung ins Daily. Sichtbare Mastery-Karte/Skill-Map (beatbare 5-Min-
+Häppchen) als Fortschrittsanzeige; Streak an den Review-Termin koppeln.
+
+### Animations-/Polish-Ideen (klein, begleitend)
+
+Animierte „so matcht die Regel"-Auflösung (Felder leuchten nacheinander,
+UND-Kette), Konzept-Mastery-Orbs die sich füllen, Packet-Flow-Feinschliff
+im Debug-Flow-Panel (Zeile für Zeile aufdecken), sanfte Zähler-Hochzähl-
+Animation bei XP/Score.
+
 ## Prinzip
 
 Neue Ideen: erst hierher, dann priorisieren. Nichts davon blockiert v1.
