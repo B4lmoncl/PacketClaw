@@ -34,15 +34,22 @@ Konsequenzen für jede Design-Entscheidung:
   Level = Daten (`content/levels/`, Validator `npm run validate:levels`).
 - **Deploy:** VPS ohne DNS — `git clone` + `docker compose up -d --build`,
   Port über `AETHERGATE_PORT` (Standard 8090), Bind über `AETHERGATE_BIND`.
-  Details: docs/DEPLOY.md. Repo: **B4lmoncl/Automation-script** (einziges
-  Remote `origin`, Arbeitsbranch `claude/packetclaw-setup-84nxyb`) — dieser
-  Container wird aus genau diesem Repo gesynct. (Historie: früher wurde
-  zusätzlich nach B4lmoncl/PacketClaw gespiegelt; der Spiegel wurde am
-  2026-07-13 auf Nutzerwunsch entfernt, weil er nicht genutzt wird.)
+  Details: docs/DEPLOY.md.
+  **Repos & Push-Ziel (Nutzerentscheidung 2026-07-13):**
+  - **Kanonisch: `B4lmoncl/PacketClaw`, Branch `main`** — das ist das Repo,
+    das der Nutzer ansieht und aus dem der Container gesynct wird. Remote-
+    Name `packetclaw`. **Hier landet die Arbeit auf `main`.**
+  - Technisch klont dieser Container aus `B4lmoncl/Automation-script`
+    (Remote `origin`, Branch `claude/packetclaw-setup-84nxyb`); dessen
+    `main` ist alt/leer, deshalb sah der Nutzer dort „nichts". Dieser Branch
+    wird als Spiegel mitgezogen, damit die Session-Anbindung nicht veraltet.
+  - **Push nach jedem Schritt in BEIDE:** `git push packetclaw HEAD:main`
+    (kanonisch) UND `git push origin HEAD:claude/packetclaw-setup-84nxyb`
+    (Container-Spiegel). Beide stehen aktuell synchron auf demselben Stand.
 - **Arbeitsweise (Nutzerwunsch):** kleine Schritte, nach jedem Schritt
-  Commit + Push nach `origin` (Branch `claude/packetclaw-setup-84nxyb`);
-  Todos/Task-Liste und PLAN.md-Status-Log aktuell halten, damit Folge-
-  Sessions den Stand ohne Codebase-Lektüre kennen.
+  Commit + Push in beide Remotes (siehe oben); Todos/Task-Liste und
+  PLAN.md-Status-Log aktuell halten, damit Folge-Sessions den Stand ohne
+  Codebase-Lektüre kennen.
 - **Checks vor jedem Commit:** `npm run lint` (ESLint + Prettier),
   `npx vitest run`, bei UI-Änderungen `npm run build` + Playwright-Smoke
   (Chromium: `/opt/pw-browsers/chromium`, Server: `node server/index.mjs`).
