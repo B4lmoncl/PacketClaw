@@ -394,3 +394,24 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   eine on-theme Netzwerk-Textur ohne Fremd-Assets. Nur EIN QuestHall-Bild
   liegt lokal (mascot-gatekeeper.png); weitere Bilder bräuchten das
   QuestHall-Repo im Session-Scope. Tests: 220 gruen.
+- 2026-07-18 (Forts. 19): DNAT/VIP-Workshop „Publish a Server" (#51) —
+  aus dem VIP/DNAT-Recherchelauf abgeleitet (FortiOS-Cookbook Virtual IPs
+  / Port-Forwarding). src/game/dnat.ts (pure): generateDnatChallenge(seed)
+  liefert ein Startnetz (interner Webserver, Routen, ABER ohne VIP/ohne
+  Eingangs-Policy) + oeffentlichen Endpunkt; verifyDnat() prueft ueber die
+  Engine, dass ein Paket wan1→extIp:443 ACCEPT+DNAT auf die Server-IP
+  ergibt UND Port 22 geblockt bleibt (kein Ueberoeffnen). Bewusst als
+  klassische 1:1-VIP (extPort=443=Serverport) statt Port-Translation
+  gebaut — Kernlektion ist, die VIP als ZIEL im dstaddr zu referenzieren
+  (nicht die interne IP; genau der `dstaddr all`/interne-IP-Klassiker, den
+  die Engine korrekt ablehnt). DnatScreen.tsx: zweistufige Werkbank —
+  ① VIP-Formular (extIP/Port, gemappte Host-IP per Select, mappedPort) →
+  „VIP speichern", ② RulesetWorkbench fuer die Eingangs-Policy → „Aus dem
+  Internet testen"; done-Panel mit ParticleBurst + XpGain, Score
+  90−10·Fehlversuche (min 30). Store: dnatSolved + recordDnat + Screen
+  'dnat'; Home-Kachel 🌐 (aura); i18n de/en komplett. 7 neue Unit-Tests
+  (Start rot; VIP+Policy = gruen; VIP fehlt/Policy fehlt/falsches Mapping/
+  interne-IP-statt-VIP/dstaddr-all = rot). Tests: 227 gruen, Lint 0 Fehler
+  (1 Vorwarnung PolicyTable), Build ok, E2E-Smoke (Home→DNAT→Ticket/VIP/
+  Test rendern, keine JS-Exceptions). OFFEN Ideen: Port-Forward-Variante
+  (8443→443 mit passendem Service-Objekt), #43/#44/#49/#50.

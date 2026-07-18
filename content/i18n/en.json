@@ -29,7 +29,9 @@
     "matchcheckSub": "45 seconds — one rule, one packet: does it match?",
     "startHere": "Start here",
     "doctor": "Config Doctor",
-    "doctorSub": "One broken ruleset, one symptom — find and fix the bug"
+    "doctorSub": "One broken ruleset, one symptom — find and fix the bug",
+    "dnat": "Publish a Server",
+    "dnatSub": "DNAT / Virtual IP — make an internal server reachable from the internet"
   },
   "level": {
     "boss": "Boss",
@@ -442,5 +444,28 @@
     "or": "or",
     "notSet": "not set",
     "explain": "All fields must match (AND). Within a field, any one entry is enough (OR)."
+  },
+  "dnat": {
+    "title": "Publish a Server",
+    "intro": "A classic FortiGate task: port forwarding. An internal server has to be reachable from the internet. Create a Virtual IP (external → internal) and an inbound firewall policy that uses the VIP as its destination. Then test it from the internet.",
+    "start": "Open ticket",
+    "solved": "Servers published",
+    "ticket": "Support ticket",
+    "task": "Publish {{server}} ({{ip}}:{{port}}) to the internet at {{extIp}}:{{extPort}} (TCP). External users should reach the server through that address only.",
+    "vipStep": "Create the Virtual IP",
+    "extIp": "External IP",
+    "extPort": "External port",
+    "mapIp": "Mapped IP",
+    "mapPort": "Mapped port",
+    "vipSave": "Save VIP",
+    "vipUpdate": "Update VIP",
+    "vipIncomplete": "Fill in all four VIP fields (external IP/port, mapped IP/port).",
+    "policyStep": "Add an inbound policy — destination = the VIP (not the internal IP)",
+    "test": "Test from the internet",
+    "stillFailing": "Test: {{count}} check(s) still failing — VIP set, and does a policy allow it in?",
+    "published": "Server reachable — published!",
+    "diagnosis": "External traffic hits the VIP, gets DNAT-translated to the server, and the inbound policy lets it through.",
+    "concept": "Concept: DNAT / Virtual IP / port forwarding",
+    "next": "Next task"
   }
 }

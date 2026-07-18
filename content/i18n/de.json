@@ -29,7 +29,9 @@
     "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?",
     "startHere": "Hier starten",
     "doctor": "Config Doctor",
-    "doctorSub": "Ein kaputtes Regelwerk, ein Symptom — finde und fixe den Fehler"
+    "doctorSub": "Ein kaputtes Regelwerk, ein Symptom — finde und fixe den Fehler",
+    "dnat": "Server veröffentlichen",
+    "dnatSub": "DNAT / Virtual IP — internen Server aus dem Internet erreichbar machen"
   },
   "level": {
     "boss": "Boss",
@@ -442,5 +444,28 @@
     "or": "oder",
     "notSet": "nicht gesetzt",
     "explain": "Alle Felder müssen passen (UND). Innerhalb eines Feldes genügt ein Eintrag (ODER)."
+  },
+  "dnat": {
+    "title": "Server veröffentlichen",
+    "intro": "Eine klassische FortiGate-Aufgabe: Port-Forwarding. Ein interner Server soll aus dem Internet erreichbar sein. Lege eine Virtual IP an (extern → intern) und eine Eingangs-Policy, die die VIP als Ziel verwendet. Dann teste es aus dem Internet.",
+    "start": "Ticket öffnen",
+    "solved": "Veröffentlichte Server",
+    "ticket": "Support-Ticket",
+    "task": "Veröffentliche {{server}} ({{ip}}:{{port}}) im Internet unter {{extIp}}:{{extPort}} (TCP). Externe Nutzer sollen den Server nur über diese Adresse erreichen.",
+    "vipStep": "Virtual IP anlegen",
+    "extIp": "Externe IP",
+    "extPort": "Externer Port",
+    "mapIp": "Interne IP",
+    "mapPort": "Interner Port",
+    "vipSave": "VIP speichern",
+    "vipUpdate": "VIP aktualisieren",
+    "vipIncomplete": "Fülle alle vier VIP-Felder aus (externe IP/Port, interne IP/Port).",
+    "policyStep": "Eingangs-Policy hinzufügen — Ziel = die VIP (nicht die interne IP)",
+    "test": "Aus dem Internet testen",
+    "stillFailing": "Test: {{count}} Prüfung(en) noch rot — VIP gesetzt, und lässt eine Policy sie rein?",
+    "published": "Server erreichbar — veröffentlicht!",
+    "diagnosis": "Externer Verkehr trifft die VIP, wird per DNAT auf den Server übersetzt, und die Eingangs-Policy lässt ihn durch.",
+    "concept": "Konzept: DNAT / Virtual IP / Port-Forwarding",
+    "next": "Nächste Aufgabe"
   }
 }

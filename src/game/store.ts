@@ -34,6 +34,7 @@ export type Screen =
   | { name: 'blitz' }
   | { name: 'matchcheck' }
   | { name: 'doctor' }
+  | { name: 'dnat' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -60,6 +61,8 @@ interface GameState {
   matchBest: number;
   /** Gelöste Config-Doctor-Fälle */
   doctorSolved: number;
+  /** Gelöste DNAT/VIP-Workshops */
+  dnatSolved: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -79,6 +82,7 @@ interface GameState {
   recordBlitz(score: number): void;
   recordMatchCheck(score: number): void;
   recordDoctor(score: number): void;
+  recordDnat(score: number): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -100,6 +104,7 @@ export const useGame = create<GameState>()(
       blitzBest: 0,
       matchBest: 0,
       doctorSolved: 0,
+      dnatSolved: 0,
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -205,6 +210,21 @@ export const useGame = create<GameState>()(
           };
         }),
 
+      recordDnat: (score) =>
+        set((state) => {
+          const xp = state.xp + score;
+          const unlocked = evaluateAchievements(
+            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            dnatSolved: state.dnatSolved + 1,
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
       recordDoctor: (score) =>
         set((state) => {
           const xp = state.xp + score;
@@ -263,6 +283,7 @@ export const useGame = create<GameState>()(
           blitzBest,
           matchBest,
           doctorSolved,
+          dnatSolved,
           stats,
           achievements,
           streak,
@@ -280,6 +301,7 @@ export const useGame = create<GameState>()(
             blitzBest,
             matchBest,
             doctorSolved,
+            dnatSolved,
             stats,
             achievements,
             streak,
@@ -322,6 +344,7 @@ export const useGame = create<GameState>()(
         blitzBest: state.blitzBest,
         matchBest: state.matchBest,
         doctorSolved: state.doctorSolved,
+        dnatSolved: state.dnatSolved,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -350,6 +373,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   blitzBest: number;
   matchBest: number;
   doctorSolved: number;
+  dnatSolved: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -371,6 +395,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     blitzBest: typeof save.blitzBest === 'number' ? save.blitzBest : 0,
     matchBest: typeof save.matchBest === 'number' ? save.matchBest : 0,
     doctorSolved: typeof save.doctorSolved === 'number' ? save.doctorSolved : 0,
+    dnatSolved: typeof save.dnatSolved === 'number' ? save.dnatSolved : 0,
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },
