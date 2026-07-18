@@ -385,3 +385,12 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   durch), wrong-srcaddr (Quelle deckt LAN nicht ab), wrong-dstintf
   (Ziel-Interface passt nicht zur Route). Je Symptom/Diagnose/Konzept-
   i18n, 3 neue Unit-Tests (jetzt 8). Tests: 220 gruen.
+- 2026-07-13 (Forts. 18, Nutzerkorrektur): Aurora-Blobs wieder prominent
+  (die vorige Abschwaechung zurueckgenommen — waren gewuenscht); nur der
+  cursor-folgende Glow war das Problem (bleibt entfernt). Panels bleiben
+  opak (Lesbarkeit) + 17px. NEU gegen „nur Farben langweilig": lebendiges
+  Netz-Geflecht auf dem Ambient-Canvas — nahe Partikel-Knoten werden mit
+  dezenten Linien (aura, distanzabhaengige Deckkraft) verbunden, ergibt
+  eine on-theme Netzwerk-Textur ohne Fremd-Assets. Nur EIN QuestHall-Bild
+  liegt lokal (mascot-gatekeeper.png); weitere Bilder bräuchten das
+  QuestHall-Repo im Session-Scope. Tests: 220 gruen.

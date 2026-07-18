@@ -32,13 +32,17 @@ function makeMote(w: number, h: number, randomY = false): Mote {
     drift: 10 + Math.random() * 22,
     phase: Math.random() * Math.PI * 2,
     color,
-    // Dezent leuchtende Datenpartikel (Hintergrund tritt zurueck)
-    alpha: 0.1 + Math.random() * 0.16,
+    // Leuchtende Datenpartikel — Knoten des Netz-Geflechts
+    alpha: 0.18 + Math.random() * 0.28,
   };
 }
 
 // Einmalig pro Farbe einen weichen Glow-Sprite vorrendern — im Frame wird nur
 // noch drawImage aufgerufen (viel billiger als per-Partikel-shadowBlur).
+// Reichweite, in der zwei Knoten mit einer Linie verbunden werden
+const LINK_DIST = 150;
+const LINK_DIST2 = LINK_DIST * LINK_DIST;
+
 const SPRITE_R = 32;
 const spriteCache = new Map<string, HTMLCanvasElement>();
 function glowSprite(color: string): HTMLCanvasElement {
@@ -72,6 +76,8 @@ export function AmbientBackground() {
     let w = 0;
     let h = 0;
     let motes: Mote[] = [];
+    let posX: number[] = [];
+    let posY: number[] = [];
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
@@ -82,6 +88,8 @@ export function AmbientBackground() {
       // Dichte wie zuvor (Qualität) — die Sprite-Zeichnung ist billig genug
       const target = Math.min(48, Math.floor((w * h) / 34000));
       motes = Array.from({ length: target }, () => makeMote(w, h, true));
+      posX = new Array<number>(target).fill(0);
+      posY = new Array<number>(target).fill(0);
     };
     resize();
     window.addEventListener('resize', resize);
@@ -96,19 +104,51 @@ export function AmbientBackground() {
       last = now;
       ctx.clearRect(0, 0, w, h);
       const t = now / 1000;
-      // Additives Leuchten via vorgerendertem Sprite (drawImage statt shadowBlur)
       ctx.globalCompositeOperation = 'lighter';
+
+      // 1) Positionen berechnen (mit Wobble) + fortbewegen
       for (let i = 0; i < motes.length; i++) {
         const m = motes[i] as Mote;
         m.y -= m.speed * dt;
         if (m.y < -10) motes[i] = makeMote(w, h);
-        const x = m.x + Math.sin(t * 0.5 + m.phase) * m.drift;
-        // sanftes Flimmern der Helligkeit
-        ctx.globalAlpha = m.alpha * (0.7 + 0.3 * Math.sin(t * 1.6 + m.phase));
-        // Glow-Durchmesser wie beim frueheren shadowBlur (~7×Kern)
-        const d = m.size * 7;
-        ctx.drawImage(glowSprite(m.color), x - d / 2, m.y - d / 2, d, d);
+        posX[i] = m.x + Math.sin(t * 0.5 + m.phase) * m.drift;
+        posY[i] = m.y;
       }
+
+      // 2) Netz-Geflecht: nahe Knoten mit dezenten Linien verbinden — das
+      //    macht aus reinen Farben eine „lebendige Netzwerk"-Textur
+      ctx.lineWidth = 1;
+      for (let i = 0; i < motes.length; i++) {
+        const xi = posX[i] as number;
+        const yi = posY[i] as number;
+        for (let j = i + 1; j < motes.length; j++) {
+          const dx = xi - (posX[j] as number);
+          const dy = yi - (posY[j] as number);
+          const d2 = dx * dx + dy * dy;
+          if (d2 > LINK_DIST2) continue;
+          const a = (1 - Math.sqrt(d2) / LINK_DIST) * 0.12;
+          ctx.strokeStyle = `rgba(139,123,255,${a})`;
+          ctx.beginPath();
+          ctx.moveTo(xi, yi);
+          ctx.lineTo(posX[j] as number, posY[j] as number);
+          ctx.stroke();
+        }
+      }
+
+      // 3) Leuchtende Knoten (vorgerendertes Glow-Sprite)
+      for (let i = 0; i < motes.length; i++) {
+        const m = motes[i] as Mote;
+        ctx.globalAlpha = m.alpha * (0.7 + 0.3 * Math.sin(t * 1.6 + m.phase));
+        const d = m.size * 7;
+        ctx.drawImage(
+          glowSprite(m.color),
+          (posX[i] as number) - d / 2,
+          (posY[i] as number) - d / 2,
+          d,
+          d,
+        );
+      }
+
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
       raf = requestAnimationFrame(frame);

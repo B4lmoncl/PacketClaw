@@ -21,10 +21,10 @@ body {
 .pc-bg-gradient {
   position: relative;
   background:
-    radial-gradient(60rem 40rem at 12% -10%, rgba(139, 123, 255, 0.055), transparent 60%),
-    radial-gradient(50rem 40rem at 100% 0%, rgba(255, 90, 60, 0.045), transparent 55%),
-    radial-gradient(55rem 45rem at 50% 120%, rgba(61, 220, 151, 0.04), transparent 60%),
-    linear-gradient(180deg, #0b1220 0%, #121022 50%, #0b1220 100%);
+    radial-gradient(60rem 40rem at 12% -10%, rgba(139, 123, 255, 0.1), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 0%, rgba(255, 90, 60, 0.08), transparent 55%),
+    radial-gradient(55rem 45rem at 50% 120%, rgba(61, 220, 151, 0.07), transparent 60%),
+    linear-gradient(180deg, #0b1220 0%, #141127 50%, #0b1220 100%);
   background-size:
     100% 100%,
     100% 100%,
@@ -90,25 +90,25 @@ body {
 .aurora-blob.b1 {
   width: 44rem;
   height: 44rem;
-  top: -16rem;
-  left: -12rem;
-  background: radial-gradient(circle, rgba(255, 90, 60, 0.22), transparent 62%);
+  top: -14rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(255, 90, 60, 0.5), transparent 62%);
   animation: aurora-a 26s ease-in-out infinite;
 }
 .aurora-blob.b2 {
   width: 40rem;
   height: 40rem;
-  right: -12rem;
-  bottom: -18rem;
-  background: radial-gradient(circle, rgba(139, 123, 255, 0.22), transparent 62%);
+  right: -10rem;
+  bottom: -16rem;
+  background: radial-gradient(circle, rgba(139, 123, 255, 0.5), transparent 62%);
   animation: aurora-b 34s ease-in-out infinite;
 }
 .aurora-blob.b3 {
-  width: 32rem;
-  height: 32rem;
-  top: 24%;
-  left: 44%;
-  background: radial-gradient(circle, rgba(61, 220, 151, 0.16), transparent 64%);
+  width: 34rem;
+  height: 34rem;
+  top: 26%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(61, 220, 151, 0.42), transparent 64%);
   animation: aurora-c 30s ease-in-out infinite;
 }
 @keyframes aurora-a {
@@ -141,7 +141,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob {
     animation: none;
-    opacity: 0.5;
+    opacity: 0.6;
   }
 }
 
