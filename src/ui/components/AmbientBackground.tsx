@@ -32,8 +32,8 @@ function makeMote(w: number, h: number, randomY = false): Mote {
     drift: 10 + Math.random() * 22,
     phase: Math.random() * Math.PI * 2,
     color,
-    // Deutlich sichtbarer als vorher — leuchtende Datenpartikel
-    alpha: 0.18 + Math.random() * 0.28,
+    // Dezent leuchtende Datenpartikel (Hintergrund tritt zurueck)
+    alpha: 0.1 + Math.random() * 0.16,
   };
 }
 

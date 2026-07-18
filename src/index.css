@@ -6,6 +6,11 @@
   color-scheme: dark;
 }
 
+/* Alles etwas groesser: rem-basierte Groessen skalieren mit (16 → 17px) */
+html {
+  font-size: 17px;
+}
+
 body {
   background-color: #0b1220;
   color: #e6edf7;
@@ -16,10 +21,10 @@ body {
 .pc-bg-gradient {
   position: relative;
   background:
-    radial-gradient(60rem 40rem at 12% -10%, rgba(139, 123, 255, 0.1), transparent 60%),
-    radial-gradient(50rem 40rem at 100% 0%, rgba(255, 90, 60, 0.08), transparent 55%),
-    radial-gradient(55rem 45rem at 50% 120%, rgba(61, 220, 151, 0.07), transparent 60%),
-    linear-gradient(180deg, #0b1220 0%, #141127 50%, #0b1220 100%);
+    radial-gradient(60rem 40rem at 12% -10%, rgba(139, 123, 255, 0.055), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 0%, rgba(255, 90, 60, 0.045), transparent 55%),
+    radial-gradient(55rem 45rem at 50% 120%, rgba(61, 220, 151, 0.04), transparent 60%),
+    linear-gradient(180deg, #0b1220 0%, #121022 50%, #0b1220 100%);
   background-size:
     100% 100%,
     100% 100%,
@@ -85,25 +90,25 @@ body {
 .aurora-blob.b1 {
   width: 44rem;
   height: 44rem;
-  top: -14rem;
-  left: -10rem;
-  background: radial-gradient(circle, rgba(255, 90, 60, 0.5), transparent 62%);
+  top: -16rem;
+  left: -12rem;
+  background: radial-gradient(circle, rgba(255, 90, 60, 0.22), transparent 62%);
   animation: aurora-a 26s ease-in-out infinite;
 }
 .aurora-blob.b2 {
   width: 40rem;
   height: 40rem;
-  right: -10rem;
-  bottom: -16rem;
-  background: radial-gradient(circle, rgba(139, 123, 255, 0.5), transparent 62%);
+  right: -12rem;
+  bottom: -18rem;
+  background: radial-gradient(circle, rgba(139, 123, 255, 0.22), transparent 62%);
   animation: aurora-b 34s ease-in-out infinite;
 }
 .aurora-blob.b3 {
-  width: 34rem;
-  height: 34rem;
-  top: 26%;
-  left: 42%;
-  background: radial-gradient(circle, rgba(61, 220, 151, 0.42), transparent 64%);
+  width: 32rem;
+  height: 32rem;
+  top: 24%;
+  left: 44%;
+  background: radial-gradient(circle, rgba(61, 220, 151, 0.16), transparent 64%);
   animation: aurora-c 30s ease-in-out infinite;
 }
 @keyframes aurora-a {
@@ -136,7 +141,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob {
     animation: none;
-    opacity: 0.6;
+    opacity: 0.5;
   }
 }
 
@@ -233,10 +238,13 @@ body {
 /* Glasflächen: Panels mit leichter Transluzenz + Innen-Highlight oben */
 .glass {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 40%),
-    rgba(17, 26, 46, 0.72);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 40%),
+    rgba(17, 26, 46, 0.94);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 10px 30px -14px rgba(0, 0, 0, 0.8);
 }
 
 /* Aurora-Verlaufstext für Titel/Headlines */
