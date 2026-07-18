@@ -411,19 +411,28 @@
     "diagnosis": {
       "nat-missing": "Die Egress-Regel griff, aber SNAT war aus — der Rückweg kam nie an.",
       "disabled": "Die richtige Regel war da, nur deaktiviert — der Verkehr fiel bis zur Deny durch.",
-      "order": "Eine breite Deny über der Erlauben-Regel hat sie verschattet — First Match gewinnt."
+      "order": "Eine breite Deny über der Erlauben-Regel hat sie verschattet — First Match gewinnt.",
+      "wrong-service": "Die Erlauben-Regel ließ den falschen Dienst durch — Web-Verkehr hat nie gematcht.",
+      "wrong-srcaddr": "Die Quelle der Erlauben-Regel deckte das LAN nicht ab — die Pakete matchten nie.",
+      "wrong-dstintf": "Das Ziel-Interface der Erlauben-Regel passte nicht zur Route ins Internet."
     },
     "concept": {
       "snat": "Konzept: SNAT",
       "status": "Konzept: Regel-Status",
-      "firstMatch": "Konzept: First Match / Reihenfolge"
+      "firstMatch": "Konzept: First Match / Reihenfolge",
+      "service": "Konzept: Service-Objekte / Ports",
+      "address": "Konzept: Adressobjekte",
+      "interface": "Konzept: Interfaces & Routing"
     },
     "editsUsed": "{{edits}} Eingriff(e)",
     "next": "Nächster Fall",
     "symptom": {
       "nat-missing": "LAN-Nutzer erreichen bei manchen Seiten die erste Seite, die meisten laufen aber in einen Timeout — als käme die Antwort nie zurück.",
       "disabled": "Seit der letzten Änderung kommt im LAN niemand mehr ins Web. Eine Regel dafür scheint es aber zu geben.",
-      "order": "Es gibt eine Erlauben-Regel für LAN-Webzugriff, aber sie greift nie — alles nach draußen wird geblockt."
+      "order": "Es gibt eine Erlauben-Regel für LAN-Webzugriff, aber sie greift nie — alles nach draußen wird geblockt.",
+      "wrong-service": "Web-Surfen aus dem LAN ist tot, obwohl es eine Erlauben-Regel für ausgehenden Verkehr gibt. Vielleicht erlaubt sie das Falsche?",
+      "wrong-srcaddr": "Web geht von manchen Rechnern, aber nicht aus dem LAN — als wäre die Erlauben-Regel auf die falsche Quelle eingeschränkt.",
+      "wrong-dstintf": "Das LAN kommt nicht ins Internet. Die Erlauben-Regel sieht gut aus, schickt den Verkehr aber zur falschen Tür raus."
     }
   },
   "matchLogic": {

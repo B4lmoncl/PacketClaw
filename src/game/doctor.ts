@@ -24,14 +24,25 @@ import {
   ZONES,
 } from './daily';
 
-export type DoctorBug = 'nat-missing' | 'disabled' | 'order';
-export const DOCTOR_BUGS: DoctorBug[] = ['nat-missing', 'disabled', 'order'];
+export type DoctorBug =
+  'nat-missing' | 'disabled' | 'order' | 'wrong-service' | 'wrong-srcaddr' | 'wrong-dstintf';
+export const DOCTOR_BUGS: DoctorBug[] = [
+  'nat-missing',
+  'disabled',
+  'order',
+  'wrong-service',
+  'wrong-srcaddr',
+  'wrong-dstintf',
+];
 
 /** Welches Konzept der Fall trainiert (für Debrief/Anzeige). */
 export const BUG_CONCEPT: Record<DoctorBug, string> = {
   'nat-missing': 'snat',
   disabled: 'status',
   order: 'firstMatch',
+  'wrong-service': 'service',
+  'wrong-srcaddr': 'address',
+  'wrong-dstintf': 'interface',
 };
 
 export interface DoctorCase {
@@ -67,11 +78,22 @@ export function generateDoctorCase(seed: string): DoctorCase {
 
   let policies = [allow, denyRest];
   if (bug === 'nat-missing') {
+    // SNAT vergessen → Rueckweg scheitert
     policies = [{ ...allow, nat: false }, denyRest];
   } else if (bug === 'disabled') {
+    // Regel versehentlich deaktiviert
     policies = [{ ...allow, enabled: false }, denyRest];
+  } else if (bug === 'wrong-service') {
+    // falscher Dienst erlaubt (SSH/DNS statt Web) → Web faellt durch
+    policies = [{ ...allow, service: [rng.pick(['SSH', 'DNS'])] }, denyRest];
+  } else if (bug === 'wrong-srcaddr') {
+    // Quelle deckt das LAN nicht ab → Pakete matchen nie
+    policies = [{ ...allow, srcaddr: [rng.pick(['DMZ_NET', 'GUEST_NET'])] }, denyRest];
+  } else if (bug === 'wrong-dstintf') {
+    // Ziel-Interface passt nicht zur Route ins Internet
+    policies = [{ ...allow, dstintf: [rng.pick(['port2', 'vlan20'])] }, denyRest];
   } else {
-    // breite Deny ganz oben verschattet die Erlauben-Regel
+    // order: breite Deny ganz oben verschattet die Erlauben-Regel
     const broadDeny = makePolicy({
       id: 1,
       name: 'block-outbound',

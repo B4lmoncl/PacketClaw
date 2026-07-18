@@ -411,19 +411,28 @@
     "diagnosis": {
       "nat-missing": "The egress rule matched, but SNAT was off — return traffic never came back.",
       "disabled": "The right rule was there, just disabled — so traffic fell through to the deny.",
-      "order": "A broad deny above the allow rule shadowed it — first match wins."
+      "order": "A broad deny above the allow rule shadowed it — first match wins.",
+      "wrong-service": "The allow rule permitted the wrong service — web traffic never matched it.",
+      "wrong-srcaddr": "The allow rule's source didn't cover the LAN — the packets never matched.",
+      "wrong-dstintf": "The allow rule's destination interface didn't match the route to the internet."
     },
     "concept": {
       "snat": "Concept: SNAT",
       "status": "Concept: rule status",
-      "firstMatch": "Concept: first match / order"
+      "firstMatch": "Concept: first match / order",
+      "service": "Concept: service objects / ports",
+      "address": "Concept: address objects",
+      "interface": "Concept: interfaces & routing"
     },
     "editsUsed": "{{edits}} edit(s)",
     "next": "Next case",
     "symptom": {
       "nat-missing": "LAN users can reach the first page of some sites, but most just time out — as if replies never make it back.",
       "disabled": "Since the last change, nobody in the LAN can browse the web at all. There does seem to be a rule for it, though.",
-      "order": "There is an allow rule for LAN web access, but it never takes effect — everything outbound gets blocked."
+      "order": "There is an allow rule for LAN web access, but it never takes effect — everything outbound gets blocked.",
+      "wrong-service": "Web browsing from the LAN is dead, yet there IS an allow rule for outbound traffic. Maybe it permits the wrong thing?",
+      "wrong-srcaddr": "Web works from some machines but not the LAN — as if the allow rule is scoped to the wrong source.",
+      "wrong-dstintf": "The LAN can't reach the internet. The allow rule looks fine, but seems to send traffic out the wrong door."
     }
   },
   "matchLogic": {

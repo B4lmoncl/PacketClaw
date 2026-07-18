@@ -377,3 +377,11 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   PolicyEditor unter den Feldern — deckt sich beim Bearbeiten LIVE mit
   den gewaehlten Objekten auf (wirkt in Architect/Audit/Incident/Sandbox/
   Doctor). 2 Unit-Tests + E2E-Smoke (Labels + Interaktion). Tests: 217.
+- 2026-07-13 (Forts. 17, Nutzerwunsch): (a) Lesbarkeit — Aurora-Blobs und
+  Partikel deutlich zurueckgenommen, Mesh-Ecken gedimmt, Glass-Panels
+  opaker (0.72→0.94) + Rand/Schatten, Root-Schrift 16→17px (alles
+  proportional groesser). (b) Config Doctor von 3 auf 6 Fehlertypen
+  erweitert: neu wrong-service (falscher Dienst erlaubt → Web faellt
+  durch), wrong-srcaddr (Quelle deckt LAN nicht ab), wrong-dstintf
+  (Ziel-Interface passt nicht zur Route). Je Symptom/Diagnose/Konzept-
+  i18n, 3 neue Unit-Tests (jetzt 8). Tests: 220 gruen.

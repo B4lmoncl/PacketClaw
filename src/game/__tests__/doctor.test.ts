@@ -46,6 +46,30 @@ describe('Config Doctor', () => {
     expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
   });
 
+  it('wrong-service: Service auf WEB korrigieren macht die Suite gruen', () => {
+    const c = caseFor('wrong-service');
+    const fixed = c.network.policies.map((p) =>
+      p.name === 'lan-web-out' ? { ...p, service: ['WEB'] } : p,
+    );
+    expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
+  });
+
+  it('wrong-srcaddr: Quelle auf LAN_NET korrigieren macht die Suite gruen', () => {
+    const c = caseFor('wrong-srcaddr');
+    const fixed = c.network.policies.map((p) =>
+      p.name === 'lan-web-out' ? { ...p, srcaddr: ['LAN_NET'] } : p,
+    );
+    expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
+  });
+
+  it('wrong-dstintf: Ziel-Interface auf wan1 korrigieren macht die Suite gruen', () => {
+    const c = caseFor('wrong-dstintf');
+    const fixed = c.network.policies.map((p) =>
+      p.name === 'lan-web-out' ? { ...p, dstintf: ['wan1'] } : p,
+    );
+    expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
+  });
+
   it('Kontroll-Check beisst: alles auf service ALL oeffnen laesst RDP durch → bleibt rot', () => {
     const c = caseFor('disabled');
     // Regel aktivieren, aber Service viel zu weit auf ALL — RDP-Deny-Kontrolle faellt
