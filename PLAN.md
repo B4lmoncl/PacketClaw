@@ -437,3 +437,37 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 235 gruen, Lint 0 Fehler, Build ok, E2E-Smoke fuer frischen
   Spieler (→ „Kampagne starten") UND Rueckkehrer (→ „Weiterspielen"),
   beide landen per Klick im Level; Screenshots Desktop 1280 + Mobil 430.
+- 2026-07-25 (Forts. 21, autonom): NEUER MODUS „Change Request" (#53) —
+  Regelwerk komplett nach schriftlichen Vorgaben bauen, der vom Nutzer
+  gewuenschte Policy-Design-Kern. src/game/design.ts (pure, 8 Tests):
+  fester CAPABILITIES-Katalog (7 Verkehrsbeziehungen im Uebungsnetz);
+  generateDesignSpec(seed) zieht 3 davon als allow-Anforderungen, ALLES
+  nicht Gezogene wird automatisch Guard (muss zu bleiben) — dadurch kann
+  Least Privilege nie im Widerspruch zur Anforderung stehen, und die
+  Guards sind keine versteckte Falle, weil das Ticket den Grundsatz
+  („was nicht gefordert ist, bleibt geschlossen") ausdruecklich nennt.
+  Segmentierung (Gast→LAN verboten) ist immer die letzte, ausformulierte
+  deny-Anforderung. reviewDesign() prueft drei Ebenen wie ein echtes
+  Review: Anforderungen erfuellt (inkl. natMissing separat gemeldet, damit
+  „geht nicht" von „SNAT fehlt" unterscheidbar ist) · nicht mehr geoeffnet
+  als gefordert (Guards, im UI mit Klartext welche Verbindung durchkommt) ·
+  Handwerk (findOverbroadPolicies + findShadowedPolicies aus der Engine
+  wiederverwendet). Alle 7 Capabilities sind paarweise trennbar (Service
+  bzw. Quelle), jeder generierte Auftrag ist also loesbar — per Test ueber
+  8 Seeds gegen eine Referenzloesung abgesichert. Didaktischer Kern:
+  die Zone `inside` enthaelt port1 UND vlan20, eine faule
+  „inside→all/ALL"-Sammelregel erfuellt die allow-Punkte und bricht die
+  Segmentierung (eigener Test). DesignScreen.tsx: LIVE-Checkliste (jede
+  Anforderung ✓/○ waehrend des Bauens, durchgestrichen wenn erfuellt,
+  [SNAT]-Marker), Breach-Warnung, Submit erst aktiv wenn passed, Sterne
+  ueber starsFor (3. Stern = review.clean). Store: designSolved +
+  recordDesign + Screen 'design'; Home-Kachel 📋 in der WERKSTATT-Gruppe;
+  i18n de/en. Flavour im Ticket-Register (trocken/buerokratisch, eigene
+  Texte — QuestHall/Lyra-Playbook liegt nicht im Session-Scope).
+  Perf: config UND review memoisiert (reviewDesign fuehrt die
+  Overbroad-/Shadow-Analysen, darf nicht pro Render laufen).
+  Tests: 243 gruen, Lint 0 Fehler, Build ok, E2E-Smoke (Ticket R1-R4,
+  Segmentierung vorab gruen via Implicit Deny, Submit gesperrt).
+  ROADMAP v1.3 ergaenzt: Routing → FQDN-Objekte → DHCP → HA (#54), mit
+  Begruendung der Reihenfolge; Routing ist der billigste naechste Schritt,
+  weil longestPrefixMatch/RouteEntry schon existieren.

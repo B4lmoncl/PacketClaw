@@ -60,6 +60,7 @@ const GROUPS: { key: string; modes: Mode[] }[] = [
     key: 'labs',
     modes: [
       { screen: { name: 'doctor' }, key: 'doctor', icon: '🩺', accent: 'deny' },
+      { screen: { name: 'design' }, key: 'design', icon: '📋', accent: 'warn' },
       { screen: { name: 'dnat' }, key: 'dnat', icon: '🌐', accent: 'aura' },
       { screen: { name: 'sandbox' }, key: 'sandbox', icon: '🧪', accent: 'trace' },
     ],

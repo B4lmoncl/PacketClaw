@@ -31,7 +31,9 @@
     "doctor": "Config Doctor",
     "doctorSub": "Symptom lesen, den einen Fehler finden und fixen",
     "dnat": "Server veröffentlichen",
-    "dnatSub": "Port-Forwarding — Server nach außen veröffentlichen"
+    "dnatSub": "Port-Forwarding — Server nach außen veröffentlichen",
+    "design": "Change Request",
+    "designSub": "Regelwerk nach Vorgaben bauen"
   },
   "level": {
     "boss": "Boss",
@@ -479,6 +481,39 @@
       "quick": "Schnelle Runden",
       "labs": "Werkstatt",
       "endurance": "Ausdauer"
+    }
+  },
+  "design": {
+    "title": "Change Request",
+    "intro": "Ein Änderungsauftrag liegt auf dem Tisch: ein paar Anforderungen in Prosa, ein leeres Regelwerk und die Frage, ob du daraus eine Firewall baust, die genau das tut — und nichts darüber hinaus. Die Prüfliste aktualisiert sich live, während du baust.",
+    "rule": "Grundsatz: Was nicht ausdrücklich gefordert ist, bleibt geschlossen. Alles, was du darüber hinaus öffnest, fällt im Review auf.",
+    "start": "Auftrag annehmen",
+    "solved": "Genehmigte Changes",
+    "ticket": "Änderungsauftrag",
+    "submit": "Zum Review einreichen",
+    "approved": "Change genehmigt",
+    "next": "Nächster Auftrag",
+    "readyForReview": "Alle Anforderungen erfüllt — bereit fürs Review.",
+    "stillOpen": "{{count}} Punkt(e) offen",
+    "breach": "Zu viel geöffnet: {{count}} nicht geforderte Verbindung(en) kommen durch",
+    "natMissing": "SNAT fehlt",
+    "hintClean": "Läuft, aber: {{overbroad}}× zu breit, {{shadowed}}× tote Regel — enger fassen für 3 Sterne.",
+    "praiseClean": "Review bestanden — enge Objekte, keine toten Regeln. Der Auditor hat nichts gefunden, was ihn unglücklich macht, und nimmt das persönlich.",
+    "praiseWorks": "Angenommen. Es tut, was gefordert war — ein Auditor hätte allerdings Fragen, und die Zeit, sie zu stellen.",
+    "req": {
+      "lanWeb": "Das LAN darf per HTTPS ins Internet.",
+      "lanDns": "Das LAN darf DNS-Anfragen an 9.9.9.9 stellen.",
+      "lanDmzHttps": "Das LAN darf den Webserver SRV_WEB01 per HTTPS erreichen.",
+      "guestWeb": "Das Gast-WLAN darf per HTTPS ins Internet — sonst nichts.",
+      "adminDmzSsh": "Nur der ADMIN_PC darf SRV_WEB01 per SSH verwalten.",
+      "lanDmzPing": "Das LAN darf SRV_WEB01 anpingen (Monitoring).",
+      "lanRdpOut": "Das LAN darf RDP nach außen (Fernwartung beim Dienstleister).",
+      "guestToLan": "Das Gast-WLAN darf das interne LAN NIEMALS erreichen."
+    },
+    "note": {
+      "a": "Der Auftraggeber bittet um zügige Umsetzung und hat vorsorglich schon allen mitgeteilt, dass es funktioniert.",
+      "b": "Anmerkung der Fachabteilung: \"Einfach alles freischalten\" wurde als Lösungsvorschlag eingereicht und aus Gründen abgelehnt, die im Anhang stehen. Es gibt keinen Anhang.",
+      "c": "Letzte dokumentierte Änderung an dieser Firewall: unbekannt. Der Kollege, der es wusste, ist befördert worden."
     }
   }
 }

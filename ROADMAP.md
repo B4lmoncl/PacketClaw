@@ -146,6 +146,36 @@ UND-Kette), Konzept-Mastery-Orbs die sich füllen, Packet-Flow-Feinschliff
 im Debug-Flow-Panel (Zeile für Zeile aufdecken), sanfte Zähler-Hochzähl-
 Animation bei XP/Score.
 
+## v1.3 — Netzwerkdienste jenseits der Policy (Nutzerwunsch 2026-07-25)
+
+Der Nutzer will mit AetherGate nicht nur Policy-Logik, sondern
+FortiGate-**Administration** lernen. Die vier genannten Bereiche, nach
+Aufwand sortiert — jeder ist ein eigener Schritt, keiner blockiert v1:
+
+1. **Routing (kleinster Sprung, Engine hat die Basis).** `longestPrefixMatch`
+   und `RouteEntry` existieren schon und bestimmen das dstintf. Fehlt: eine
+   Routing-Werkbank, in der der Spieler Routen selbst anlegt/ändert und sieht,
+   wie sich das Egress-Interface und damit der Policy-Match verschiebt;
+   Distance/Priority bei konkurrierenden Routen; Blackhole-Route; „warum geht
+   der Traffic aufs falsche Interface?"-Troubleshooting. Dazu passt eine
+   Route-Lookup-Ansicht analog zum Policy Lookup.
+2. **DHCP.** Interface-Rollen (LAN/WAN), Adress-Pools, Reservierungen,
+   Lease-Liste. Lernwert vor allem im Zusammenspiel: ein Client bekommt eine
+   IP aus einem Pool, der nicht im erwarteten Adressobjekt liegt → Policy
+   matcht nicht. Braucht ein Client-/Lease-Modell in der Engine.
+3. **DNS.** FortiGate als DNS-Server bzw. Forwarder, plus FQDN-Adressobjekte
+   (in echten Regelwerken sehr üblich und eine typische Fehlerquelle: das
+   FQDN-Objekt ist noch nicht aufgelöst, die Regel matcht nicht). FQDN-
+   Objekte wären auch ohne DHCP/DNS-Server ein eigenständiger Gewinn.
+4. **HA (größter Sprung, eigene Ebene).** A-P vs. A-A, Heartbeat-Interfaces,
+   Priority/Override, Session-Pickup, Failover-Übung („Node fällt aus — was
+   passiert mit bestehenden Sessions?"). Sinnvoll erst, wenn die Engine ein
+   Cluster-/Session-Konzept hat; als Lernstoff aber sehr wertvoll, weil
+   Failover-Verhalten in Prüfungen und Praxis dauernd auftaucht.
+
+Reihenfolge-Empfehlung: Routing zuerst (billig, sofort spielbar), dann
+FQDN-Objekte, dann DHCP, HA zuletzt.
+
 ## Prinzip
 
 Neue Ideen: erst hierher, dann priorisieren. Nichts davon blockiert v1.

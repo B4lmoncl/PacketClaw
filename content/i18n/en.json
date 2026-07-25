@@ -31,7 +31,9 @@
     "doctor": "Config Doctor",
     "doctorSub": "Read the symptom, find and fix the one bug",
     "dnat": "Publish a Server",
-    "dnatSub": "Port forwarding — publish a server to the internet"
+    "dnatSub": "Port forwarding — publish a server to the internet",
+    "design": "Change Request",
+    "designSub": "Build a ruleset from written requirements"
   },
   "level": {
     "boss": "Boss",
@@ -479,6 +481,39 @@
       "quick": "Quick rounds",
       "labs": "Workshops",
       "endurance": "Endurance"
+    }
+  },
+  "design": {
+    "title": "Change Request",
+    "intro": "A change request is on your desk: a handful of requirements in plain prose, an empty ruleset, and the question of whether you can turn one into a firewall that does exactly that — and nothing beyond it. The checklist updates live while you build.",
+    "rule": "Standing rule: anything not explicitly requested stays closed. Whatever you open beyond the request will show up in the review.",
+    "start": "Accept the request",
+    "solved": "Approved changes",
+    "ticket": "Change request",
+    "submit": "Submit for review",
+    "approved": "Change approved",
+    "next": "Next request",
+    "readyForReview": "All requirements met — ready for review.",
+    "stillOpen": "{{count}} item(s) open",
+    "breach": "Too much open: {{count}} unrequested connection(s) get through",
+    "natMissing": "SNAT missing",
+    "hintClean": "Works, but: {{overbroad}}× too broad, {{shadowed}}× dead rule — tighten it for 3 stars.",
+    "praiseClean": "Review passed — tight objects, no dead rules. The auditor found nothing to be unhappy about, and took it personally.",
+    "praiseWorks": "Approved. It does what was asked — though an auditor would have questions, and the time to ask them.",
+    "req": {
+      "lanWeb": "The LAN may reach the internet over HTTPS.",
+      "lanDns": "The LAN may send DNS queries to 9.9.9.9.",
+      "lanDmzHttps": "The LAN may reach the web server SRV_WEB01 over HTTPS.",
+      "guestWeb": "Guest WiFi may reach the internet over HTTPS — nothing else.",
+      "adminDmzSsh": "Only ADMIN_PC may manage SRV_WEB01 over SSH.",
+      "lanDmzPing": "The LAN may ping SRV_WEB01 (monitoring).",
+      "lanRdpOut": "The LAN may use RDP outbound (remote support at a vendor).",
+      "guestToLan": "Guest WiFi must NEVER reach the internal LAN."
+    },
+    "note": {
+      "a": "The requester asks for swift implementation and has already told everyone it works.",
+      "b": "Note from the department: \"just open everything\" was submitted as a proposal and rejected for reasons set out in the appendix. There is no appendix.",
+      "c": "Last documented change to this firewall: unknown. The colleague who knew has been promoted."
     }
   }
 }
