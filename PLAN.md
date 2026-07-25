@@ -415,3 +415,25 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   (1 Vorwarnung PolicyTable), Build ok, E2E-Smoke (Home→DNAT→Ticket/VIP/
   Test rendern, keine JS-Exceptions). OFFEN Ideen: Port-Forward-Variante
   (8443→443 mit passendem Service-Objekt), #43/#44/#49/#50.
+- 2026-07-25 (Forts. 20, Nutzerfeedback „Hauptmenue etwas ueberladen"):
+  Menue-Hierarchie statt flachem Raster (#52). (a) NEU src/game/campaign.ts
+  (pure, 8 Unit-Tests): nextLevel() = erstes Level in Kapitel-/Index-
+  Reihenfolge ohne Stern (= genau die Freischalt-Grenze, weil sequenziell
+  entsperrt wird → kein Store-Import noetig, Level-Liste injizierbar);
+  campaignProgress() liefert completed/total + Sterne (auf 3 geklemmt,
+  verwaiste Save-IDs ignoriert). (b) Hauptmenue: primaere Zeile beantwortet
+  „was mache ich jetzt?" — grosse Karte „Weiterspielen" springt DIREKT ins
+  naechste offene Level (vorher immer nach Kapitel 1) mit Kapitel+Level-
+  Titel und Kampagnen-Fortschrittsbalken (5/80); daneben Daily mit
+  Heute-Status (✓ „Heute erledigt" gruen vs. „Heute offen" warn, aus
+  dailyHistory[todayString()]) + Streak. Label wechselt
+  „Kampagne starten"/„Weiterspielen"/„Kampagne abgeschlossen".
+  (c) Die uebrigen 7 Modi in drei benannte Gruppen mit Hairline-Headern:
+  SCHNELLE RUNDEN (Blitz, Match-Check) · WERKSTATT (Config Doctor, Server
+  veroeffentlichen, Sandbox) · AUSDAUER (Endlos, Challenge); Karten
+  kompakter (h-10-Icon, py-3). (d) „Alle Kapitel · N/240 ★" als sekundaerer
+  Link fuer gezieltes Wiederholen. (e) Lesbarkeit: Untertitel line-clamp-2
+  statt truncate; doctorSub/dnatSub gekuerzt, damit nichts mehr abschneidet.
+  Tests: 235 gruen, Lint 0 Fehler, Build ok, E2E-Smoke fuer frischen
+  Spieler (→ „Kampagne starten") UND Rueckkehrer (→ „Weiterspielen"),
+  beide landen per Klick im Level; Screenshots Desktop 1280 + Mobil 430.

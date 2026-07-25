@@ -29,9 +29,9 @@
     "matchcheckSub": "45 seconds — one rule, one packet: does it match?",
     "startHere": "Start here",
     "doctor": "Config Doctor",
-    "doctorSub": "One broken ruleset, one symptom — find and fix the bug",
+    "doctorSub": "Read the symptom, find and fix the one bug",
     "dnat": "Publish a Server",
-    "dnatSub": "DNAT / Virtual IP — make an internal server reachable from the internet"
+    "dnatSub": "Port forwarding — publish a server to the internet"
   },
   "level": {
     "boss": "Boss",
@@ -467,5 +467,18 @@
     "diagnosis": "External traffic hits the VIP, gets DNAT-translated to the server, and the inbound policy lets it through.",
     "concept": "Concept: DNAT / Virtual IP / port forwarding",
     "next": "Next task"
+  },
+  "home": {
+    "continue": "Continue",
+    "startCampaign": "Start the campaign",
+    "campaignDone": "Campaign complete",
+    "allChapters": "All chapters",
+    "dailyDone": "Done today",
+    "dailyOpen": "Open today",
+    "group": {
+      "quick": "Quick rounds",
+      "labs": "Workshops",
+      "endurance": "Endurance"
+    }
   }
 }

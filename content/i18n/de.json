@@ -29,9 +29,9 @@
     "matchcheckSub": "45 Sekunden — eine Regel, ein Paket: matcht das?",
     "startHere": "Hier starten",
     "doctor": "Config Doctor",
-    "doctorSub": "Ein kaputtes Regelwerk, ein Symptom — finde und fixe den Fehler",
+    "doctorSub": "Symptom lesen, den einen Fehler finden und fixen",
     "dnat": "Server veröffentlichen",
-    "dnatSub": "DNAT / Virtual IP — internen Server aus dem Internet erreichbar machen"
+    "dnatSub": "Port-Forwarding — Server nach außen veröffentlichen"
   },
   "level": {
     "boss": "Boss",
@@ -467,5 +467,18 @@
     "diagnosis": "Externer Verkehr trifft die VIP, wird per DNAT auf den Server übersetzt, und die Eingangs-Policy lässt ihn durch.",
     "concept": "Konzept: DNAT / Virtual IP / Port-Forwarding",
     "next": "Nächste Aufgabe"
+  },
+  "home": {
+    "continue": "Weiterspielen",
+    "startCampaign": "Kampagne starten",
+    "campaignDone": "Kampagne abgeschlossen",
+    "allChapters": "Alle Kapitel",
+    "dailyDone": "Heute erledigt",
+    "dailyOpen": "Heute offen",
+    "group": {
+      "quick": "Schnelle Runden",
+      "labs": "Werkstatt",
+      "endurance": "Ausdauer"
+    }
   }
 }
