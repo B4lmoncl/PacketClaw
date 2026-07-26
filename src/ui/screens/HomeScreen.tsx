@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
 import { rankFor } from '../../game/progression';
+import { CHEST_EVERY, chestsEarned, dailyGoal } from '../../game/rewards';
+import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor } from '../../game/unlocks';
 import { useGame } from '../../game/store';
 import type { Screen } from '../../game/store';
+import { DailyGoalRing } from '../components/DailyGoalRing';
 import { Mascot } from '../components/Mascot';
+import { RewardOverlay } from '../components/RewardOverlay';
+import type { RewardPayload } from '../components/RewardOverlay';
 
 type Accent = 'claw' | 'warn' | 'deny' | 'trace' | 'aura';
 
@@ -87,11 +93,39 @@ export function HomeScreen() {
   const endlessBest = useGame((s) => s.endlessBest);
   const { rank, next, progress } = rankFor(xp);
 
+  const dailyXp = useGame((s) => s.dailyXp);
+  const tasksSolved = useGame((s) => s.tasksSolved);
+  const chestsOpened = useGame((s) => s.chestsOpened);
+  const seenUnlocks = useGame((s) => s.seenUnlocks);
+  const openNextChest = useGame((s) => s.openNextChest);
+  const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
+
+  const [reward, setReward] = useState<RewardPayload | null>(null);
+
   const campaign = campaignProgress(stars);
   const dailyDone = dailyHistory[todayString()] !== undefined;
   const nextChapter = campaign.next?.chapter;
   const campaignPct =
     campaign.total > 0 ? Math.round((campaign.completed / campaign.total) * 100) : 0;
+
+  const today = todayString();
+  const goal = dailyGoal(dailyXp.date === today ? dailyXp.xp : 0);
+  const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
+  const upcoming = nextUnlock(campaign.completed, xp);
+  // Frisch freigeschaltete Modi feiern, sobald der Spieler wieder hier landet
+  const fresh = freshUnlocks(campaign.completed, xp, seenUnlocks);
+
+  function claimChest() {
+    const got = openNextChest();
+    if (got) setReward({ kind: 'chest', xp: got.xp, rarity: got.rarity as 'common' });
+  }
+
+  function celebrateUnlock() {
+    const key = fresh[0];
+    if (!key) return;
+    markUnlocksSeen([key]);
+    setReward({ kind: 'unlock', modeKey: key });
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col items-center gap-7 px-4 pb-16 pt-10 lg:max-w-5xl lg:gap-8 lg:pt-14">
@@ -142,6 +176,75 @@ export function HomeScreen() {
           </div>
         </div>
       </button>
+
+      {/* Belohnungs-Leiste: Tagesziel, wartende Truhe, naechste Freischaltung.
+          Das ist die Vorfreude-Ebene — sie beantwortet „warum noch eine Runde?" */}
+      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="glass flex items-center rounded-panel px-4 py-3">
+          <DailyGoalRing goal={goal} />
+        </div>
+
+        {chestsReady > 0 ? (
+          <button
+            onClick={claimChest}
+            className="card-mode glass group flex animate-pulse items-center gap-3 rounded-panel border border-warn/50 px-4 py-3 text-left hover:-translate-y-0.5 hover:border-warn hover:shadow-glow-warn motion-reduce:animate-none"
+          >
+            <span className="text-2xl">🎁</span>
+            <div className="min-w-0">
+              <div className="font-display text-sm font-bold text-warn">{t('reward.ready')}</div>
+              <div className="font-mono text-[11px] text-dim">
+                {t('reward.readySub', { count: chestsReady })}
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+            <span className="text-2xl opacity-40">🎁</span>
+            <div className="min-w-0">
+              <div className="font-display text-sm font-bold text-dim">{t('reward.next')}</div>
+              <div className="font-mono text-[11px] text-dim/80">
+                {t('reward.nextSub', { count: CHEST_EVERY - (tasksSolved % CHEST_EVERY) })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {fresh.length > 0 ? (
+          <button
+            onClick={celebrateUnlock}
+            className="card-mode glass group flex items-center gap-3 rounded-panel border border-trace/60 px-4 py-3 text-left hover:-translate-y-0.5 hover:shadow-glow-trace"
+          >
+            <span className="text-2xl">🔓</span>
+            <div className="min-w-0">
+              <div className="font-display text-sm font-bold text-trace">
+                {t('unlock.freshTitle')}
+              </div>
+              <div className="truncate font-mono text-[11px] text-dim">{t(`nav.${fresh[0]}`)}</div>
+            </div>
+          </button>
+        ) : upcoming ? (
+          <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+            <span className="text-2xl opacity-60">🔒</span>
+            <div className="min-w-0 flex-1">
+              <div className="font-display text-sm font-bold text-dim">{t('unlock.nextTitle')}</div>
+              <div className="truncate font-mono text-[11px] text-dim/80">
+                {t(`nav.${upcoming.key}`)} ·{' '}
+                <span className="text-warn">
+                  {t('unlock.inLevels', { count: upcoming.levelsToGo })}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+            <span className="text-2xl">🏅</span>
+            <div className="min-w-0">
+              <div className="font-display text-sm font-bold text-trace">{t('unlock.allOpen')}</div>
+              <div className="font-mono text-[11px] text-dim">{t('unlock.allOpenSub')}</div>
+            </div>
+          </div>
+        )}
+      </div>
 
       <nav className="flex w-full flex-col gap-6" aria-label={t('nav.mainMenu')}>
         {/* Primäre Zeile: „Was mache ich jetzt?" — Kampagne fortsetzen + Daily */}
@@ -254,6 +357,33 @@ export function HomeScreen() {
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
               {group.modes.map((m) => {
                 const a = ACCENT[m.accent];
+                const open = isUnlocked(m.key, campaign.completed, xp);
+                if (!open) {
+                  // Gesperrt, aber SICHTBAR mit Bedingung: das erzeugt Vorfreude.
+                  // Verstecken wuerde nur die Auswahl verkleinern, nicht motivieren.
+                  const state = unlockStateFor(m.key, campaign.completed, xp);
+                  return (
+                    <div
+                      key={m.key}
+                      className="glass flex items-center gap-3 rounded-panel border border-line/50 px-3.5 py-3 text-left opacity-60"
+                      aria-label={`${t(`nav.${m.key}`)} — ${t('unlock.locked')}`}
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-panel bg-bg/60 text-lg grayscale">
+                        🔒
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-display text-[15px] font-bold text-dim">
+                          {t(`nav.${m.key}`)}
+                        </div>
+                        <div className="font-mono text-[11px] leading-snug text-dim/80">
+                          {state && state.levelsToGo > 0
+                            ? t('unlock.inLevels', { count: state.levelsToGo })
+                            : t('unlock.locked')}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <button
                     key={m.key}
@@ -266,11 +396,11 @@ export function HomeScreen() {
                       {m.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-display text-[15px] font-bold text-ink">
+                      <div className="font-display text-[15px] font-bold text-ink lg:text-base">
                         {t(`nav.${m.key}`)}
                       </div>
                       {/* zwei Zeilen statt Abschneiden — die Untertitel erklären den Modus */}
-                      <div className="line-clamp-2 font-mono text-[11px] leading-snug text-dim">
+                      <div className="line-clamp-2 font-mono text-[11px] leading-snug text-dim lg:text-xs">
                         {t(`nav.${m.key}Sub`)}
                       </div>
                     </div>
@@ -286,6 +416,8 @@ export function HomeScreen() {
           </section>
         ))}
       </nav>
+
+      <RewardOverlay reward={reward} onClose={() => setReward(null)} />
     </div>
   );
 }

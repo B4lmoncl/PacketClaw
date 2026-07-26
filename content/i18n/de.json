@@ -559,5 +559,41 @@
       "dstintf": "Die Route war da und zeigte aufs falsche Interface. Die Policy für port2 wurde nie befragt, deshalb sah das Regelwerk unschuldig aus. Es war unschuldig.",
       "lpm": "Longest Prefix Match interessiert nicht, wie korrekt deine /24 ist. Eine /25 ist spezifischer, also gewinnt die /25. Spezifität schlägt Absicht, jedes Mal."
     }
+  },
+  "combo": {
+    "label": {
+      "warm": "läuft",
+      "hot": "heiße Serie",
+      "blaze": "brennt",
+      "perfect": "unantastbar"
+    }
+  },
+  "goal": {
+    "title": "Tagesziel",
+    "done": "Tagesziel geschafft",
+    "remaining": "noch {{xp}} XP",
+    "earnedToday": "{{xp}} XP heute"
+  },
+  "reward": {
+    "ready": "Depot bereit",
+    "readySub": "{{count}} wartet — antippen zum Öffnen",
+    "next": "Nächstes Depot",
+    "nextSub": "noch {{count}} Aufgabe(n)",
+    "chestTitle": "Depot geöffnet",
+    "rarity": {
+      "common": "Standardausgabe",
+      "rare": "seltener Fund",
+      "epic": "Tiefenarchiv"
+    },
+    "unlockKicker": "Neuer Modus freigeschaltet",
+    "nice": "Nehm ich"
+  },
+  "unlock": {
+    "locked": "Gesperrt",
+    "inLevels": "noch {{count}} Level",
+    "nextTitle": "Nächste Freischaltung",
+    "freshTitle": "Da hat sich was geöffnet",
+    "allOpen": "Alles freigeschaltet",
+    "allOpenSub": "Der ganze Werkzeugkasten gehört dir."
   }
 }

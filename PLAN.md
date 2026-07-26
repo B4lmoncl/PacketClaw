@@ -541,3 +541,37 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Lerneffekt-Notiz: Die Objekt-Chips reagieren auf HOVER (Lock per Klick);
   Playwright braucht hover() + einen :visible-Selektor, weil Mobil- und
   Desktop-Variante der Tabelle beide im DOM liegen.
+- 2026-07-25 (Forts. 24, Nutzerwunsch „Anreiz/Dopamin fehlt"): GAMIFICATION-
+  DURCHLAUF 1 (#57). Vorher recherchiert statt geraten — „Juice it or lose
+  it" (Jonasson/Purho): Feedback muss PRO AKTION kommen, plus Duolingo-
+  Analysen: Tagesziel, Combo-Boni, VARIABLE Belohnungen, gestufte
+  Achievements. Diagnose: Belohnungen existierten (10 Raenge, 39
+  Achievements, Partikel, XP-Flug) — waren aber unsichtbar bis zum
+  Modus-Ende. Es fehlte die VORFREUDE.
+  NEU src/game/unlocks.ts (pure, 10 Tests): Modi schalten sich ueber
+  Kampagnenfortschritt frei, Schwellen = Kapitelgrenzen (Routing-Werkstatt
+  bei Kapitel 4, wo die Kampagne Routing lehrt; DNAT bei Kapitel 7).
+  ODER-Bedingung ueber XP, damit reine Casual-Spieler nicht feststecken —
+  per Test abgesichert, ebenso dass Schwellen monoton steigen und mit der
+  vollen Kampagne alles erreichbar ist. Gesperrte Modi werden NICHT
+  versteckt, sondern zeigen „noch N Level": Verstecken verkleinert nur die
+  Auswahl, sichtbare Bedingungen motivieren.
+  NEU src/game/rewards.ts (pure, 11 Tests): Combo-Stufen mit echtem
+  Multiplikator (x1,25 ab 3 richtigen bis x2 ab 12), Tagesziel (300 XP,
+  klein und heute schaffbar), Truhen alle 5 Aufgaben mit VARIABLEM Inhalt
+  (70/25/5 % common/rare/epic) — deterministisch aus der Truhen-Nummer,
+  also kein Math.random und trotzdem Ueberraschung.
+  Bewusst NICHT gebaut: Verlust-Druck, kuenstliche Wartezeiten, Ranglisten
+  gegen Fremde. Das Spiel soll ziehen, weil man besser wird.
+  Store zentral umgebaut: rewardPatch() haengt XP + Tagesziel + Truhen-
+  Zaehler + Achievements an JEDE record*-Aktion (6 automatisch per Regex,
+  Level- und Daily-Pfad haendisch) — damit fuettert wirklich jeder Modus
+  den Loop und nicht nur die, an die man gerade denkt.
+  UI: Belohnungs-Leiste auf Home (Tagesziel-Ring, wartende Truhe,
+  naechste Freischaltung), RewardOverlay als EINZIGE blockierende Feier
+  (Truhe + Freischaltung, Feder-Pop + Partikel), ComboMeter mit Stufen
+  ersetzt das simple x N im Blitz, .pc-shake fuer Screenshake.
+  Desktop-Schrift ab 1024px auf 18px (Nutzerwunsch).
+  Tests: 282 gruen, Lint 0 Fehler, Build ok, E2E-Smoke in zwei
+  Fortschritts-Staenden (frisch: Sperren+Countdown sichtbar; fortgeschritten:
+  Depot bereit, Tagesziel-Rest, frische Freischaltung).

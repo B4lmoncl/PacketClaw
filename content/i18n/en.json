@@ -559,5 +559,41 @@
       "dstintf": "The route existed and pointed at the wrong interface. The policy for port2 was never even consulted, which is why the ruleset looked innocent. It was.",
       "lpm": "Longest prefix match does not care how correct your /24 is. A /25 is more specific, so the /25 wins. Specificity beats intent, every time."
     }
+  },
+  "combo": {
+    "label": {
+      "warm": "on a roll",
+      "hot": "hot streak",
+      "blaze": "blazing",
+      "perfect": "untouchable"
+    }
+  },
+  "goal": {
+    "title": "Daily goal",
+    "done": "Daily goal met",
+    "remaining": "{{xp}} XP to go",
+    "earnedToday": "{{xp}} XP today"
+  },
+  "reward": {
+    "ready": "Cache ready",
+    "readySub": "{{count}} waiting — tap to open",
+    "next": "Next cache",
+    "nextSub": "{{count}} task(s) away",
+    "chestTitle": "Cache opened",
+    "rarity": {
+      "common": "standard issue",
+      "rare": "rare find",
+      "epic": "deep archive"
+    },
+    "unlockKicker": "New mode unlocked",
+    "nice": "Take it"
+  },
+  "unlock": {
+    "locked": "Locked",
+    "inLevels": "{{count}} level(s) to go",
+    "nextTitle": "Next unlock",
+    "freshTitle": "Something opened up",
+    "allOpen": "Everything unlocked",
+    "allOpenSub": "The whole toolbox is yours."
   }
 }

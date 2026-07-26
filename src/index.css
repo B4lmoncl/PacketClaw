@@ -380,3 +380,40 @@ body {
     transparent 3px
   );
 }
+
+/* Screenshake für große Treffer ("Juice it or lose it": Wucht durch einen
+   Sekundenbruchteil Kamerabewegung). Kurz, klein, nie mehr als ein Hauch. */
+@keyframes pc-shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-4px, 2px, 0);
+  }
+  40% {
+    transform: translate3d(4px, -2px, 0);
+  }
+  60% {
+    transform: translate3d(-3px, -1px, 0);
+  }
+  80% {
+    transform: translate3d(3px, 1px, 0);
+  }
+}
+.pc-shake {
+  animation: pc-shake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-shake {
+    animation: none;
+  }
+}
+
+/* Desktop: alles eine Spur groesser — auf grossen Schirmen war der
+   Fliesstext unnoetig klein (Nutzerwunsch). */
+@media (min-width: 1024px) {
+  html {
+    font-size: 18px;
+  }
+}

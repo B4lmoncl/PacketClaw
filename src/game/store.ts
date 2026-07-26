@@ -5,6 +5,8 @@
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { todayString } from './daily';
+import { chestsEarned, openChest } from './rewards';
 import { getLevel, levelsForChapter } from './levels';
 import {
   advanceStreak,
@@ -69,6 +71,14 @@ interface GameState {
   designSolved: number;
   /** Reparierte Routing-Faelle */
   routingSolved: number;
+  /** XP von heute (fuer das Tagesziel) — Datum + Betrag */
+  dailyXp: { date: string; xp: number };
+  /** Insgesamt geloeste Einzelaufgaben (Truhen-Zaehler) */
+  tasksSolved: number;
+  /** Bereits geoeffnete Truhen */
+  chestsOpened: number;
+  /** Freischaltungen, die der Spieler schon gefeiert bekommen hat */
+  seenUnlocks: string[];
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -91,6 +101,10 @@ interface GameState {
   recordDnat(score: number): void;
   recordDesign(score: number): void;
   recordRouting(score: number): void;
+  /** Eine Einzelaufgabe geloest: zaehlt fuer Truhen und Tagesziel */
+  addTaskXp(score: number, date: string): void;
+  openNextChest(): { xp: number; rarity: string } | null;
+  markUnlocksSeen(keys: string[]): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -98,6 +112,27 @@ interface GameState {
   updateSettings(patch: Partial<Settings>): void;
   exportSave(): string;
   importSave(json: string): boolean;
+}
+
+/**
+ * Gemeinsamer Belohnungs-Teil JEDER gelösten Aufgabe: XP, Tagesziel,
+ * Truhen-Zähler, Achievements. Zentral, damit wirklich jeder Modus den
+ * Belohnungs-Loop füttert und nicht nur die, an die man gerade gedacht hat.
+ */
+function rewardPatch(state: GameState, score: number, date = todayString()) {
+  const xp = state.xp + score;
+  const sameDay = state.dailyXp.date === date;
+  const unlocked = evaluateAchievements(
+    { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+    state.achievements,
+  );
+  return {
+    xp,
+    tasksSolved: state.tasksSolved + 1,
+    dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
+    achievements: [...state.achievements, ...unlocked],
+    lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+  };
 }
 
 export const useGame = create<GameState>()(
@@ -115,6 +150,10 @@ export const useGame = create<GameState>()(
       dnatSolved: 0,
       designSolved: 0,
       routingSolved: 0,
+      dailyXp: { date: '', xp: 0 },
+      tasksSolved: 0,
+      chestsOpened: 0,
+      seenUnlocks: [],
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -137,9 +176,13 @@ export const useGame = create<GameState>()(
             { stats: state.stats, xp, stars: nextStars, streak: state.streak },
             state.achievements,
           );
+          const date = todayString();
+          const sameDay = state.dailyXp.date === date;
           return {
             xp,
             stars: nextStars,
+            tasksSolved: state.tasksSolved + 1,
+            dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
             bestScores: {
               ...state.bestScores,
               [levelId]: Math.max(state.bestScores[levelId] ?? 0, score),
@@ -163,10 +206,13 @@ export const useGame = create<GameState>()(
             { stats, xp, stars: state.stars, streak },
             state.achievements,
           );
+          const sameDay = state.dailyXp.date === date;
           return {
             xp,
             streak,
             stats,
+            tasksSolved: state.tasksSolved + 1,
+            dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
             dailyHistory: { ...state.dailyHistory, [date]: results },
             achievements: [...state.achievements, ...unlocked],
             lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
@@ -191,94 +237,72 @@ export const useGame = create<GameState>()(
         }),
 
       recordBlitz: (score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            blitzBest: Math.max(state.blitzBest, score),
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          blitzBest: Math.max(state.blitzBest, score),
+        })),
 
       recordMatchCheck: (score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            matchBest: Math.max(state.matchBest, score),
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          matchBest: Math.max(state.matchBest, score),
+        })),
 
       recordDnat: (score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            dnatSolved: state.dnatSolved + 1,
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          dnatSolved: state.dnatSolved + 1,
+        })),
 
       recordDesign: (score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            designSolved: state.designSolved + 1,
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          designSolved: state.designSolved + 1,
+        })),
 
       recordRouting: (score) =>
+        set((state) => ({
+          ...rewardPatch(state, score),
+          routingSolved: state.routingSolved + 1,
+        })),
+
+      addTaskXp: (score, date) =>
         set((state) => {
           const xp = state.xp + score;
+          // Tages-XP laufen mit dem Datum mit: neuer Tag ⇒ Zaehler beginnt neu
+          const sameDay = state.dailyXp.date === date;
           const unlocked = evaluateAchievements(
             { stats: state.stats, xp, stars: state.stars, streak: state.streak },
             state.achievements,
           );
           return {
             xp,
-            routingSolved: state.routingSolved + 1,
+            tasksSolved: state.tasksSolved + 1,
+            dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
             achievements: [...state.achievements, ...unlocked],
             lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
           };
         }),
 
+      openNextChest: () => {
+        const state = get();
+        const available = chestsEarned(state.tasksSolved) - state.chestsOpened;
+        if (available <= 0) return null;
+        const reward = openChest(state.chestsOpened + 1);
+        set({ chestsOpened: state.chestsOpened + 1, xp: state.xp + reward.xp });
+        return reward;
+      },
+
+      markUnlocksSeen: (keys) =>
+        set((state) => ({
+          seenUnlocks: [...new Set([...state.seenUnlocks, ...keys])],
+        })),
+
       recordDoctor: (score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            doctorSolved: state.doctorSolved + 1,
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          doctorSolved: state.doctorSolved + 1,
+        })),
 
       bumpStats: (increments, maxima = {}) =>
         set((state) => {
@@ -326,6 +350,10 @@ export const useGame = create<GameState>()(
           dnatSolved,
           designSolved,
           routingSolved,
+          dailyXp,
+          tasksSolved,
+          chestsOpened,
+          seenUnlocks,
           stats,
           achievements,
           streak,
@@ -346,6 +374,10 @@ export const useGame = create<GameState>()(
             dnatSolved,
             designSolved,
             routingSolved,
+            dailyXp,
+            tasksSolved,
+            chestsOpened,
+            seenUnlocks,
             stats,
             achievements,
             streak,
@@ -391,6 +423,10 @@ export const useGame = create<GameState>()(
         dnatSolved: state.dnatSolved,
         designSolved: state.designSolved,
         routingSolved: state.routingSolved,
+        dailyXp: state.dailyXp,
+        tasksSolved: state.tasksSolved,
+        chestsOpened: state.chestsOpened,
+        seenUnlocks: state.seenUnlocks,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -422,6 +458,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   dnatSolved: number;
   designSolved: number;
   routingSolved: number;
+  dailyXp: { date: string; xp: number };
+  tasksSolved: number;
+  chestsOpened: number;
+  seenUnlocks: string[];
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -446,6 +486,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     dnatSolved: typeof save.dnatSolved === 'number' ? save.dnatSolved : 0,
     designSolved: typeof save.designSolved === 'number' ? save.designSolved : 0,
     routingSolved: typeof save.routingSolved === 'number' ? save.routingSolved : 0,
+    dailyXp: { date: '', xp: 0, ...((save.dailyXp as { date: string; xp: number } | null) ?? {}) },
+    tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
+    chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,
+    seenUnlocks: Array.isArray(save.seenUnlocks) ? (save.seenUnlocks as string[]) : [],
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

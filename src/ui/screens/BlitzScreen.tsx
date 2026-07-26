@@ -3,7 +3,6 @@
  * "kommt das durch?" — ACCEPT oder DENY. Nach jeder Antwort blitzt kurz die
  * Regel auf, die wirklich gezogen hat (First Match lernen nebenbei).
  */
-import { motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createRng } from '../../engine';
@@ -17,6 +16,7 @@ import {
 } from '../../game/blitz';
 import { playAccept, playWrong } from '../../game/sound';
 import { useGame } from '../../game/store';
+import { ComboMeter } from '../components/ComboMeter';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { PacketCard } from '../components/PacketCard';
 import { PolicyTable, type RowHighlight } from '../components/PolicyTable';
@@ -208,16 +208,7 @@ export function BlitzScreen() {
         <div className="tabular-nums text-ink">
           {score} <span className="text-[10px] uppercase text-dim">{t('blitz.points')}</span>
         </div>
-        {streak >= 2 && (
-          <motion.div
-            key={streak}
-            initial={reducedMotion ? false : { scale: 1.3 }}
-            animate={{ scale: 1 }}
-            className="rounded-row bg-claw/15 px-1.5 py-0.5 text-xs font-bold text-claw"
-          >
-            ×{streak}
-          </motion.div>
-        )}
+        <ComboMeter streak={streak} />
       </div>
 
       <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-6">
