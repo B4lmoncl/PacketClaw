@@ -599,3 +599,22 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   „noch N" — aus einem Ueberraschungs-Popup wird ein Ziel.
   6 neue Unit-Tests, 291 gruen. Merknotiz: Panel-Ueberschriften sind per
   CSS uppercase, E2E-Regexe muessen case-insensitive pruefen.
+- 2026-07-25 (Forts. 27, Nutzerwunsch „konzentrier dich auf Desktop"):
+  DESKTOP-HOME UMGEBAUT. Messung vorher: bei 1280px war das Hauptmenue
+  3210px hoch — zweieinhalb Bildschirme Scrollen fuer ein Menue, weil der
+  Hero allein ~450px als gestapelter Block frass und alles einspaltig
+  untereinander lag. Jetzt: max-w-7xl statt 5xl, Hero auf Desktop als
+  flache Zeile (Maskottchen 72px links, Titel+Tagline rechts), und ein
+  zweispaltiges Grid `lg:grid-cols-[1fr_21rem]` — links das HANDELN
+  (Weiterspielen, Daily, Modi-Gruppen), rechts als <aside> der STATUS
+  (Rang, Tagesziel, Depot, Freischaltung, Kurz-davor-Abzeichen).
+  Reihenfolge ueber lg:order: im DOM kommt die Sidebar zuerst, damit sie
+  MOBIL oben steht (Status zuerst), auf Desktop rutscht sie per order-2
+  nach rechts. Mobil bleibt damit unveraendert gestapelt.
+  Modus-Raster in der schmaleren linken Spalte auf 2 Karten (erst ab 2xl
+  drei), line-clamp auf Desktop 3 Zeilen, und die zwei laengsten
+  Modus-Untertitel gekuerzt.
+  Ergebnis gemessen: 1920x1080 = 1.00 Bildschirme (passt komplett),
+  1440x900 = 1.07, Mobil 2.43 wie vorher; 0 abgeschnittene Textzeilen auf
+  allen drei Breiten, kein horizontaler Overflow.
+  Tests: 291 gruen, Lint 0 Fehler, Build ok.
