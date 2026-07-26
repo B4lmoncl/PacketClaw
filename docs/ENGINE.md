@@ -21,6 +21,37 @@ Für jedes Paket führt `evaluate(packet, config)` exakt diese Schritte aus:
 4. **Implicit Deny.** Matcht keine Policy: `deny`, `matchedPolicyId: 0`,
    Trace-Schritt `implicit-deny`.
 
+## Local-In: Verkehr AN die Firewall
+
+Ein Paket, dessen Ziel-IP die IP eines Firewall-Interfaces ist, ist **kein
+Forward-Traffic**. Es wird nicht geroutet, hat kein Ziel-Interface und wird
+**nicht** von der Policy-Tabelle entschieden. `evaluate()` erkennt das an
+`Iface.ip` und delegiert an `evaluateLocalIn()` (`src/engine/localIn.ts`); das
+Verdict trägt dann `localIn` und hat `dstintf: ''` sowie `matchedPolicyId: 0`,
+weil beides für diesen Verkehr keine Bedeutung hat.
+
+**Drei unabhängige Tore** müssen zustimmen, damit Management-Verkehr ankommt:
+
+1. **`allowaccess` am Interface** — ist der Dienst hier überhaupt offen? Der
+   häufigste Grund für „ich komme nicht auf die GUI", und er steht in keiner
+   Policy-Tabelle.
+2. **Local-In-Policy** — darf diese Quelle ihn erreichen? First Match, Felder
+   wie bei der Forward-Policy, aber **ohne `dstintf`**.
+3. **`trusthost` des Admin-Kontos** — nur für Dienste mit Admin-Login
+   (https/ssh/http). Ein einziges passendes Konto genügt. Leere `trustedHosts`
+   heißt „von überall": Auslieferungszustand und Audit-Befund in einem.
+
+Die Engine prüft in dieser Reihenfolge und meldet über `localIn.gate`, welches
+Tor entschieden hat. Fachlich müssen ohnehin alle drei passen — die Reihenfolge
+ist eine Darstellungsentscheidung, damit die Erklärung eindeutig bleibt.
+
+### Die Asymmetrie, auf die es ankommt
+
+Die Forward-Tabelle endet mit **Implicit Deny**. Die Local-In-Tabelle endet mit
+einem **impliziten ACCEPT**. Eine leere Local-In-Tabelle sperrt also nichts aus.
+Wer die beiden verwechselt, sucht den Fehler an der falschen Stelle — und zwar
+in beide Richtungen.
+
 ## Feld-Matching
 
 Innerhalb eines Feldes gilt **ODER** (über die Array-Einträge), zwischen Feldern **UND**.
@@ -83,18 +114,19 @@ aber keine Session-Tabelle. Kapitel 5 nutzt die überflüssige „Rückregel" al
 
 ## Bewusste Vereinfachungen gegenüber realem FortiOS
 
-| Vereinfachung                                              | Begründung                                               |
-| ---------------------------------------------------------- | -------------------------------------------------------- |
-| Kein src-Port-Matching in Services                         | praktisch immer dst-Port; kein Lerneffekt                |
-| Kein `match-vip`-Sonderfall bei Deny-Policies              | Detailtiefe verwässert die VIP-Lektion                   |
-| Keine Session-Tabelle / kein Antwortverkehr                | Stateful-Prinzip wird gelehrt, nicht simuliert           |
-| IPv4 only                                                  | v1-Scope; IP-Logik ist in `ip.ts` gekapselt (Intervalle) |
-| SNAT nur als Flag (keine IP-Pools)                         | didaktisch ausreichend für LAN→WAN vs. LAN→DMZ           |
-| Kein Central NAT, keine Policy Routes, kein SD-WAN         | REJECTED.md                                              |
-| Schedules nur `always`/`work-hours`                        | genug für die Schedule-Lektion                           |
-| `dstintf` rein aus der Routing-Tabelle                     | keine connected/static-Unterscheidung nötig              |
-| Ein VIP pro extIp/Port-Kombi (erster gewinnt)              | Level definieren eindeutige VIPs (Validator)             |
-| Local-in-Traffic (Ziel = Firewall selbst) nicht modelliert | außerhalb des Spielumfangs                               |
+| Vereinfachung                                            | Begründung                                               |
+| -------------------------------------------------------- | -------------------------------------------------------- |
+| Kein src-Port-Matching in Services                       | praktisch immer dst-Port; kein Lerneffekt                |
+| Kein `match-vip`-Sonderfall bei Deny-Policies            | Detailtiefe verwässert die VIP-Lektion                   |
+| Keine Session-Tabelle / kein Antwortverkehr              | Stateful-Prinzip wird gelehrt, nicht simuliert           |
+| IPv4 only                                                | v1-Scope; IP-Logik ist in `ip.ts` gekapselt (Intervalle) |
+| SNAT nur als Flag (keine IP-Pools)                       | didaktisch ausreichend für LAN→WAN vs. LAN→DMZ           |
+| Kein Central NAT, keine Policy Routes, kein SD-WAN       | REJECTED.md                                              |
+| Schedules nur `always`/`work-hours`                      | genug für die Schedule-Lektion                           |
+| `dstintf` rein aus der Routing-Tabelle                   | keine connected/static-Unterscheidung nötig              |
+| Ein VIP pro extIp/Port-Kombi (erster gewinnt)            | Level definieren eindeutige VIPs (Validator)             |
+| Local-In: keine VDOMs, kein `fgfm`, keine Session-Helper | Kernlektion braucht sie nicht                            |
+| Local-In: `allowaccess` nur mit den Diensten des Spiels  | ping/https/ssh/http/snmp reichen für die Lektion         |
 
 ## Determinismus
 

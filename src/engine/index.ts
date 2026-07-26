@@ -22,6 +22,14 @@ export {
 } from './resolve';
 export { evaluate, matchVip, firstFailedField, matchesExpectation } from './evaluate';
 export {
+  evaluateLocalIn,
+  isLocalInTraffic,
+  localInInterface,
+  localServiceOf,
+  isAdminService,
+  trustedHostAllows,
+} from './localIn';
+export {
   findShadowedPolicies,
   findRedundantPolicies,
   findOverbroadPolicies,

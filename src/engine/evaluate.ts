@@ -4,6 +4,7 @@
  * Semantik-Details und bewusste Vereinfachungen: docs/ENGINE.md.
  */
 import { longestPrefixMatch } from './ip';
+import { evaluateLocalIn, isLocalInTraffic } from './localIn';
 import { createResolver, type Resolver } from './resolve';
 import { scheduleMatches } from './schedule';
 import type {
@@ -84,6 +85,29 @@ function destinationMatches(
 export function evaluate(packet: Packet, config: NetworkConfig): Verdict {
   const resolver = createResolver(config);
   const trace: TraceStep[] = [];
+
+  /**
+   * 0. Verkehr AN die Firewall ist kein Forward-Traffic.
+   *
+   * Er wird nicht geroutet, hat kein Ziel-Interface und wird nicht von der
+   * Policy-Tabelle entschieden — deshalb der eigene Pfad (siehe localIn.ts).
+   * Ein Level ohne Interface-IPs kann hier nicht landen, das Verhalten aller
+   * bestehenden Level bleibt also unveraendert.
+   *
+   * dstintf bleibt bewusst leer statt „irgendwas": ein Ziel-Interface zu
+   * behaupten waere eine Luege ueber die Natur dieses Verkehrs.
+   */
+  if (isLocalInTraffic(packet, config)) {
+    const local = evaluateLocalIn(packet, config);
+    return {
+      action: local.action,
+      matchedPolicyId: 0,
+      dstintf: '',
+      natApplied: false,
+      localIn: local,
+      trace: local.trace,
+    };
+  }
 
   // 1. VIP/DNAT vor Routing und Policy-Match (FortiOS: DNAT bestimmt das Egress-Interface)
   const vip = matchVip(packet, config.vips);

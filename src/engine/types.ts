@@ -50,6 +50,52 @@ export interface ServiceGroup {
 export interface Iface {
   id: string;
   name: string; // "port1", "wan1", "vlan20"
+  /**
+   * IP der Firewall AN diesem Interface. Gesetzt heißt: Pakete an genau diese
+   * Adresse sind Local-In-Traffic (Verkehr an die FortiGate selbst) und laufen
+   * nicht durch die Forward-Policy-Tabelle. Fehlt sie, gibt es an diesem
+   * Interface kein Local-In — so verhalten sich alle Level ohne
+   * Management-Thema.
+   */
+  ip?: IPv4;
+  /**
+   * Offene Management-Dienste an diesem Interface (FortiOS `set allowaccess`).
+   * Fehlt oder leer heißt: nichts offen. Das ist der sichere Zustand und
+   * gleichzeitig der häufigste Grund für „ich komme nicht auf die GUI".
+   */
+  allowaccess?: LocalService[];
+}
+
+/** Management-Dienste, die `allowaccess` kennt. */
+export type LocalService = 'ping' | 'https' | 'ssh' | 'http' | 'snmp';
+
+/**
+ * Local-In-Policy (FortiOS `config firewall local-in-policy`): filtert Verkehr
+ * AN die FortiGate. Kein dstintf — Local-In-Traffic hat keines. Und kein NAT:
+ * es wird nichts weitergeleitet.
+ */
+export interface LocalInPolicy {
+  id: number;
+  name: string;
+  enabled: boolean;
+  /** Eingangs-Interface oder Zone; "any" erlaubt */
+  intf: string;
+  srcaddr: string[];
+  /** meist "all" oder das Adressobjekt der Interface-IP */
+  dstaddr: string[];
+  service: string[];
+  action: PolicyAction;
+  schedule: ScheduleName;
+}
+
+/**
+ * Admin-Konto mit Trusted Hosts (FortiOS `config system admin`, `set
+ * trusthost1..10`). LEERE Liste heißt „von überall" — Auslieferungszustand und
+ * Audit-Befund in einem.
+ */
+export interface AdminAccount {
+  name: string;
+  trustedHosts: Cidr[];
 }
 
 /** members: Interface-IDs (Engine akzeptiert lenient auch Interface-Namen) */
@@ -110,6 +156,15 @@ export type MatchField = 'srcintf' | 'dstintf' | 'srcaddr' | 'dstaddr' | 'servic
 
 export type TraceStep =
   | { kind: 'dnat'; vipName: string; toIp: IPv4; toPort?: number }
+  // Local-In: Verkehr an die Firewall selbst
+  | { kind: 'local-in'; iface: string; service: LocalService | null }
+  | { kind: 'allowaccess-denied'; iface: string; service: LocalService | null }
+  | { kind: 'local-in-no-match'; policyId: number; failedField: MatchField }
+  | { kind: 'local-in-match'; policyId: number; action: PolicyAction }
+  /** Die Asymmetrie zur Forward-Tabelle: keine Regel getroffen ⇒ erlaubt */
+  | { kind: 'local-in-implicit-accept' }
+  | { kind: 'trusthost-denied'; admins: string[] }
+  | { kind: 'trusthost-ok'; admin: string }
   | { kind: 'route'; dstintf: string; route: Cidr }
   | { kind: 'no-route' }
   | { kind: 'policy-skipped'; policyId: number; reason: 'disabled' }
@@ -126,6 +181,12 @@ export interface Verdict {
   natApplied: boolean;
   /** nur gesetzt bei ACCEPT einer DNAT-Verbindung (VIP-Match) */
   dnat?: { toIp: IPv4; toPort?: number };
+  /**
+   * Gesetzt, wenn das Paket an die Firewall SELBST ging. Dann sind
+   * matchedPolicyId (0) und dstintf ('') bedeutungslos — es war kein
+   * Forward-Traffic, und die Entscheidung steht in localIn.gate.
+   */
+  localIn?: LocalInVerdict;
   trace: TraceStep[];
 }
 
@@ -140,6 +201,33 @@ export interface NetworkConfig {
   vips: Vip[];
   routes: RouteEntry[];
   policies: Policy[];
+  /**
+   * Optional: Regeln für Verkehr AN die Firewall. Fehlend ist nicht dasselbe
+   * wie leer und trotzdem gleich behandelt — beides heißt „keine Regel greift",
+   * und Local-In endet mit implizitem ACCEPT.
+   */
+  localInPolicies?: LocalInPolicy[];
+  /** Optional: Admin-Konten mit Trusted Hosts. Leer = trusthost spielt keine Rolle. */
+  admins?: AdminAccount[];
+}
+
+/**
+ * Ergebnis für Local-In-Traffic. Eigener Typ, weil hier kein dstintf, kein
+ * Routing und kein NAT vorkommt — ein Verdict mit leerem dstintf wäre eine
+ * Lüge über die Natur des Verkehrs.
+ */
+export interface LocalInVerdict {
+  action: PolicyAction;
+  /** Interface, dessen IP angesprochen wurde ('' wenn gar kein Local-In) */
+  iface: string;
+  service: LocalService | null;
+  /** Welches Tor entschieden hat */
+  gate: 'not-local' | 'allowaccess' | 'local-in-policy' | 'trusthost' | 'open';
+  /** Local-In-Policy, die getroffen hat (fehlt beim impliziten Accept) */
+  matchedPolicyId?: number;
+  /** Konto, dessen trusthost die Quelle zugelassen hat */
+  admin?: string;
+  trace: TraceStep[];
 }
 
 /** Testpaket mit Erwartung — Basis für Architect/Audit/Incident-Verifikation */

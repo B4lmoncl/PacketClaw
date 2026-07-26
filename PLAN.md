@@ -914,3 +914,39 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
     Serie bleibt korrekt bei 0 (100 < 300), 0 Konsolenfehler.
     (Nebenbei in eigener Sache: der beforeEach eines neuen Tests setzte stats
     nicht zurueck, wodurch dailiesPerfect von Test zu Test wanderte — gefixt.)
+- 2026-07-26 (Forts. 41): LOCAL-IN IN DER ENGINE (#50, Teil 1 — Engine, ohne UI).
+  Bisher stand in docs/ENGINE.md „Local-in-Traffic nicht modelliert —
+  ausserhalb des Spielumfangs". Das war die falsche Entscheidung: sich aus einer
+  FortiGate auszusperren ist die teuerste Erfahrung, die man an dem Geraet machen
+  kann, und sie hat mit der Policy-Tabelle NICHTS zu tun.
+  NEU src/engine/localIn.ts (pure, 27 Tests, 100 % Branch-Coverage; Engine
+  gesamt 98,1 % — Gate ist 95 %). evaluate() erkennt an Iface.ip, dass ein Paket
+  an die Firewall selbst geht, und delegiert. Der Forward-Pfad bleibt dabei
+  BIT-IDENTISCH: ohne Interface-IPs kann kein Level in den neuen Zweig laufen,
+  alle 70 bestehenden Level verhalten sich unveraendert.
+  Das Verdict traegt dstintf: '' und matchedPolicyId: 0 — beides hat fuer diesen
+  Verkehr keine Bedeutung, und ein Ziel-Interface zu behaupten waere eine Luege
+  ueber seine Natur.
+  DREI UNABHAENGIGE TORE, alle drei muessen zustimmen:
+  1. allowaccess am Interface — der haeufigste Grund fuer „ich komme nicht auf
+     die GUI", und er steht in KEINER Policy-Tabelle.
+  2. Local-In-Policy — First Match, Felder wie in der Forward-Policy, aber ohne
+     dstintf.
+  3. trusthost des Admin-Kontos — nur fuer Dienste mit Login (https/ssh/http);
+     ein passendes Konto genuegt; leeres trusthost heisst „von ueberall"
+     (Auslieferungszustand UND Audit-Befund).
+     DIE ASYMMETRIE, um die es geht: Local-In endet mit implizitem ACCEPT, nicht
+     mit Implicit Deny. Eine leere Local-In-Tabelle sperrt nichts aus. Wer die
+     beiden Tabellen verwechselt, sucht den Fehler in beide Richtungen falsch.
+     Eigener Test dafuer, plus einer fuer den Aussperr-Klassiker: Dienst offen,
+     keine Regel im Weg, und trotzdem kein Login, weil trusthost auf ein anderes
+     Netz zeigt.
+     Nebenbei gefunden: makeConfig() liess die neuen optionalen Felder fallen
+     (sieben Tests schlugen deswegen fehl). localInPolicies/admins werden jetzt
+     nur mitgeschrieben, wenn ein Level sie nutzt — „fehlt" und „ist leer" sollen
+     in der Anzeige unterscheidbar bleiben.
+     docs/ENGINE.md: eigener Abschnitt, und die veraltete Zeile aus der
+     Vereinfachungs-Tabelle ersetzt.
+     OFFEN (Teil 2): Workshop-Modus „Management-Zugriff" — Zugriff fuers Buero
+     freischalten, ohne sich selbst auszusperren.
+     Tests: 408 gruen, Lint 0 Fehler, Build ok.

@@ -12,6 +12,11 @@ export function makeConfig(partial: Partial<NetworkConfig>): NetworkConfig {
     vips: partial.vips ?? [],
     routes: partial.routes ?? [],
     policies: partial.policies ?? [],
+    // Local-In bleibt optional: nur mitschreiben, wenn ein Level es nutzt.
+    // Ein leeres Array waere hier nicht gleichwertig — die Anzeige unterscheidet
+    // „kein Management-Thema" von „Tabelle absichtlich leer".
+    ...(partial.localInPolicies !== undefined && { localInPolicies: partial.localInPolicies }),
+    ...(partial.admins !== undefined && { admins: partial.admins }),
   };
 }
 
