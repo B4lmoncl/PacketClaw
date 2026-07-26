@@ -33,7 +33,9 @@
     "dnat": "Publish a Server",
     "dnatSub": "Port forwarding — publish a server to the internet",
     "design": "Change Request",
-    "designSub": "Build a ruleset from written requirements"
+    "designSub": "Build a ruleset from written requirements",
+    "routing": "Routing Lab",
+    "routingSub": "The ruleset is fine. The routing table is not."
   },
   "level": {
     "boss": "Boss",
@@ -514,6 +516,44 @@
       "a": "The requester asks for swift implementation and has already told everyone it works.",
       "b": "Note from the department: \"just open everything\" was submitted as a proposal and rejected for reasons set out in the appendix. There is no appendix.",
       "c": "Last documented change to this firewall: unknown. The colleague who knew has been promoted."
+    }
+  },
+  "routing": {
+    "title": "Routing Lab",
+    "intro": "Something does not reach its destination, and for once the ruleset is not to blame. The policies are correct and locked — you only get to touch the routing table. Route first, then policy: the route decides which interface the traffic leaves through, and a policy for the wrong interface never matches.",
+    "rule": "Watch out for the trap: as long as a default route exists, there is no such thing as \"no route\". 0.0.0.0/0 catches everything and sends it towards the internet, where the egress rule cheerfully allows it. The firewall says ACCEPT and the server is still never reached.",
+    "start": "Open ticket",
+    "solved": "Routing cases fixed",
+    "ticket": "Support ticket",
+    "probe": "Traffic in question: {{src}} → {{dst}}:{{port}} (TCP)",
+    "checks": "Verification",
+    "want": "want",
+    "got": "got",
+    "tableTitle": "Static routes",
+    "destination": "Destination",
+    "iface": "Interface",
+    "defaultTag": "default",
+    "add": "Add",
+    "delete": "Delete route",
+    "badCidr": "Needs a network in CIDR form, e.g. 172.16.0.0/24.",
+    "lookup": "Route lookup",
+    "wins": "wins",
+    "noRoute": "no matching route",
+    "rulesetLocked": "Ruleset (read-only — the bug is not in here)",
+    "verify": "Verify routing",
+    "allGreen": "Everything lands where it should.",
+    "stillFailing": "{{count}} check(s) still failing",
+    "fixed": "Traffic is back on course",
+    "next": "Next case",
+    "symptom": {
+      "missing": "Accounting cannot reach the web server. Accounting cannot reach a lot of things, but this time it really is the firewall.",
+      "wrong-iface": "Since the maintenance window, traffic to the DMZ leaves towards the internet. The maintenance window is documented as completed successfully.",
+      "hijack": "Someone added a route on Thursday. The change is undocumented, but very specific."
+    },
+    "debrief": {
+      "defaultRoute": "The specific route was missing, so 0.0.0.0/0 took the traffic and the egress rule waved it through. A default route is not a safety net — it is a very confident guess.",
+      "dstintf": "The route existed and pointed at the wrong interface. The policy for port2 was never even consulted, which is why the ruleset looked innocent. It was.",
+      "lpm": "Longest prefix match does not care how correct your /24 is. A /25 is more specific, so the /25 wins. Specificity beats intent, every time."
     }
   }
 }

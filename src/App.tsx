@@ -20,6 +20,7 @@ import { MatchCheckScreen } from './ui/screens/MatchCheckScreen';
 import { DoctorScreen } from './ui/screens/DoctorScreen';
 import { DnatScreen } from './ui/screens/DnatScreen';
 import { DesignScreen } from './ui/screens/DesignScreen';
+import { RoutingScreen } from './ui/screens/RoutingScreen';
 import { ChallengeScreen } from './ui/screens/ChallengeScreen';
 import { ProfileScreen } from './ui/screens/ProfileScreen';
 import { SettingsScreen } from './ui/screens/SettingsScreen';
@@ -102,6 +103,10 @@ export default function App() {
       break;
     case 'design':
       content = <DesignScreen />;
+      onBack = () => navigate({ name: 'home' });
+      break;
+    case 'routing':
+      content = <RoutingScreen />;
       onBack = () => navigate({ name: 'home' });
       break;
     case 'challenge':

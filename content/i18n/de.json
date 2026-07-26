@@ -33,7 +33,9 @@
     "dnat": "Server veröffentlichen",
     "dnatSub": "Port-Forwarding — Server nach außen veröffentlichen",
     "design": "Change Request",
-    "designSub": "Regelwerk nach Vorgaben bauen"
+    "designSub": "Regelwerk nach Vorgaben bauen",
+    "routing": "Routing-Werkstatt",
+    "routingSub": "Das Regelwerk stimmt. Die Routing-Tabelle nicht."
   },
   "level": {
     "boss": "Boss",
@@ -514,6 +516,44 @@
       "a": "Der Auftraggeber bittet um zügige Umsetzung und hat vorsorglich schon allen mitgeteilt, dass es funktioniert.",
       "b": "Anmerkung der Fachabteilung: \"Einfach alles freischalten\" wurde als Lösungsvorschlag eingereicht und aus Gründen abgelehnt, die im Anhang stehen. Es gibt keinen Anhang.",
       "c": "Letzte dokumentierte Änderung an dieser Firewall: unbekannt. Der Kollege, der es wusste, ist befördert worden."
+    }
+  },
+  "routing": {
+    "title": "Routing-Werkstatt",
+    "intro": "Irgendetwas kommt nicht an, und ausnahmsweise ist das Regelwerk unschuldig. Die Policies sind korrekt und gesperrt — anfassen darfst du nur die Routing-Tabelle. Route zuerst, dann Policy: die Route bestimmt, über welches Interface der Verkehr rausgeht, und eine Policy für das falsche Interface greift nie.",
+    "rule": "Achtung, Falle: solange eine Default-Route existiert, gibt es kein \"no route\". Die 0.0.0.0/0 fängt alles ab und schickt es Richtung Internet, wo die Egress-Regel es bereitwillig erlaubt. Die Firewall sagt ACCEPT, und der Server wird trotzdem nie erreicht.",
+    "start": "Ticket öffnen",
+    "solved": "Reparierte Routing-Fälle",
+    "ticket": "Support-Ticket",
+    "probe": "Der Verkehr um den es geht: {{src}} → {{dst}}:{{port}} (TCP)",
+    "checks": "Prüfung",
+    "want": "soll",
+    "got": "ist",
+    "tableTitle": "Statische Routen",
+    "destination": "Ziel",
+    "iface": "Interface",
+    "defaultTag": "Default",
+    "add": "Hinzufügen",
+    "delete": "Route löschen",
+    "badCidr": "Braucht ein Netz in CIDR-Form, z. B. 172.16.0.0/24.",
+    "lookup": "Route-Lookup",
+    "wins": "gewinnt",
+    "noRoute": "keine passende Route",
+    "rulesetLocked": "Regelwerk (read-only — hier liegt der Fehler nicht)",
+    "verify": "Routing prüfen",
+    "allGreen": "Alles landet da, wo es hingehört.",
+    "stillFailing": "{{count}} Prüfung(en) noch rot",
+    "fixed": "Der Verkehr ist wieder auf Kurs",
+    "next": "Nächster Fall",
+    "symptom": {
+      "missing": "Die Buchhaltung erreicht den Webserver nicht. Die Buchhaltung erreicht vieles nicht, aber diesmal ist es wirklich die Firewall.",
+      "wrong-iface": "Seit dem Wartungsfenster geht der Verkehr in die DMZ Richtung Internet. Das Wartungsfenster ist als erfolgreich abgeschlossen dokumentiert.",
+      "hijack": "Jemand hat am Donnerstag eine Route eingetragen. Die Änderung ist nicht dokumentiert, aber sehr spezifisch."
+    },
+    "debrief": {
+      "defaultRoute": "Die spezifische Route fehlte, also hat die 0.0.0.0/0 den Verkehr genommen und die Egress-Regel hat ihn durchgewinkt. Eine Default-Route ist kein Sicherheitsnetz — sie ist eine sehr selbstbewusste Vermutung.",
+      "dstintf": "Die Route war da und zeigte aufs falsche Interface. Die Policy für port2 wurde nie befragt, deshalb sah das Regelwerk unschuldig aus. Es war unschuldig.",
+      "lpm": "Longest Prefix Match interessiert nicht, wie korrekt deine /24 ist. Eine /25 ist spezifischer, also gewinnt die /25. Spezifität schlägt Absicht, jedes Mal."
     }
   }
 }

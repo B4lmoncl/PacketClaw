@@ -36,6 +36,7 @@ export type Screen =
   | { name: 'doctor' }
   | { name: 'dnat' }
   | { name: 'design' }
+  | { name: 'routing' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -66,6 +67,8 @@ interface GameState {
   dnatSolved: number;
   /** Angenommene Change Requests (Regelwerk nach Vorgaben) */
   designSolved: number;
+  /** Reparierte Routing-Faelle */
+  routingSolved: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -87,6 +90,7 @@ interface GameState {
   recordDoctor(score: number): void;
   recordDnat(score: number): void;
   recordDesign(score: number): void;
+  recordRouting(score: number): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -110,6 +114,7 @@ export const useGame = create<GameState>()(
       doctorSolved: 0,
       dnatSolved: 0,
       designSolved: 0,
+      routingSolved: 0,
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -245,6 +250,21 @@ export const useGame = create<GameState>()(
           };
         }),
 
+      recordRouting: (score) =>
+        set((state) => {
+          const xp = state.xp + score;
+          const unlocked = evaluateAchievements(
+            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+            state.achievements,
+          );
+          return {
+            xp,
+            routingSolved: state.routingSolved + 1,
+            achievements: [...state.achievements, ...unlocked],
+            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
+          };
+        }),
+
       recordDoctor: (score) =>
         set((state) => {
           const xp = state.xp + score;
@@ -305,6 +325,7 @@ export const useGame = create<GameState>()(
           doctorSolved,
           dnatSolved,
           designSolved,
+          routingSolved,
           stats,
           achievements,
           streak,
@@ -324,6 +345,7 @@ export const useGame = create<GameState>()(
             doctorSolved,
             dnatSolved,
             designSolved,
+            routingSolved,
             stats,
             achievements,
             streak,
@@ -368,6 +390,7 @@ export const useGame = create<GameState>()(
         doctorSolved: state.doctorSolved,
         dnatSolved: state.dnatSolved,
         designSolved: state.designSolved,
+        routingSolved: state.routingSolved,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -398,6 +421,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   doctorSolved: number;
   dnatSolved: number;
   designSolved: number;
+  routingSolved: number;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -421,6 +445,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     doctorSolved: typeof save.doctorSolved === 'number' ? save.doctorSolved : 0,
     dnatSolved: typeof save.dnatSolved === 'number' ? save.dnatSolved : 0,
     designSolved: typeof save.designSolved === 'number' ? save.designSolved : 0,
+    routingSolved: typeof save.routingSolved === 'number' ? save.routingSolved : 0,
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

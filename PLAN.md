@@ -471,3 +471,38 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   ROADMAP v1.3 ergaenzt: Routing → FQDN-Objekte → DHCP → HA (#54), mit
   Begruendung der Reihenfolge; Routing ist der billigste naechste Schritt,
   weil longestPrefixMatch/RouteEntry schon existieren.
+- 2026-07-25 (Forts. 22, autonom): ROUTING-WERKSTATT (#55) — erster Schritt
+  aus ROADMAP v1.3. Kniff: das Regelwerk ist korrekt und READ-ONLY, der
+  Fehler liegt ausschliesslich in der Routing-Tabelle. Damit sitzt die
+  FortiOS-Reihenfolge: Route zuerst, sie bestimmt das dstintf, erst danach
+  Policy-Match — eine Policy fuer port2 greift nie, wenn die Route nach wan1
+  schickt. src/game/routing.ts (pure, 10 Tests) mit drei Fallarten: missing
+  (spezifische Route fehlt), wrong-iface (Route zeigt falsch), hijack (eine
+  SPEZIFISCHERE /25 gewinnt per LPM gegen die korrekte /24).
+  WICHTIGE KORREKTUR durch die Tests: mein erster Entwurf wollte „no route,
+  drop" zeigen — das ist mit vorhandener Default-Route UNMOEGLICH, 0.0.0.0/0
+  faengt alles ab. Der Verkehr geht dann nach wan1 und wird von der
+  Egress-Regel sogar ERLAUBT: die Firewall sagt ACCEPT, der Server wird nie
+  erreicht. Das ist der bessere, gemeinere Fall — deshalb prueft der Modus
+  ueber eigenes RoutingCheck-Interface (statt TestPacket) auch das
+  EGRESS-INTERFACE: accept ueber das falsche Interface ist ein Fehler.
+  Eigener Test haelt das fest. UI: RoutingTable.tsx im FortiOS-Stil
+  (Network → Static Routes: Ziel/Interface, anlegen/aendern/loeschen, CIDR-
+  Validierung) plus Route-Lookup analog zum Policy Lookup (Ziel-IP → welche
+  Route gewinnt, welches Egress-Interface, rot wenn es nicht das erwartete
+  ist). RoutingScreen zeigt Symptom-Ticket, Live-Pruefliste im Format
+  „soll accept @ port2 · ist accept @ wan1", die read-only PolicyTable und
+  den echten debugFlow-Trace (wiederverwendet) — genau die drei Werkzeuge,
+  mit denen man das auf einer echten Box diagnostiziert. Routen bewusst
+  NICHT nach Praefix sortiert: macht sichtbar, dass beim Routing die
+  Tabellenreihenfolge irrelevant ist (anders als bei Policies), nur
+  Spezifitaet zaehlt. Store: routingSolved + recordRouting + Screen
+  'routing'; Home-Kachel 🧭 in WERKSTATT; i18n de/en.
+  QuestHall ist jetzt im Session-Scope (/workspace/questhall) — Flavour
+  gegen LYRA-PLAYBOOK Abschnitt 0 geschrieben: trocken, spezifisch, jeder
+  Text mit Landung, Katastrophe als Terminproblem, kein Pathos, keine
+  Motivationssprache. Die bereits existierenden design.ts-Notizen habe ich
+  gegengeprueft — sie treffen den Kanon schon, kein Retune noetig.
+  Tests: 253 gruen, Lint 0 Fehler, Build ok, E2E-Smoke spielt einen Fall
+  KOMPLETT durch (Ticket → Route-Lookup → Route reparieren → gruen →
+  geloest), 0 JS-Fehler.
