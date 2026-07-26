@@ -575,3 +575,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 282 gruen, Lint 0 Fehler, Build ok, E2E-Smoke in zwei
   Fortschritts-Staenden (frisch: Sperren+Countdown sichtbar; fortgeschritten:
   Depot bereit, Tagesziel-Rest, frische Freischaltung).
+- 2026-07-25 (Forts. 25): GAMIFICATION-DURCHLAUF 2 — Juice im Kernloop.
+  Der store-interne `combo` (Serie richtiger Antworten UEBER Level hinweg)
+  wurde bisher nur fuer Scoring/Stats benutzt und war NIRGENDS sichtbar;
+  jetzt haengt der ComboMeter in der Antwortphase des VerdictScreens. Das
+  ist der Faden, der zur naechsten Aufgabe zieht, weil die Serie erst beim
+  Weiterspielen waechst.
+  Test-Infrastruktur: src/test/setup.ts stubbt jetzt window.matchMedia —
+  ohne das stirbt JEDE Komponente mit useReducedMotionPref in jsdom, also
+  praktisch jede animierte. Damit sind Komponententests ueberhaupt erst
+  moeglich; erster davon deckt den ComboMeter ab (unsichtbar unter 3,
+  Stufen ab 3/5/12).
+  Merknotiz fuer Folge-Sessions: `combo` ist BEWUSST fluechtig (nicht im
+  Save) — ein E2E-Test kann ihn nicht ueber localStorage setzen, man muss
+  ihn erspielen oder die Komponente direkt testen.
+  Tests: 285 gruen, Lint 0 Fehler, Build ok.

@@ -10,6 +10,7 @@ import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
 import { PacketCard } from '../components/PacketCard';
 import { ObjectBrowser } from '../components/ObjectBrowser';
+import { ComboMeter } from '../components/ComboMeter';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { XpGain } from '../components/XpGain';
 import { PolicyTable } from '../components/PolicyTable';
@@ -295,6 +296,14 @@ export function VerdictScreen({
               <p className="text-center text-sm text-dim" aria-live="polite">
                 {t('verdict.pickPolicy')}
               </p>
+            )}
+
+            {/* Combo laeuft ueber Level hinweg weiter — sichtbar zu machen ist
+                der Faden, der zur naechsten Aufgabe zieht */}
+            {phase === 'answer' && (
+              <div className="self-center">
+                <ComboMeter streak={combo} />
+              </div>
             )}
 
             {phase === 'descent' && (
