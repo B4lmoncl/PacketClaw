@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { todayString } from './daily';
 import { DEFAULT_DAILY_GOAL } from './rewards';
-import { pickQuests } from './dailyQuests';
+import { pickQuests, weekMilestone } from './dailyQuests';
 import type { Concept, MasteryMap } from './mastery';
 import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
@@ -214,11 +214,23 @@ function streakForGoal(
 }
 
 function rewardPatch(state: GameState, score: number, date = todayString()) {
-  const xp = state.xp + score;
   const sameDay = state.dailyXp.date === date;
   const xpBefore = sameDay ? state.dailyXp.xp : 0;
   const xpToday = xpBefore + score;
   const streak = streakForGoal(state.streak, date, xpBefore, xpToday);
+  /**
+   * Wochenmeilenstein AUSZAHLEN. Die Belohnung stand bisher nur in der Anzeige
+   * („Tag 5 von sieben +240") und kam nie an — ein Versprechen, das das Spiel
+   * jeden Tag gemacht und jeden Tag gebrochen hat.
+   *
+   * Bezahlt wird genau dann, wenn die Serie WIRKLICH weiterzaehlt (streak !==
+   * state.streak). advanceStreak ist fuer denselben Tag idempotent, also kann
+   * derselbe Tag nicht doppelt kassieren — auch nicht, wenn danach noch zehn
+   * Aufgaben geloest werden.
+   */
+  const streakAdvanced = streak !== state.streak;
+  const weekBonus = streakAdvanced ? weekMilestone(streak.current).reward : 0;
+  const xp = state.xp + score + weekBonus;
   const unlocked = evaluateAchievements(
     { stats: state.stats, xp, stars: state.stars, streak },
     state.achievements,

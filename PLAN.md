@@ -868,3 +868,23 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   motivieren, feststellen).
   Tests: 365 gruen, Lint 0 Fehler, Build ok, E2E: drei Saves gegenuebergestellt
   (12d ohne Token = laut, 12d mit Token = leise, 2d = leise), 0 Konsolenfehler.
+- 2026-07-26 (Forts. 39): ECHTER FEHLER GEFUNDEN — der Wochenmeilenstein wurde
+  ANGEZEIGT, aber NIE AUSGEZAHLT. „Tag 5 von sieben +240" stand jeden Tag da,
+  und die 240 XP kamen nie an. Ein Belohnungssystem, das ein Versprechen
+  taeglich macht und taeglich bricht, ist schlimmer als keines.
+  (a) AUSZAHLUNG in rewardPatch(): bezahlt wird genau dann, wenn die Serie
+  WIRKLICH weiterzaehlt (streak !== state.streak). advanceStreak ist fuer
+  denselben Tag idempotent, derselbe Tag kann also nicht doppelt kassieren —
+  auch nicht nach zehn weiteren Aufgaben. Der Bonus laeuft bewusst NICHT in die
+  Tages-XP des Ziels: der Ring soll 300/300 zeigen und nicht 540/300, er misst
+  das Erspielte, nicht die Folge davon.
+  (b) ZWEITER FEHLER, beim Nachrechnen aufgefallen: die Anzeige war um einen Tag
+  versetzt. streak.current ist der letzte GESICHERTE Tag; bei Serie 4 und
+  offenem Tagesziel stand „Tag 4, +180" da, waehrend der heutige Abschluss Tag 5
+  mit +240 auszahlt. NEU weekMilestoneFor(streak, goalDone) — solange das Ziel
+  offen ist, nennt die Anzeige den Tag, den HEUTE bringt. Ein Test haelt fest,
+  dass Anzeige und Auszahlung dieselbe Zahl liefern.
+  Die Zeile zeigt jetzt ausserdem „✓ +240" statt nur „+240", sobald kassiert —
+  die nackte Zahl war zweideutig.
+  Tests: 375 gruen (10 neue), Lint 0 Fehler, Build ok, E2E: Serie 4 + offenes
+  Ziel zeigt Tag 5 und +240, 0 Konsolenfehler.

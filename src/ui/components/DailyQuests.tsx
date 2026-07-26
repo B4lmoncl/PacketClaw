@@ -16,10 +16,12 @@ interface Props {
   progress: QuestProgress[];
   week: WeekMilestone;
   streak: number;
+  /** Tagesziel heute erreicht? Dann ist der Wochenbonus schon gezahlt. */
+  weekPaid: boolean;
   onClaim: (quest: QuestProgress) => void;
 }
 
-export function DailyQuests({ progress, week, streak, onClaim }: Props) {
+export function DailyQuests({ progress, week, streak, weekPaid, onClaim }: Props) {
   const { t } = useTranslation();
   if (progress.length === 0) return null;
 
@@ -113,7 +115,12 @@ export function DailyQuests({ progress, week, streak, onClaim }: Props) {
             <span className="truncate font-display text-xs font-bold text-ink">
               {t('quests.week', { day: week.day })}
             </span>
-            <span className="shrink-0 font-mono text-[10px] text-warn">+{week.reward}</span>
+            {/* Kassiert oder noch offen — die Zahl allein waere zweideutig */}
+            <span
+              className={`shrink-0 font-mono text-[10px] ${weekPaid ? 'text-trace' : 'text-warn'}`}
+            >
+              {weekPaid ? '✓ ' : ''}+{week.reward}
+            </span>
           </div>
           {/* Sieben Punkte statt Balken: man soll den siebten Tag SEHEN */}
           <div className="mt-1.5 flex gap-1">

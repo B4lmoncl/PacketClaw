@@ -169,3 +169,17 @@ export function weekMilestone(streakDays: number): WeekMilestone {
     isFinal: day === 7,
   };
 }
+
+/**
+ * Der Meilenstein, den die ANZEIGE nennen soll.
+ *
+ * `streak.current` ist der Stand des letzten gesicherten Tages. Steht das
+ * heutige Tagesziel noch offen, gehört in die Anzeige also der Tag, den heute
+ * BRINGEN würde — sonst nennt die Karte Tag 4 mit 180 XP, während der heutige
+ * Abschluss tatsächlich Tag 5 mit 240 XP auszahlt. Genau diese Zahl hat
+ * vorher nicht zur Auszahlung gepasst.
+ */
+export function weekMilestoneFor(streakDays: number, goalDone: boolean): WeekMilestone {
+  const safe = Math.max(0, streakDays);
+  return weekMilestone(goalDone ? safe : safe + 1);
+}

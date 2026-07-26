@@ -8,6 +8,7 @@ import {
   QUESTS_PER_DAY,
   questProgress,
   weekMilestone,
+  weekMilestoneFor,
   WEEK_REWARDS,
 } from '../dailyQuests';
 import type { QuestCounters } from '../dailyQuests';
@@ -141,5 +142,43 @@ describe('Wochenmeilenstein', () => {
 
   it('negative Eingaben stuerzen nicht ab', () => {
     expect(weekMilestone(-3).day).toBe(1);
+  });
+});
+
+/**
+ * Die Anzeige muss dieselbe Zahl nennen, die spaeter auch ausgezahlt wird.
+ * Vorher stand da Tag 4 mit 180 XP, waehrend der heutige Abschluss Tag 5 mit
+ * 240 XP gebracht hat — ein Versprechen, das nicht zur Auszahlung passte.
+ */
+describe('weekMilestoneFor — Anzeige passt zur Auszahlung', () => {
+  it('offenes Tagesziel: zeigt den Tag, den HEUTE bringt', () => {
+    const shown = weekMilestoneFor(4, false);
+    expect(shown.day).toBe(5);
+    expect(shown.reward).toBe(WEEK_REWARDS[4]);
+    // genau das zahlt der Store, wenn die Serie auf 5 weiterzaehlt
+    expect(weekMilestone(5).reward).toBe(shown.reward);
+  });
+
+  it('erledigtes Tagesziel: zeigt den Tag, der gerade gesichert wurde', () => {
+    const shown = weekMilestoneFor(5, true);
+    expect(shown.day).toBe(5);
+    expect(shown.reward).toBe(WEEK_REWARDS[4]);
+  });
+
+  it('ganz ohne Serie zeigt Tag 1', () => {
+    expect(weekMilestoneFor(0, false).day).toBe(1);
+    expect(weekMilestoneFor(0, true).day).toBe(1);
+  });
+
+  it('der siebte Tag wird als Finale erkannt, bevor er da ist', () => {
+    const shown = weekMilestoneFor(6, false);
+    expect(shown.day).toBe(7);
+    expect(shown.isFinal).toBe(true);
+    expect(shown.reward).toBe(WEEK_REWARDS[6]);
+  });
+
+  it('nach dem siebten Tag beginnt der Zyklus wieder bei 1', () => {
+    expect(weekMilestoneFor(7, false).day).toBe(1);
+    expect(weekMilestoneFor(7, true).day).toBe(7);
   });
 });

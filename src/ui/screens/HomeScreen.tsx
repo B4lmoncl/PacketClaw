@@ -10,7 +10,7 @@ import {
   allQuestsDone,
   QUEST_POOL,
   questProgress,
-  weekMilestone,
+  weekMilestoneFor,
 } from '../../game/dailyQuests';
 import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor, UNLOCKS } from '../../game/unlocks';
 import { readQuestCounters, useGame } from '../../game/store';
@@ -171,7 +171,8 @@ export function HomeScreen() {
           questDay.claimed,
         )
       : [];
-  const week = weekMilestone(streak.current);
+  // Die Anzeige nennt den Tag, den HEUTE bringt — solange das Ziel offen ist
+  const week = weekMilestoneFor(streak.current, goal.done);
 
   // Mastery: die Schwaechen zuerst — das ist der ehrlichste Grund weiterzuspielen
   const weakConcepts = weakestConcepts(mastery, 3);
@@ -386,6 +387,7 @@ export function HomeScreen() {
             progress={quests}
             week={week}
             streak={streak.current}
+            weekPaid={goal.done}
             onClaim={claimQuestReward}
           />
           <MasteryPanel
