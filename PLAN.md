@@ -994,3 +994,16 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
     Forward-Policy beteiligt). Kein Aufrufer fuettert das heute, aber der
     naechste haette den Fehler geerbt. Jetzt Guard + Test.
     Tests: 426 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-26 (Forts. 44): LAYOUT NACHGEMESSEN, NICHT GERATEN. Nach den letzten
+  Ausbauten habe ich die Startseite in einem realistischen Mittelspiel-Stand
+  vermessen (9000 XP, Serie 5, halbe Sammlung): auf 1920 px endete die
+  Modi-Spalte bei ~990 px, waehrend die Seitenleiste bis 1520 px weiterlief.
+  600 px toter Raum links, und rechts ein Stapel aus ELF Panels — genau die
+  Ueberladung, die vermieden werden soll.
+  Die Diagnose-Ebene (Schwachstellen + „Kurz davor") sitzt jetzt UNTER den Modi
+  statt in der Leiste, zweispaltig. Das ist auch inhaltlich die richtige
+  Reihenfolge: erst die Auswahl („was mache ich jetzt?"), dann der Befund
+  („woran hakt es?").
+  Gemessen: 1920 px 1,48 → 1,31 Bildschirmhoehen, 1440 px 1,77 → 1,58, mobil
+  3,54 unveraendert, kein waagerechter Ueberlauf, 0 Konsolenfehler.
+  Tests: 426 gruen, Lint 0 Fehler, Build ok.

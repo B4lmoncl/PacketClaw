@@ -236,7 +236,7 @@ export function HomeScreen() {
       {/* Desktop: zwei Spalten — links das Handeln, rechts der Status.
           Mobil bleibt alles gestapelt, Status zuerst (order). */}
       <div className="lg:grid lg:grid-cols-[1fr_21rem] lg:items-start lg:gap-5">
-        <aside className="mb-6 flex flex-col gap-3 lg:order-2 lg:mb-0">
+        <aside className="mb-6 flex flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mb-0">
           {/* Spieler-Statusleiste: Rang + XP-Fortschritt + Bestwerte */}
           <button
             onClick={() => navigate({ name: 'profile' })}
@@ -393,18 +393,10 @@ export function HomeScreen() {
             weekPaid={goal.done}
             onClaim={claimQuestReward}
           />
-          <MasteryPanel
-            weak={weakConcepts}
-            untested={untestedCount}
-            overall={masteryOverall}
-            canReview={isUnlocked('review', campaign.completed, xp)}
-            onReview={() => navigate({ name: 'review' })}
-          />
-          <NextBadges items={nearBadges} />
         </aside>
 
         <nav
-          className="flex w-full flex-col gap-6 lg:order-1 lg:gap-4"
+          className="flex w-full flex-col gap-6 lg:col-start-1 lg:row-start-1 lg:gap-4"
           aria-label={t('nav.mainMenu')}
         >
           {/* Primäre Zeile: „Was mache ich jetzt?" — Kampagne fortsetzen + Daily */}
@@ -576,6 +568,25 @@ export function HomeScreen() {
             </section>
           ))}
         </nav>
+
+        {/*
+          Die Diagnose-Ebene sitzt UNTER den Modi, nicht in der Seitenleiste.
+          Grund: die Modi-Spalte endete auf 1920 px bei ~990 px, während die
+          Leiste bis 1520 px weiterlief — 600 px toter Raum links, und rechts ein
+          Stapel aus elf Panels. Genau das ist die Überladung, die vermieden
+          werden soll. Hier gehört es auch inhaltlich hin: erst die Auswahl
+          („was mache ich jetzt?"), dann der Befund („woran hakt es?").
+        */}
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-start-1 lg:row-start-2 lg:mt-4">
+          <MasteryPanel
+            weak={weakConcepts}
+            untested={untestedCount}
+            overall={masteryOverall}
+            canReview={isUnlocked('review', campaign.completed, xp)}
+            onReview={() => navigate({ name: 'review' })}
+          />
+          <NextBadges items={nearBadges} />
+        </div>
       </div>
 
       <RewardOverlay reward={reward} onClose={() => setReward(null)} />
