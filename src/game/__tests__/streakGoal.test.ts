@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DAILY_GOAL } from '../rewards';
 import { WEEK_REWARDS } from '../dailyQuests';
 import { todayString } from '../daily';
+import { EMPTY_STATS } from '../progression';
 import { useGame } from '../store';
 
 /**
@@ -123,3 +124,82 @@ function yesterday(): string {
   d.setDate(d.getDate() - 1);
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * Drei Modi hatten ihre eigene Kopie der Belohnungslogik, und alle drei waren
+ * falsch. Diese Tests halten fest, dass es jetzt genau einen Zahlweg gibt.
+ */
+describe('jeder Modus fuettert denselben Belohnungs-Loop', () => {
+  beforeEach(() => {
+    useGame.setState({
+      xp: 0,
+      dailyXp: { date: '', xp: 0 },
+      tasksSolved: 0,
+      stars: {},
+      bestScores: {},
+      dailyHistory: {},
+      endlessBest: { rounds: 0, score: 0 },
+      streak: { current: 0, best: 0, lastDate: null, freezeTokens: 0 },
+      // stats MUSS mit zurueck: dailiesPlayed/-Perfect wandern sonst von Test
+      // zu Test weiter und die Zusicherungen messen die Vorgeschichte
+      stats: { ...EMPTY_STATS },
+      achievements: [],
+    });
+  });
+
+  it('ENDLOS zaehlte fuer nichts: kein Tagesziel, keine Truhe, keine Serie', () => {
+    useGame.getState().recordEndless(12, DEFAULT_DAILY_GOAL);
+    const s = useGame.getState();
+    expect(s.dailyXp.xp).toBe(DEFAULT_DAILY_GOAL);
+    expect(s.tasksSolved).toBe(1);
+    expect(s.streak.current).toBe(1);
+    expect(s.xp).toBe(DEFAULT_DAILY_GOAL + WEEK_REWARDS[0]);
+    expect(s.endlessBest).toEqual({ rounds: 12, score: DEFAULT_DAILY_GOAL });
+  });
+
+  it('KAMPAGNE zahlte keinen Wochenbonus', () => {
+    useGame.getState().recordLevelResult('ch1-l1', 3, DEFAULT_DAILY_GOAL);
+    const s = useGame.getState();
+    expect(s.xp).toBe(DEFAULT_DAILY_GOAL + WEEK_REWARDS[0]);
+    expect(s.streak.current).toBe(1);
+    // Sterne und Bestwert bleiben trotz Umbau erhalten
+    expect(s.stars['ch1-l1']).toBe(3);
+    expect(s.bestScores['ch1-l1']).toBe(DEFAULT_DAILY_GOAL);
+  });
+
+  it('Sterne gehen nie zurueck, auch bei schwaecherem Durchlauf', () => {
+    useGame.getState().recordLevelResult('ch1-l1', 3, 500);
+    useGame.getState().recordLevelResult('ch1-l1', 1, 100);
+    expect(useGame.getState().stars['ch1-l1']).toBe(3);
+    expect(useGame.getState().bestScores['ch1-l1']).toBe(500);
+  });
+
+  /**
+   * Der Daily Run ist der EINE Fall, der den Tag unabhaengig vom XP-Stand
+   * sichert — das Ding heisst „Daily". Vorher lief er an der Regel vorbei UND
+   * bekam keinen Wochenbonus.
+   */
+  it('DAILY RUN sichert den Tag auch unter dem Tagesziel — mit Wochenbonus', () => {
+    const today = todayString();
+    useGame.getState().recordDaily(today, [true, true, false], 50);
+    const s = useGame.getState();
+    expect(s.streak.current).toBe(1);
+    expect(s.xp).toBe(50 + WEEK_REWARDS[0]);
+    expect(s.stats.dailiesPlayed).toBe(1);
+    expect(s.dailyHistory[today]).toEqual([true, true, false]);
+  });
+
+  it('der Daily zaehlt pro Tag nur einmal — kein zweiter Wochenbonus', () => {
+    const today = todayString();
+    useGame.getState().recordDaily(today, [true], 50);
+    const after = useGame.getState().xp;
+    useGame.getState().recordDaily(today, [true], 50);
+    expect(useGame.getState().xp).toBe(after);
+    expect(useGame.getState().stats.dailiesPlayed).toBe(1);
+  });
+
+  it('perfekter Daily wird als perfekt gezaehlt', () => {
+    useGame.getState().recordDaily(todayString(), [true, true, true], 400);
+    expect(useGame.getState().stats.dailiesPerfect).toBe(1);
+  });
+});

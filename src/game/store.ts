@@ -213,11 +213,37 @@ function streakForGoal(
   return crossed ? advanceStreak(streak, date) : streak;
 }
 
-function rewardPatch(state: GameState, score: number, date = todayString()) {
+interface RewardOpts {
+  /**
+   * Der Tag ist unabhaengig vom XP-Stand gesichert. Genau EIN Fall: der Daily
+   * Run. Das Ding heisst „Daily" — wer ihn gespielt hat, hat den Tag erledigt,
+   * auch wenn die zehn Pakete das Tagesziel knapp nicht reissen.
+   */
+  secureDay?: boolean;
+  /** Stats/Stars, die dieser Aufruf selbst schon fortgeschrieben hat */
+  stats?: Stats;
+  stars?: Record<string, number>;
+}
+
+/**
+ * Der gemeinsame Belohnungsteil JEDER gelösten Aufgabe: XP, Tagesziel, Serie,
+ * Wochenmeilenstein, Truhen-Zähler, Achievements.
+ *
+ * Es gibt genau EINE Stelle, die die Serie weiterzählt und den
+ * Wochenmeilenstein auszahlt — nämlich diese. Vorher hatten
+ * recordLevelResult und recordDaily ihre eigene Kopie dieser Logik, und beide
+ * Kopien waren falsch: die Kampagne zahlte keinen Wochenbonus, und der Daily
+ * Run zählte die Serie an der Regel vorbei. Der Endlos-Modus fütterte den Loop
+ * gar nicht (kein Tagesziel, keine Truhe). Genau davor warnt der Kommentar hier
+ * seit Anfang an; die Duplikate WAREN der Fehler.
+ */
+function rewardPatch(state: GameState, score: number, date = todayString(), opts: RewardOpts = {}) {
   const sameDay = state.dailyXp.date === date;
   const xpBefore = sameDay ? state.dailyXp.xp : 0;
   const xpToday = xpBefore + score;
-  const streak = streakForGoal(state.streak, date, xpBefore, xpToday);
+  const streak = opts.secureDay
+    ? advanceStreak(state.streak, date)
+    : streakForGoal(state.streak, date, xpBefore, xpToday);
   /**
    * Wochenmeilenstein AUSZAHLEN. Die Belohnung stand bisher nur in der Anzeige
    * („Tag 5 von sieben +240") und kam nie an — ein Versprechen, das das Spiel
@@ -231,10 +257,9 @@ function rewardPatch(state: GameState, score: number, date = todayString()) {
   const streakAdvanced = streak !== state.streak;
   const weekBonus = streakAdvanced ? weekMilestone(streak.current).reward : 0;
   const xp = state.xp + score + weekBonus;
-  const unlocked = evaluateAchievements(
-    { stats: state.stats, xp, stars: state.stars, streak },
-    state.achievements,
-  );
+  const stats = opts.stats ?? state.stats;
+  const stars = opts.stars ?? state.stars;
+  const unlocked = evaluateAchievements({ stats, xp, stars, streak }, state.achievements);
   return {
     xp,
     streak,
@@ -285,73 +310,40 @@ export const useGame = create<GameState>()(
             ...state.stars,
             [levelId]: Math.max(state.stars[levelId] ?? 0, stars),
           };
-          const xp = state.xp + score;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: nextStars, streak: state.streak },
-            state.achievements,
-          );
-          const date = todayString();
-          const sameDay = state.dailyXp.date === date;
-          const xpBefore = sameDay ? state.dailyXp.xp : 0;
-          const xpToday = xpBefore + score;
           return {
-            xp,
+            // nextStars muss in den Achievement-Kontext, sonst greifen die
+            // Kapitel-Abzeichen erst eine Runde zu spaet
+            ...rewardPatch(state, score, todayString(), { stars: nextStars }),
             stars: nextStars,
-            streak: streakForGoal(state.streak, date, xpBefore, xpToday),
-            tasksSolved: state.tasksSolved + 1,
-            dailyXp: { date, xp: xpToday },
             bestScores: {
               ...state.bestScores,
               [levelId]: Math.max(state.bestScores[levelId] ?? 0, score),
             },
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
           };
         }),
 
       recordDaily: (date, results, score) =>
         set((state) => {
           if (state.dailyHistory[date]) return state; // ein gewertetes Ergebnis pro Tag
-          const xp = state.xp + score;
-          const streak = advanceStreak(state.streak, date);
           const stats: Stats = {
             ...state.stats,
             dailiesPlayed: state.stats.dailiesPlayed + 1,
             dailiesPerfect: state.stats.dailiesPerfect + (results.every(Boolean) ? 1 : 0),
           };
-          const unlocked = evaluateAchievements(
-            { stats, xp, stars: state.stars, streak },
-            state.achievements,
-          );
-          const sameDay = state.dailyXp.date === date;
           return {
-            xp,
-            streak,
+            // secureDay: der Daily Run sichert den Tag auch dann, wenn die zehn
+            // Pakete das Tagesziel knapp nicht reissen — das Ding heisst „Daily"
+            ...rewardPatch(state, score, date, { secureDay: true, stats }),
             stats,
-            tasksSolved: state.tasksSolved + 1,
-            dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
             dailyHistory: { ...state.dailyHistory, [date]: results },
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
           };
         }),
 
       recordEndless: (rounds, score) =>
-        set((state) => {
-          const xp = state.xp + score;
-          const best: EndlessBest =
-            score > state.endlessBest.score ? { rounds, score } : state.endlessBest;
-          const unlocked = evaluateAchievements(
-            { stats: state.stats, xp, stars: state.stars, streak: state.streak },
-            state.achievements,
-          );
-          return {
-            xp,
-            endlessBest: best,
-            achievements: [...state.achievements, ...unlocked],
-            lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
-          };
-        }),
+        set((state) => ({
+          ...rewardPatch(state, score),
+          endlessBest: score > state.endlessBest.score ? { rounds, score } : state.endlessBest,
+        })),
 
       recordBlitz: (score) =>
         set((state) => ({

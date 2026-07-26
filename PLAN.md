@@ -888,3 +888,29 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   die nackte Zahl war zweideutig.
   Tests: 375 gruen (10 neue), Lint 0 Fehler, Build ok, E2E: Serie 4 + offenes
   Ziel zeigt Tag 5 und +240, 0 Konsolenfehler.
+- 2026-07-26 (Forts. 40): DREI KOPIEN DERSELBEN LOGIK, ALLE DREI FALSCH.
+  Nach dem Wochenbonus-Fund habe ich die uebrigen Belohnungs-Versprechen
+  durchgeprueft (Achievements: nur Abzeichen, kein XP-Versprechen — sauber;
+  Auftrags-Bonus: zahlt, erreichbar). Dabei fiel auf, dass drei record*-Aktionen
+  rewardPatch NICHT benutzten, sondern eine eigene Kopie hatten:
+  - ENDLOS fuetterte den Loop GAR NICHT: kein Tagesziel, kein Truhen-Zaehler,
+    keine Serie. Wer nur Endlos spielte, kam auf keinen Streak-Tag und auf keine
+    Truhe. Das war der einzige der drei mit direkt spuerbarem Schaden.
+  - KAMPAGNE hatte die Streak-Logik dupliziert und dadurch den neuen
+    Wochenbonus nicht mitbekommen.
+  - DAILY RUN rief advanceStreak direkt und lief damit an der dokumentierten
+    Regel vorbei — und bekam ebenfalls keinen Wochenbonus.
+    Genau davor warnt der Kommentar ueber rewardPatch seit Anfang an („damit
+    wirklich JEDER Modus den Loop fuettert und nicht nur die, an die man gerade
+    gedacht hat"). Die Duplikate WAREN der Fehler, deshalb ist die Konsolidierung
+    die Korrektur und nicht bloss Aufraeumen: es gibt jetzt genau EINE Stelle, die
+    die Serie weiterzaehlt und den Wochenmeilenstein auszahlt.
+    rewardPatch nimmt dafuer Optionen: `stars`/`stats` (damit Kapitel- und
+    Daily-Abzeichen im richtigen Kontext greifen) und `secureDay` — der EINE
+    bewusste Sonderfall: der Daily Run sichert den Tag auch, wenn die zehn Pakete
+    das Tagesziel knapp nicht reissen. Das Ding heisst „Daily".
+    Tests: 381 gruen (6 neue, je einer pro Fehlverhalten), Lint 0 Fehler, Build ok,
+    E2E: Kampagnenlevel 1 durchgespielt → xp 100, tasksSolved 1, dailyXp gesetzt,
+    Serie bleibt korrekt bei 0 (100 < 300), 0 Konsolenfehler.
+    (Nebenbei in eigener Sache: der beforeEach eines neuen Tests setzte stats
+    nicht zurueck, wodurch dailiesPerfect von Test zu Test wanderte — gefixt.)
