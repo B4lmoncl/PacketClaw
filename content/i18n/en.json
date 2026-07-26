@@ -628,5 +628,23 @@
       "design1": "Get one change request approved",
       "dnat1": "Publish one server"
     }
+  },
+  "mastery": {
+    "title": "Weak spots",
+    "noData": "Not enough answers yet to say anything useful.",
+    "allSolid": "Nothing stands out as weak. That either means you know it, or the sample is being polite.",
+    "attempts": "{{correct}} of {{total}} right",
+    "untested": "{{count}} concept(s) barely tested yet.",
+    "concept": {
+      "implicitDeny": "Implicit deny",
+      "firstMatch": "First match / order",
+      "interface": "Interfaces & zones",
+      "address": "Address objects",
+      "service": "Services & ports",
+      "schedule": "Schedules",
+      "routing": "Routing → dstintf",
+      "vip": "VIP / DNAT",
+      "snat": "SNAT"
+    }
   }
 }

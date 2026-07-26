@@ -5,6 +5,7 @@ import type { VerdictLevel } from '../../game/levels';
 import { scoreVerdictAnswer } from '../../game/scoring';
 import { starsFor } from '../../game/scoring';
 import { useGame } from '../../game/store';
+import { conceptOfVerdict } from '../../game/mastery';
 import { CliView } from '../components/CliView';
 import { Debrief } from '../components/Debrief';
 import { NetworkDiagram } from '../components/NetworkDiagram';
@@ -38,6 +39,7 @@ export function VerdictScreen({
   const combo = useGame((s) => s.combo);
   const setCombo = useGame((s) => s.setCombo);
   const recordLevelResult = useGame((s) => s.recordLevelResult);
+  const recordConcept = useGame((s) => s.recordConcept);
   const bumpStats = useGame((s) => s.bumpStats);
   const navigate = useGame((s) => s.navigate);
 
@@ -117,6 +119,9 @@ export function VerdictScreen({
     totalSecondsRef.current += elapsedSeconds;
 
     setTimedOut(false);
+    // Konzept aus dem Engine-Trace ableiten und buchen — damit weiss das Spiel,
+    // WORAN es hakt, statt nur DASS es hakt
+    recordConcept(conceptOfVerdict(verdict), correct);
     if (dailyMode) resultsRef.current.push(correct);
     if (correct) {
       bumpStats(

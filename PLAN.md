@@ -709,3 +709,26 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Bedingungszeile zurueckkommt (Laenge ODER mehr als ein Satz), dass DE und
   EN wirklich uebersetzt sind, und verbietet Motivationsposter-Floskeln.
   Tests: 317 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-25 (Forts. 32): KONZEPT-MASTERY (#49, Teil 1 von 2). Der Posten
+  verbindet Lernen und Retention: ein Lernspiel, das nicht weiss, wo man
+  schwach ist, kann nur zufaellig ueben — und „an DIESEM Konzept hakt es
+  noch" ist der ehrlichste Grund, morgen wiederzukommen.
+  NEU src/game/mastery.ts (pure, 13 Tests). Kernstueck ist
+  conceptOfVerdict(): das Konzept wird AUS DEM ENGINE-TRACE abgeleitet, nicht
+  handgepflegt (CLAUDE.md: die Engine ist die Wahrheit). Pruefreihenfolge nach
+  LERNRELEVANZ, nicht nach Trace-Reihenfolge: no-route → routing; DNAT
+  beteiligt → vip (die schwerste Lektion schlaegt alles); kein Treffer →
+  implicitDeny; sonst der NAHE TREFFER, also das Feld, an dem die Regel
+  direkt ueber der Treffer-Regel gescheitert ist — genau dort verrechnet man
+  sich; gar keine Beinah-Regel → firstMatch.
+  weakestConcepts() filtert bewusst Konzepte mit weniger als MIN_ATTEMPTS
+  Versuchen heraus: ein einziger Fehler ist ein Ausrutscher, keine Schwaeche,
+  und ihn zu melden waere nur Rauschen (eigener Test).
+  Store: mastery-Map + recordConcept(); VerdictScreen bucht jede Antwort auf
+  ihr Konzept. UI: MasteryPanel in der Sidebar zeigt die drei schwaechsten
+  Konzepte mit Quote und Balken (Farbe als Wegweiser, nicht als Strafe) plus
+  Hinweis auf noch ungeprueften Stoff; ohne Datenbasis behauptet es nichts.
+  OFFEN (Teil 2): Review-Modus, der Aufgaben gezielt aus den schwachen
+  Konzepten generiert — die Datenbasis dafuer steht jetzt.
+  Tests: 330 gruen, Lint 0 Fehler, Build ok, E2E: schwaechstes Konzept steht
+  oben (Services 25 %), Freeze-Token und Serie-Bezug sichtbar.

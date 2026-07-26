@@ -8,6 +8,7 @@ import { persist } from 'zustand/middleware';
 import { todayString } from './daily';
 import { DEFAULT_DAILY_GOAL } from './rewards';
 import { pickQuests } from './dailyQuests';
+import type { Concept, MasteryMap } from './mastery';
 import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
 import { getLevel, levelsForChapter } from './levels';
@@ -93,6 +94,12 @@ interface GameState {
     snapshot: QuestCounters;
     claimed: string[];
   };
+  /**
+   * Konzept-Mastery: pro FortiOS-Kernkonzept richtig/falsch. Das Konzept
+   * wird aus dem Engine-Trace abgeleitet (mastery.conceptOfVerdict), nicht
+   * handgepflegt.
+   */
+  mastery: MasteryMap;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -123,6 +130,8 @@ interface GameState {
   ensureQuestDay(date: string, unlockedModes: string[]): void;
   /** Erfuellten Auftrag einloesen; gibt die XP zurueck oder null */
   claimQuest(id: string, xp: number): number | null;
+  /** Eine beantwortete Aufgabe auf ihr Konzept buchen */
+  recordConcept(concept: Concept, correct: boolean): void;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -229,6 +238,7 @@ export const useGame = create<GameState>()(
       chestsOpened: 0,
       seenUnlocks: [],
       questDay: { date: '', ids: [], snapshot: EMPTY_QUEST_COUNTERS, claimed: [] },
+      mastery: {},
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -400,6 +410,20 @@ export const useGame = create<GameState>()(
         return xp;
       },
 
+      recordConcept: (concept, correct) =>
+        set((state) => {
+          const prev = state.mastery[concept] ?? { correct: 0, wrong: 0 };
+          return {
+            mastery: {
+              ...state.mastery,
+              [concept]: {
+                correct: prev.correct + (correct ? 1 : 0),
+                wrong: prev.wrong + (correct ? 0 : 1),
+              },
+            },
+          };
+        }),
+
       recordDoctor: (score) =>
         set((state) => ({
           ...rewardPatch(state, score),
@@ -457,6 +481,7 @@ export const useGame = create<GameState>()(
           chestsOpened,
           seenUnlocks,
           questDay,
+          mastery,
           stats,
           achievements,
           streak,
@@ -482,6 +507,7 @@ export const useGame = create<GameState>()(
             chestsOpened,
             seenUnlocks,
             questDay,
+            mastery,
             stats,
             achievements,
             streak,
@@ -532,6 +558,7 @@ export const useGame = create<GameState>()(
         chestsOpened: state.chestsOpened,
         seenUnlocks: state.seenUnlocks,
         questDay: state.questDay,
+        mastery: state.mastery,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -568,6 +595,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   chestsOpened: number;
   seenUnlocks: string[];
   questDay: { date: string; ids: string[]; snapshot: QuestCounters; claimed: string[] };
+  mastery: MasteryMap;
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -603,6 +631,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
       claimed: [],
       ...((save.questDay as Record<string, unknown> | null) ?? {}),
     } as GameState['questDay'],
+    mastery: ((save.mastery as MasteryMap | null) ?? {}) as MasteryMap,
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

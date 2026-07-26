@@ -628,5 +628,23 @@
       "design1": "Bring einen Change Request durch",
       "dnat1": "Veröffentliche einen Server"
     }
+  },
+  "mastery": {
+    "title": "Schwachstellen",
+    "noData": "Noch zu wenige Antworten für eine belastbare Aussage.",
+    "allSolid": "Nichts fällt als Schwäche auf. Das heißt entweder, du kannst es, oder die Stichprobe ist höflich.",
+    "attempts": "{{correct}} von {{total}} richtig",
+    "untested": "{{count}} Konzept(e) bisher kaum geprüft.",
+    "concept": {
+      "implicitDeny": "Implicit Deny",
+      "firstMatch": "First Match / Reihenfolge",
+      "interface": "Interfaces & Zonen",
+      "address": "Adressobjekte",
+      "service": "Services & Ports",
+      "schedule": "Zeitplan",
+      "routing": "Routing → dstintf",
+      "vip": "VIP / DNAT",
+      "snat": "SNAT"
+    }
   }
 }

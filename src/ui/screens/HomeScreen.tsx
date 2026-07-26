@@ -13,10 +13,12 @@ import {
 } from '../../game/dailyQuests';
 import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor, UNLOCKS } from '../../game/unlocks';
 import { readQuestCounters, useGame } from '../../game/store';
+import { overallMastery, untestedConcepts, weakestConcepts } from '../../game/mastery';
 import type { Screen } from '../../game/store';
 import { DailyGoalRing } from '../components/DailyGoalRing';
 import { DailyQuests } from '../components/DailyQuests';
 import { Mascot } from '../components/Mascot';
+import { MasteryPanel } from '../components/MasteryPanel';
 import { NextBadges } from '../components/NextBadges';
 import { RewardOverlay } from '../components/RewardOverlay';
 import type { RewardPayload } from '../components/RewardOverlay';
@@ -109,6 +111,7 @@ export function HomeScreen() {
   const stats = useGame((s) => s.stats);
   const achievements = useGame((s) => s.achievements);
   const questDay = useGame((s) => s.questDay);
+  const mastery = useGame((s) => s.mastery);
   const ensureQuestDay = useGame((s) => s.ensureQuestDay);
   const claimQuest = useGame((s) => s.claimQuest);
   const doctorSolved = useGame((s) => s.doctorSolved);
@@ -162,6 +165,11 @@ export function HomeScreen() {
         )
       : [];
   const week = weekMilestone(streak.current);
+
+  // Mastery: die Schwaechen zuerst — das ist der ehrlichste Grund weiterzuspielen
+  const weakConcepts = weakestConcepts(mastery, 3);
+  const untestedCount = untestedConcepts(mastery).length;
+  const masteryOverall = overallMastery(mastery);
   // Frisch freigeschaltete Modi feiern, sobald der Spieler wieder hier landet
   const fresh = freshUnlocks(campaign.completed, xp, seenUnlocks);
 
@@ -336,6 +344,7 @@ export function HomeScreen() {
             streak={streak.current}
             onClaim={claimQuestReward}
           />
+          <MasteryPanel weak={weakConcepts} untested={untestedCount} overall={masteryOverall} />
           <NextBadges items={nearBadges} />
         </aside>
 
