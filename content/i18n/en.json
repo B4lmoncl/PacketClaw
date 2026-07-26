@@ -628,7 +628,8 @@
       "doctor2": "Repair two rulesets",
       "routing1": "Put one routing table back on course",
       "design1": "Get one change request approved",
-      "dnat1": "Publish one server"
+      "dnat1": "Publish one server",
+      "review1": "Run one review session"
     }
   },
   "mastery": {
@@ -647,7 +648,9 @@
       "routing": "Routing → dstintf",
       "vip": "VIP / DNAT",
       "snat": "SNAT"
-    }
+    },
+    "trainWeak": "Train these",
+    "trainAny": "Run a review"
   },
   "review": {
     "title": "Review",

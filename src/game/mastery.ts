@@ -93,15 +93,27 @@ export interface ConceptMastery {
 /** Ab so vielen Versuchen traut sich die Anzeige eine Aussage zu. */
 export const MIN_ATTEMPTS = 4;
 
+/**
+ * Zähler aus dem Save robust lesen. Saves wandern über das Backend und über
+ * Versionsgrenzen; ein fehlendes oder kaputtes Feld darf keine „9 von NaN
+ * richtig" ins GUI schreiben. Lieber ein ehrliches 0 als eine Zahl, die es
+ * nicht gibt.
+ */
+function count(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+}
+
 export function conceptMastery(mastery: MasteryMap, concept: Concept): ConceptMastery {
-  const stat = mastery[concept] ?? { correct: 0, wrong: 0 };
-  const attempts = stat.correct + stat.wrong;
+  const stat = mastery[concept];
+  const correct = count(stat?.correct);
+  const wrong = count(stat?.wrong);
+  const attempts = correct + wrong;
   return {
     concept,
-    correct: stat.correct,
-    wrong: stat.wrong,
+    correct,
+    wrong,
     attempts,
-    accuracy: attempts > 0 ? stat.correct / attempts : 0,
+    accuracy: attempts > 0 ? correct / attempts : 0,
     unproven: attempts < MIN_ATTEMPTS,
   };
 }

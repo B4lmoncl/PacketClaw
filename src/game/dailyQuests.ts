@@ -25,6 +25,7 @@ import { createRng } from '../engine';
 export interface QuestCounters {
   tasksSolved: number;
   starsTotal: number;
+  reviewsDone: number;
   implicitDenyCorrect: number;
   doctorSolved: number;
   routingSolved: number;
@@ -60,6 +61,8 @@ export const QUEST_POOL: QuestTemplate[] = [
   { id: 'routing1', metric: 'routingSolved', target: 1, xp: 200, requiresMode: 'routing' },
   { id: 'design1', metric: 'designSolved', target: 1, xp: 240, requiresMode: 'design' },
   { id: 'dnat1', metric: 'dnatSolved', target: 1, xp: 240, requiresMode: 'dnat' },
+  // Der lernwirksamste Auftrag: gezielt an den eigenen Schwaechen ueben
+  { id: 'review1', metric: 'reviewsDone', target: 1, xp: 220, requiresMode: 'review' },
 ];
 
 export const QUESTS_PER_DAY = 3;

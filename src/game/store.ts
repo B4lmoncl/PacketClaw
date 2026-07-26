@@ -155,6 +155,7 @@ interface GameState {
 const EMPTY_QUEST_COUNTERS: QuestCounters = {
   tasksSolved: 0,
   starsTotal: 0,
+  reviewsDone: 0,
   implicitDenyCorrect: 0,
   doctorSolved: 0,
   routingSolved: 0,
@@ -172,10 +173,12 @@ export function readQuestCounters(state: {
   routingSolved: number;
   designSolved: number;
   dnatSolved: number;
+  reviewsDone: number;
 }): QuestCounters {
   return {
     tasksSolved: state.tasksSolved,
     starsTotal: Object.values(state.stars).reduce((sum, n) => sum + Math.min(3, n), 0),
+    reviewsDone: state.reviewsDone,
     implicitDenyCorrect: state.stats.implicitDenyCorrect,
     doctorSolved: state.doctorSolved,
     routingSolved: state.routingSolved,

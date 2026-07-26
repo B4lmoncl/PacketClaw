@@ -119,6 +119,7 @@ export function HomeScreen() {
   const routingSolved = useGame((s) => s.routingSolved);
   const designSolved = useGame((s) => s.designSolved);
   const dnatSolved = useGame((s) => s.dnatSolved);
+  const reviewsDone = useGame((s) => s.reviewsDone);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
 
@@ -161,6 +162,7 @@ export function HomeScreen() {
             routingSolved,
             designSolved,
             dnatSolved,
+            reviewsDone,
           }),
           questDay.claimed,
         )
@@ -345,7 +347,13 @@ export function HomeScreen() {
             streak={streak.current}
             onClaim={claimQuestReward}
           />
-          <MasteryPanel weak={weakConcepts} untested={untestedCount} overall={masteryOverall} />
+          <MasteryPanel
+            weak={weakConcepts}
+            untested={untestedCount}
+            overall={masteryOverall}
+            canReview={isUnlocked('review', campaign.completed, xp)}
+            onReview={() => navigate({ name: 'review' })}
+          />
           <NextBadges items={nearBadges} />
         </aside>
 

@@ -628,7 +628,8 @@
       "doctor2": "Reparier zwei Regelwerke",
       "routing1": "Bring eine Routing-Tabelle zurück auf Kurs",
       "design1": "Bring einen Change Request durch",
-      "dnat1": "Veröffentliche einen Server"
+      "dnat1": "Veröffentliche einen Server",
+      "review1": "Mach eine Review-Sitzung"
     }
   },
   "mastery": {
@@ -647,7 +648,9 @@
       "routing": "Routing → dstintf",
       "vip": "VIP / DNAT",
       "snat": "SNAT"
-    }
+    },
+    "trainWeak": "Genau das üben",
+    "trainAny": "Review starten"
   },
   "review": {
     "title": "Review",

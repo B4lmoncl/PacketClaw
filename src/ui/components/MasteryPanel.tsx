@@ -15,6 +15,9 @@ interface Props {
   weak: ConceptMastery[];
   untested: number;
   overall: number;
+  /** Review schon freigeschaltet? Sonst waere der Knopf eine Sackgasse */
+  canReview: boolean;
+  onReview: () => void;
 }
 
 /** Farbe nach Beherrschung: nicht rot als Strafe, sondern als Wegweiser. */
@@ -24,7 +27,7 @@ function tone(accuracy: number): { bar: string; text: string } {
   return { bar: 'bg-deny', text: 'text-deny' };
 }
 
-export function MasteryPanel({ weak, untested, overall }: Props) {
+export function MasteryPanel({ weak, untested, overall, canReview, onReview }: Props) {
   const { t } = useTranslation();
 
   // Noch keine Datenbasis: dann lieber gar nichts behaupten
@@ -90,6 +93,17 @@ export function MasteryPanel({ weak, untested, overall }: Props) {
         <p className="panel-inset rounded-panel px-3 py-2 font-mono text-[11px] leading-relaxed text-trace">
           {t('mastery.allSolid')}
         </p>
+      )}
+
+      {/* Eine Diagnose ohne Handlungsmoeglichkeit ist nur ein Vorwurf —
+          deshalb fuehrt das Panel direkt in die passende Uebung */}
+      {canReview && (
+        <button
+          onClick={onReview}
+          className="panel-action rounded-panel px-3 py-2 text-left font-display text-xs font-bold text-aura hover:-translate-y-0.5"
+        >
+          🧠 {weak.length > 0 ? t('mastery.trainWeak') : t('mastery.trainAny')} →
+        </button>
       )}
 
       {untested > 0 && (

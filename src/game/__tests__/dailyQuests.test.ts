@@ -15,6 +15,7 @@ import type { QuestCounters } from '../dailyQuests';
 const ZERO: QuestCounters = {
   tasksSolved: 0,
   starsTotal: 0,
+  reviewsDone: 0,
   implicitDenyCorrect: 0,
   doctorSolved: 0,
   routingSolved: 0,

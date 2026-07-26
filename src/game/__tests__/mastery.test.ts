@@ -213,6 +213,30 @@ describe('Mastery-Stand', () => {
     expect(untested.length).toBe(CONCEPTS.length - 1);
   });
 
+  /**
+   * Saves wandern ueber das Backend und ueber Versionsgrenzen. Ein kaputtes
+   * Feld darf nie als „9 von NaN richtig" im GUI landen — genau das ist beim
+   * Smoke-Test mit einem falsch geformten Save passiert.
+   */
+  it('kaputte Save-Zaehler ergeben 0, niemals NaN', () => {
+    const broken = {
+      service: { correct: 9 },
+      address: { correct: 'viele', wrong: null },
+      vip: { correct: NaN, wrong: 3 },
+      snat: { correct: -5, wrong: 2 },
+    } as unknown as MasteryMap;
+    for (const concept of CONCEPTS) {
+      const m = conceptMastery(broken, concept);
+      expect(Number.isFinite(m.attempts), concept).toBe(true);
+      expect(Number.isFinite(m.accuracy), concept).toBe(true);
+      expect(m.attempts).toBeGreaterThanOrEqual(0);
+    }
+    // die intakte Haelfte bleibt erhalten, statt alles zu verwerfen
+    expect(conceptMastery(broken, 'service')).toMatchObject({ correct: 9, wrong: 0, attempts: 9 });
+    expect(conceptMastery(broken, 'vip')).toMatchObject({ correct: 0, wrong: 3, accuracy: 0 });
+    expect(Number.isFinite(overallMastery(broken))).toBe(true);
+  });
+
   it('overallMastery mittelt nur ueber belegte Konzepte', () => {
     expect(overallMastery({})).toBe(0);
     const mastery: MasteryMap = {

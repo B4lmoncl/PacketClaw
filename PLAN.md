@@ -758,3 +758,21 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   recordReview; Home-Kachel 🧠 vorne in der WERKSTATT.
   Tests: 339 gruen, Lint 0 Fehler, Build ok, E2E: volle Sitzung mit fuenf
   Runden durchgespielt, Schwerpunkt zeigt die schwachen Konzepte.
+- 2026-07-26 (Forts. 34): REVIEW ANGEBUNDEN — der Modus war gebaut, aber nicht
+  verdrahtet. Zwei Luecken geschlossen:
+  (a) Mastery war eine Diagnose ohne Handlungsmoeglichkeit — also nur ein
+  Vorwurf. Das MasteryPanel hat jetzt einen Knopf, der direkt in die passende
+  Uebung fuehrt („Genau das ueben" bei Schwaechen, sonst „Review starten").
+  Der Knopf erscheint nur, wenn Review offen ist; sonst waere er eine
+  Sackgasse.
+  (b) Tagesauftrag `review1` (+220 XP) — der lernwirksamste Auftrag im Pool,
+  weil er gezielt an den eigenen Schwaechen uebt. QuestCounters kennt dafuer
+  reviewsDone.
+  HAERTUNG: Der Smoke-Test lief mit einem falsch geformten Save und hat
+  „9 von NaN richtig" ins GUI geschrieben. Saves wandern ueber das Backend und
+  ueber Versionsgrenzen, also filtert conceptMastery() die Zaehler jetzt an der
+  einen Stelle, durch die alle Leser gehen (count(): nur endliche positive
+  Zahlen, sonst 0). Die intakte Haelfte eines kaputten Eintrags bleibt
+  erhalten, statt alles zu verwerfen. Eigener Test mit vier Sorten Muell.
+  Tests: 340 gruen, Lint 0 Fehler, Build ok, E2E: Mastery-Knopf sichtbar,
+  fuehrt in Review, volle Sitzung durchgespielt, 0 Konsolenfehler.
