@@ -160,6 +160,27 @@ describe('conceptOfVerdict — aus dem Engine-Trace abgeleitet', () => {
     expect(conceptOfVerdict(v)).toBe('firstMatch');
   });
 
+  /**
+   * Local-In-Verdicts tragen matchedPolicyId 0, weil keine Forward-Policy
+   * beteiligt war. Ohne Guard wuerde daraus die Lektion „die Regel, die nicht
+   * dasteht" — und die Mastery-Messung wuerde Management-Verkehr auf das
+   * falsche Konzept buchen.
+   */
+  it('Verkehr AN die Firewall ist NICHT implicitDeny', () => {
+    const config = net({
+      interfaces: [
+        { id: 'p1', name: 'port1', ip: '10.0.1.1', allowaccess: ['https'] },
+        { id: 'p2', name: 'port2' },
+        { id: 'w1', name: 'wan1' },
+      ],
+      policies: [],
+    });
+    const v = evaluate({ ...probe, dstIp: '10.0.1.1', protocol: 'tcp', dstPort: 443 }, config);
+    expect(v.localIn).toBeDefined();
+    expect(conceptOfVerdict(v)).not.toBe('implicitDeny');
+    expect(CONCEPTS).toContain(conceptOfVerdict(v));
+  });
+
   it('liefert fuer JEDEN Verdict ein bekanntes Konzept, nie undefined', () => {
     const configs = [
       net({ policies: [] }),

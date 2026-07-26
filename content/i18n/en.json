@@ -632,7 +632,8 @@
       "routing1": "Put one routing table back on course",
       "design1": "Get one change request approved",
       "dnat1": "Publish one server",
-      "review1": "Run one review session"
+      "review1": "Run one review session",
+      "mgmt1": "Secure one management access"
     }
   },
   "mastery": {
@@ -805,6 +806,18 @@
       "scheduleLooksOn": {
         "title": "Schedule",
         "body": "A schedule switches a rule off outside its window. The rule looks enabled the whole time. It is, too — just not now."
+      },
+      "localInAccept": {
+        "title": "Two tables, two endings",
+        "body": "The forward table ends with an implicit deny. The local-in table ends with an implicit accept. An empty local-in table therefore locks nobody out — confuse the two and you will reliably search the wrong side, where you will reliably find nothing."
+      },
+      "allowaccess": {
+        "title": "allowaccess",
+        "body": "Per interface, this decides which management services answer at all. It is not a rule, it appears in no policy table, and it is the most common reason for “I cannot reach the GUI”. One can search the ruleset for a very long time before failing to find it there."
+      },
+      "trusthost": {
+        "title": "trusthost",
+        "body": "A second, independent gate on the admin account: which addresses may log in. Unset means anywhere. Set wrongly means nowhere, and you notice that only after the renumbering, when the firewall is still waiting for visitors from a network that no longer exists."
       }
     }
   },

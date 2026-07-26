@@ -982,3 +982,15 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 425 gruen, Lint 0 Fehler, Build ok, 80 Level valide, E2E: alles
   zumachen meldet korrekt „ausgesperrt", die richtige Loesung loest, 0
   Konsolenfehler.
+- 2026-07-26 (Forts. 43): DEN NEUEN MODUS AN DEN LOOP HAENGEN. Ein Modus, der
+  nichts fuettert, ist eine Insel.
+  - Tagesauftrag `mgmt1` (+240 XP), dafuer mgmtSolvedCount in QuestCounters.
+  - DREI NEUE FELDNOTIZEN (Katalog jetzt 27): „Zwei Tabellen, zwei Enden"
+    (legendary — die Asymmetrie ist so grundlegend wie Policy 0 selbst),
+    „allowaccess" und „trusthost" (beide epic). Der Stoff hat jetzt einen Modus,
+    der ihn lehrt, und die Karten sind das Nachschlagewerk dazu.
+  - LATENTE FALLE GESCHLOSSEN: conceptOfVerdict() haette ein Local-In-Verdict
+    als „implicitDeny" gebucht, weil matchedPolicyId dort 0 ist (es war ja keine
+    Forward-Policy beteiligt). Kein Aufrufer fuettert das heute, aber der
+    naechste haette den Fehler geerbt. Jetzt Guard + Test.
+    Tests: 426 gruen, Lint 0 Fehler, Build ok.

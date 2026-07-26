@@ -38,7 +38,12 @@ export const FIELD_NOTES: FieldNote[] = [
   { id: 'policy0', rarity: 'legendary', concept: 'implicitDeny' },
   { id: 'routeFirst', rarity: 'legendary', concept: 'routing' },
 
+  // Local-In: die Asymmetrie ist so grundlegend wie Policy 0 selbst
+  { id: 'localInAccept', rarity: 'legendary', concept: 'interface' },
+
   // epic
+  { id: 'allowaccess', rarity: 'epic', concept: 'interface' },
+  { id: 'trusthost', rarity: 'epic', concept: 'interface' },
   { id: 'vipOnly', rarity: 'epic', concept: 'vip' },
   { id: 'prednatPort', rarity: 'epic', concept: 'service' },
   { id: 'shadowing', rarity: 'epic', concept: 'firstMatch' },

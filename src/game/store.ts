@@ -173,6 +173,7 @@ const EMPTY_QUEST_COUNTERS: QuestCounters = {
   routingSolved: 0,
   designSolved: 0,
   dnatSolved: 0,
+  mgmtSolvedCount: 0,
   dailiesPlayed: 0,
 };
 
@@ -186,6 +187,7 @@ export function readQuestCounters(state: {
   designSolved: number;
   dnatSolved: number;
   reviewsDone: number;
+  mgmtSolvedCount: number;
 }): QuestCounters {
   return {
     tasksSolved: state.tasksSolved,
@@ -196,6 +198,7 @@ export function readQuestCounters(state: {
     routingSolved: state.routingSolved,
     designSolved: state.designSolved,
     dnatSolved: state.dnatSolved,
+    mgmtSolvedCount: state.mgmtSolvedCount,
     dailiesPlayed: state.stats.dailiesPlayed,
   };
 }

@@ -632,7 +632,8 @@
       "routing1": "Bring eine Routing-Tabelle zurück auf Kurs",
       "design1": "Bring einen Change Request durch",
       "dnat1": "Veröffentliche einen Server",
-      "review1": "Mach eine Review-Sitzung"
+      "review1": "Mach eine Review-Sitzung",
+      "mgmt1": "Sichere einen Management-Zugang"
     }
   },
   "mastery": {
@@ -805,6 +806,18 @@
       "scheduleLooksOn": {
         "title": "Zeitplan",
         "body": "Ein Zeitplan schaltet eine Regel außerhalb ihres Fensters ab. Die Regel sieht dabei die ganze Zeit aktiviert aus. Sie ist es auch — nur nicht jetzt."
+      },
+      "localInAccept": {
+        "title": "Zwei Tabellen, zwei Enden",
+        "body": "Die Forward-Tabelle endet mit Implicit Deny. Die Local-In-Tabelle endet mit einem impliziten Accept. Eine leere Local-In-Tabelle sperrt also gar nichts aus — wer die beiden verwechselt, sucht den Fehler zuverlässig auf der falschen Seite und findet dort auch zuverlässig nichts."
+      },
+      "allowaccess": {
+        "title": "allowaccess",
+        "body": "Pro Interface steht hier, welche Management-Dienste überhaupt antworten. Es ist keine Regel, es steht in keiner Policy-Tabelle, und es ist der häufigste Grund für „ich komme nicht auf die GUI“. Man kann sehr lange im Regelwerk suchen, bevor man dort nicht fündig wird."
+      },
+      "trusthost": {
+        "title": "trusthost",
+        "body": "Ein zweites, unabhängiges Tor am Admin-Konto: von welchen Adressen darf sich jemand anmelden. Nicht gesetzt heißt von überall. Falsch gesetzt heißt von nirgends, und das merkt man erst nach der Netzumstellung, wenn die Firewall noch auf Besuch aus einem Netz wartet, das es nicht mehr gibt."
       }
     }
   },

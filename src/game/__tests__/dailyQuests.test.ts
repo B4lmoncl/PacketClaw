@@ -22,6 +22,7 @@ const ZERO: QuestCounters = {
   routingSolved: 0,
   designSolved: 0,
   dnatSolved: 0,
+  mgmtSolvedCount: 0,
   dailiesPlayed: 0,
 };
 

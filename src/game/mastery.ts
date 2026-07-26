@@ -52,6 +52,16 @@ const FIELD_CONCEPT: Record<MatchField, Concept> = {
  *     gepasst, wer falsch lag, hat die Reihenfolge missachtet)
  */
 export function conceptOfVerdict(verdict: Verdict): Concept {
+  /**
+   * Verkehr AN die Firewall zaehlt hier NICHT als „Implicit Deny".
+   *
+   * Local-In-Verdicts tragen matchedPolicyId 0, weil keine Forward-Policy
+   * beteiligt war — die Pruefung darunter wuerde daraus faelschlich die Lektion
+   * „die Regel, die nicht dasteht" machen. Local-In hat kein eigenes
+   * Mastery-Konzept (die Review-Aufgaben decken nur Forward-Traffic ab), also
+   * ist das naechstgelegene ehrliche Konzept das Interface.
+   */
+  if (verdict.localIn !== undefined) return 'interface';
   if (verdict.trace.some((s) => s.kind === 'no-route')) return 'routing';
   if (verdict.trace.some((s) => s.kind === 'dnat')) return 'vip';
   if (verdict.matchedPolicyId === 0) return 'implicitDeny';

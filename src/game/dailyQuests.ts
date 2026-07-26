@@ -31,6 +31,7 @@ export interface QuestCounters {
   routingSolved: number;
   designSolved: number;
   dnatSolved: number;
+  mgmtSolvedCount: number;
   dailiesPlayed: number;
 }
 
@@ -61,6 +62,7 @@ export const QUEST_POOL: QuestTemplate[] = [
   { id: 'routing1', metric: 'routingSolved', target: 1, xp: 200, requiresMode: 'routing' },
   { id: 'design1', metric: 'designSolved', target: 1, xp: 240, requiresMode: 'design' },
   { id: 'dnat1', metric: 'dnatSolved', target: 1, xp: 240, requiresMode: 'dnat' },
+  { id: 'mgmt1', metric: 'mgmtSolvedCount', target: 1, xp: 240, requiresMode: 'mgmt' },
   // Der lernwirksamste Auftrag: gezielt an den eigenen Schwaechen ueben
   { id: 'review1', metric: 'reviewsDone', target: 1, xp: 220, requiresMode: 'review' },
 ];

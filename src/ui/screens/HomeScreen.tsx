@@ -123,6 +123,7 @@ export function HomeScreen() {
   const designSolved = useGame((s) => s.designSolved);
   const dnatSolved = useGame((s) => s.dnatSolved);
   const reviewsDone = useGame((s) => s.reviewsDone);
+  const mgmtSolvedCount = useGame((s) => s.mgmtSolvedCount);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
 
@@ -168,6 +169,7 @@ export function HomeScreen() {
             designSolved,
             dnatSolved,
             reviewsDone,
+            mgmtSolvedCount,
           }),
           questDay.claimed,
         )
