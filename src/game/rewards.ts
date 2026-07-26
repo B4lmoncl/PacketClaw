@@ -88,6 +88,35 @@ export function dailyGoal(xpToday: number, target = DEFAULT_DAILY_GOAL): DailyGo
   };
 }
 
+/**
+ * Wieviel steht heute auf dem Spiel?
+ *
+ * Der stärkste Hebel fürs tägliche Wiederkommen ist nicht die Belohnung,
+ * sondern das, was man verlieren kann — deshalb darf eine lange Serie mit
+ * offenem Tagesziel nicht genauso leise dastehen wie Tag null. Das Tagesziel
+ * eskaliert also seine SICHTBARKEIT mit dem Einsatz.
+ *
+ * Was NICHT eskaliert, ist die Sprache. Kein Countdown, keine Drohung, kein
+ * „schnell noch!" — die Karte stellt fest, was der Stand ist („Zwölf Tage.
+ * Heute ist noch keiner davon."). Das trifft härter als eine Warnung und
+ * bleibt bei der Tonlage des Spiels.
+ *
+ * Die Schwelle liegt bei sieben Tagen: ab einer ganzen Woche fühlt sich eine
+ * Serie wie Besitz an, und Besitz verliert man nicht gern. Darunter ist noch
+ * nichts aufgebaut, das man schützen müsste.
+ */
+export const STAKE_STREAK_THRESHOLD = 7;
+
+export type StakeLevel = 'calm' | 'notice' | 'urgent';
+
+export function stakeLevel(streak: number, goalDone: boolean, freezeTokens = 0): StakeLevel {
+  // Geschafft: es steht nichts mehr aus, also auch nichts mehr im Weg
+  if (goalDone) return 'calm';
+  // Ein Freeze-Token federt den Tag ab — dann ist es eine Notiz, kein Alarm
+  if (streak >= STAKE_STREAK_THRESHOLD && freezeTokens === 0) return 'urgent';
+  return 'notice';
+}
+
 // ---------------------------------------------------------------------------
 // Truhen
 // ---------------------------------------------------------------------------

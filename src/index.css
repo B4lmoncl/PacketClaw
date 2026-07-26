@@ -496,6 +496,28 @@ body {
   --rarity-glow: 22px;
 }
 
+/* Langsames Atmen fuer „hier steht heute etwas auf dem Spiel". Bewusst TRAEGE
+   (3,4 s) und nur im Schein, nicht in der Groesse: ein blinkendes Panel im
+   Hauptmenue waere Nervositaet, kein Hinweis. Es gibt genau eine Stelle im
+   Spiel, die das benutzt — sonst waere es Rauschen. */
+@keyframes pc-pulse-soft {
+  0%,
+  100% {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--rarity, #f97316) 18%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 26px color-mix(in srgb, var(--rarity, #f97316) 45%, transparent);
+  }
+}
+.animate-pulse-soft {
+  animation: pc-pulse-soft 3.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft {
+    animation: none;
+  }
+}
+
 /* Text in der Farbe der aktuellen Rarity-Stufe. Spart pro Verwendungsstelle
    eine Farbtabelle, die sonst neben den .rarity-*-Klassen veralten wuerde. */
 .text-rarity {

@@ -848,3 +848,23 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Nachschlagewerk dazu schon da ist.
   Tests: 361 gruen, Lint 0 Fehler, Build ok, E2E: absichtlich falsch geantwortet,
   Karte „The object decides" erscheint beim Adress-Konzept, 0 Konsolenfehler.
+- 2026-07-26 (Forts. 38): EINSATZ SICHTBAR MACHEN. Das Tagesziel kannte die
+  Serie schon im Text, aber sein VISUELLES Gewicht war immer gleich: eine
+  Zwoelf-Tage-Serie mit offenem Ziel sah genauso leise aus wie Tag null. Der
+  staerkste Hebel fuers taegliche Wiederkommen ist aber nicht die Belohnung,
+  sondern das, was man verlieren kann.
+  NEU rewards.stakeLevel(streak, goalDone, freezeTokens) → calm | notice |
+  urgent (pure, 4 Tests). Schwelle sieben Tage: ab einer ganzen Woche fuehlt
+  sich eine Serie wie Besitz an, darunter ist noch nichts aufgebaut, das man
+  schuetzen muesste — ein Alarm am zweiten Tag waere nur Laerm. Ein
+  Freeze-Token federt den Tag ab und nimmt die Dringlichkeit heraus.
+  urgent: panel-reward rarity-legendary + 🔥 + oranger Ring + neues
+  animate-pulse-soft (3,4 s, nur im Schein, nicht in der Groesse, per
+  prefers-reduced-motion abschaltbar; es gibt genau EINE Stelle im Spiel, die
+  das benutzt, sonst waere es Rauschen).
+  WAS NICHT ESKALIERT, IST DIE SPRACHE. Kein Countdown, keine Drohung:
+  „12 Tage. Heute ist noch keiner davon." Das ist eine Feststellung und trifft
+  haerter als eine Warnung — und bleibt bei der Tonlage (Playbook: niemals
+  motivieren, feststellen).
+  Tests: 365 gruen, Lint 0 Fehler, Build ok, E2E: drei Saves gegenuebergestellt
+  (12d ohne Token = laut, 12d mit Token = leise, 2d = leise), 0 Konsolenfehler.

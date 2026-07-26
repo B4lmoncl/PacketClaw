@@ -7,6 +7,8 @@ import {
   dailyGoal,
   DEFAULT_DAILY_GOAL,
   openChest,
+  STAKE_STREAK_THRESHOLD,
+  stakeLevel,
 } from '../rewards';
 import { COMBO_MAX, comboMultiplier } from '../scoring';
 
@@ -102,5 +104,34 @@ describe('Truhen', () => {
     // Common muss der Normalfall bleiben, sonst nutzt sich die Ueberraschung ab
     const commons = rewards.filter((r) => r.rarity === 'common').length;
     expect(commons).toBeGreaterThan(rewards.length / 2);
+  });
+});
+
+describe('Einsatz — wie laut darf das Tagesziel sein?', () => {
+  it('erfuelltes Ziel ist immer ruhig, egal wie lang die Serie', () => {
+    for (const streak of [0, 3, 7, 40]) {
+      expect(stakeLevel(streak, true), `Serie ${streak}`).toBe('calm');
+    }
+  });
+
+  /**
+   * Die Schwelle ist der ganze Punkt: erst ab einer Woche fuehlt sich eine
+   * Serie wie Besitz an. Darunter gibt es nichts zu schuetzen, und ein Alarm
+   * am zweiten Tag waere nur Laerm.
+   */
+  it('unter der Schwelle bleibt es ein Hinweis, darueber wird es dringend', () => {
+    expect(stakeLevel(0, false)).toBe('notice');
+    expect(stakeLevel(STAKE_STREAK_THRESHOLD - 1, false)).toBe('notice');
+    expect(stakeLevel(STAKE_STREAK_THRESHOLD, false)).toBe('urgent');
+    expect(stakeLevel(30, false)).toBe('urgent');
+  });
+
+  it('ein Freeze-Token federt den Tag ab und nimmt die Dringlichkeit heraus', () => {
+    expect(stakeLevel(20, false, 1)).toBe('notice');
+    expect(stakeLevel(20, false, 0)).toBe('urgent');
+  });
+
+  it('negative Serien (kaputter Save) erzeugen keinen Alarm', () => {
+    expect(stakeLevel(-5, false)).toBe('notice');
   });
 });

@@ -1,12 +1,17 @@
 /**
  * Tagesziel als Ring. Kleines, heute erreichbares Ziel statt eines fernen
  * Fernziels — der Ring füllt sich sichtbar mit jeder gelösten Aufgabe und
- * schließt sich mit einem Häkchen. Bewusst ohne Verlust-Druck: ein nicht
- * erfülltes Tagesziel hat keine Konsequenz, es ist nur noch offen.
+ * schließt sich mit einem Häkchen.
+ *
+ * Der Ring wird LAUTER, wenn eine lange Serie offen dasteht (siehe
+ * rewards.stakeLevel) — eine Woche Serie darf nicht so leise aussehen wie Tag
+ * null. Die SPRACHE eskaliert dabei nicht: die Karte stellt fest, was der
+ * Stand ist, und droht nicht. Ein Freeze-Token nimmt die Dringlichkeit
+ * wieder heraus, weil der Tag dann abgefedert ist.
  */
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import type { DailyGoal } from '../../game/rewards';
+import { stakeLevel, type DailyGoal } from '../../game/rewards';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
 const SIZE = 46;
@@ -25,6 +30,8 @@ interface Props {
 export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotionPref();
+  const stake = stakeLevel(streak, goal.done, freezeTokens);
+  const ringColor = goal.done ? '#3ddc97' : stake === 'urgent' ? '#f97316' : '#ff5a3c';
 
   return (
     <div className="flex items-center gap-2.5">
@@ -43,7 +50,7 @@ export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
             cy={SIZE / 2}
             r={R}
             fill="none"
-            stroke={goal.done ? '#3ddc97' : '#ff5a3c'}
+            stroke={ringColor}
             strokeWidth={STROKE}
             strokeLinecap="round"
             strokeDasharray={CIRC}
@@ -53,21 +60,27 @@ export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
           />
         </svg>
         <span className="absolute inset-0 flex items-center justify-center text-sm">
-          {goal.done ? '✓' : '🎯'}
+          {goal.done ? '✓' : stake === 'urgent' ? '🔥' : '🎯'}
         </span>
       </div>
       <div className="min-w-0">
         {/* Das Tagesziel HAELT die Serie — wer das nicht sieht, versteht nicht,
             warum die 300 XP zaehlen. Formuliert als Feststellung, nicht als
-            Drohung: kein Verlust-Druck, nur der Zusammenhang. */}
-        <div className="font-display text-sm font-bold text-ink">
+            Drohung: der Stand wird genannt, nicht angedroht. */}
+        <div
+          className={`font-display text-sm font-bold ${
+            stake === 'urgent' ? 'text-warn' : 'text-ink'
+          }`}
+        >
           {goal.done
             ? streak > 0
               ? t('goal.streakSafe', { days: streak })
               : t('goal.done')
-            : streak > 0
-              ? t('goal.keepStreak')
-              : t('goal.title')}
+            : stake === 'urgent'
+              ? t('goal.atStake', { days: streak })
+              : streak > 0
+                ? t('goal.keepStreak')
+                : t('goal.title')}
         </div>
         <div className="font-mono text-[11px] text-dim">
           {goal.done

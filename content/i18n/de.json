@@ -579,7 +579,8 @@
     "earnedToday": "{{xp}} XP heute",
     "keepStreak": "Serie halten",
     "streakSafe": "Serie gehalten · Tag {{days}}",
-    "freezeHint": "Ein Freeze deckt einen verpassten Tag ab."
+    "freezeHint": "Ein Freeze deckt einen verpassten Tag ab.",
+    "atStake": "{{days}} Tage. Heute ist noch keiner davon."
   },
   "reward": {
     "ready": "Depot bereit",

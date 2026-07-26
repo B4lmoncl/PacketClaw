@@ -579,7 +579,8 @@
     "earnedToday": "{{xp}} XP today",
     "keepStreak": "Keep the streak",
     "streakSafe": "Streak held · day {{days}}",
-    "freezeHint": "A freeze covers one missed day."
+    "freezeHint": "A freeze covers one missed day.",
+    "atStake": "{{days}} days. Today is not one of them yet."
   },
   "reward": {
     "ready": "Cache ready",

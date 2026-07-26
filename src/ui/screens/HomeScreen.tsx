@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
 import { nearestAchievements, rankFor } from '../../game/progression';
-import { CHEST_EVERY, chestsEarned, dailyGoal } from '../../game/rewards';
+import { CHEST_EVERY, chestsEarned, dailyGoal, stakeLevel } from '../../game/rewards';
 import { collectionProgress } from '../../game/fieldNotes';
 import {
   ALL_DONE_BONUS_XP,
@@ -137,6 +137,7 @@ export function HomeScreen() {
   const goal = dailyGoal(dailyXp.date === today ? dailyXp.xp : 0);
   const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
   const notes = collectionProgress(fieldNotes);
+  const stake = stakeLevel(streak.current, goal.done, streak.freezeTokens);
   const upcoming = nextUnlock(campaign.completed, xp);
   const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
 
@@ -274,7 +275,15 @@ export function HomeScreen() {
           {/* Belohnungs-Leiste: Tagesziel, wartende Truhe, naechste Freischaltung.
           Das ist die Vorfreude-Ebene — sie beantwortet „warum noch eine Runde?" */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="panel-inset flex items-center rounded-panel px-4 py-3">
+            {/* Das Material folgt dem Einsatz: eine offene Woche-Serie ist
+                das Lauteste auf der Seite, ein erfuelltes Ziel das Leiseste */}
+            <div
+              className={`flex items-center rounded-panel px-4 py-3 ${
+                stake === 'urgent'
+                  ? 'panel-reward rarity-legendary animate-pulse-soft'
+                  : 'panel-inset'
+              }`}
+            >
               <DailyGoalRing
                 goal={goal}
                 streak={streak.current}
