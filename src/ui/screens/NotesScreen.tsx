@@ -14,13 +14,15 @@ import { useTranslation } from 'react-i18next';
 import {
   collectionProgress,
   NOTE_RARITIES,
+  NOTE_TOPICS,
   sortedCollection,
   type NoteRarity,
+  type NoteTopic,
 } from '../../game/fieldNotes';
 import { useGame } from '../../game/store';
 import { FieldNoteCard } from '../components/FieldNoteCard';
 
-type Filter = 'all' | NoteRarity | 'missing';
+type Filter = 'all' | NoteRarity | NoteTopic | 'missing';
 
 export function NotesScreen() {
   const { t } = useTranslation();
@@ -32,10 +34,15 @@ export function NotesScreen() {
     const all = sortedCollection(owned);
     if (filter === 'all') return all;
     if (filter === 'missing') return all.filter((c) => !c.owned);
+    if ((NOTE_TOPICS as readonly string[]).includes(filter)) {
+      return all.filter((c) => c.topic === filter);
+    }
     return all.filter((c) => c.rarity === filter);
   }, [owned, filter]);
 
-  const filters: Filter[] = ['all', ...NOTE_RARITIES, 'missing'];
+  // Themen zuerst: „wovon handelt das?" ist die naheliegendere Frage als
+  // „wie selten ist das?"
+  const filters: Filter[] = ['all', ...NOTE_TOPICS, ...NOTE_RARITIES, 'missing'];
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pb-16 pt-6 lg:max-w-7xl lg:px-8">
@@ -95,7 +102,9 @@ export function NotesScreen() {
               ? t('notes.filterAll')
               : f === 'missing'
                 ? t('notes.filterMissing')
-                : t(`notes.rarity.${f}`)}
+                : (NOTE_TOPICS as readonly string[]).includes(f)
+                  ? t(`notes.topic.${f}`)
+                  : t(`notes.rarity.${f}`)}
           </button>
         ))}
       </div>

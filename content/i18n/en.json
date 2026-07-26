@@ -713,6 +713,11 @@
     "filterNothing": "Nothing in this selection.",
     "fromArchive": "From the archive",
     "hasOneFor": "There are {{count}} field note(s) on this — still in a chest.",
+    "topic": {
+      "forward": "Forward",
+      "localIn": "Local-In",
+      "ops": "Operations"
+    },
     "card": {
       "policy0": {
         "title": "Policy 0",
@@ -821,6 +826,42 @@
       "trusthost": {
         "title": "trusthost",
         "body": "A second, independent gate on the admin account: which addresses may log in. Unset means anywhere. Set wrongly means nowhere, and you notice that only after the renumbering, when the firewall is still waiting for visitors from a network that no longer exists."
+      },
+      "haSyncNotConfig": {
+        "title": "HA does not sync everything",
+        "body": "The cluster keeps the configuration in step, but not every detail: hostname, HA priority and interface roles stay per device. Miss that and you spend a night configuring the passive node, wondering why nothing changes."
+      },
+      "haOverride": {
+        "title": "override",
+        "body": "Without override, equal state means uptime decides who is primary — so after a reboot, often the other box. With override, priority wins, but the cluster fails over more eagerly. Both are correct; only one suits your maintenance window."
+      },
+      "dhcpLease": {
+        "title": "Lease",
+        "body": "A lease is borrowed, not granted. It expires, gets renewed, and after a restart may go to somebody else. Write a rule against a DHCP-assigned address and you have written a rule that means a different person next week."
+      },
+      "dnsResolverVsProxy": {
+        "title": "Resolver or DNS proxy",
+        "body": "The FortiGate has two separate roles: what it resolves for itself (FQDN objects, updates) and what it handles on behalf of clients. Configuring one changes nothing about the other, which surprises everyone exactly once."
+      },
+      "dhcpRelay": {
+        "title": "DHCP relay",
+        "body": "Broadcasts do not cross the firewall. If the server sits in another network, the client interface needs a relay to forward the request deliberately. Without it the client searches until timeout, then helpfully reports that there is no server."
+      },
+      "dnsTtl": {
+        "title": "TTL",
+        "body": "A DNS record is valid for as long as its TTL says — at clients, at intermediaries, and in the firewall's own cache. After a change the new value is not wrong, it has merely not arrived everywhere. Four hours of TTL is four hours of explaining."
+      },
+      "dhcpReserve": {
+        "title": "Reservation",
+        "body": "A reservation ties an address to a MAC and makes it predictable enough to name in a rule. It is also the only thing about DHCP you can cite in an audit."
+      },
+      "haHeartbeat": {
+        "title": "Heartbeat",
+        "body": "The heartbeat link is how the nodes know the other one is still there. Lose it while both are running and both consider themselves primary — and the network gets two firewalls with the same address. A second heartbeat link costs one port and saves one evening."
+      },
+      "dnsSplit": {
+        "title": "Split DNS",
+        "body": "The same name, different addresses inside and out. Sensible, so internal clients need not go out through your own VIP and back in again. Also the most elegant way to create a problem that appears at exactly one of two sites."
       }
     }
   },

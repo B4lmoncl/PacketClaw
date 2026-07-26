@@ -7,7 +7,9 @@ import {
   FIELD_NOTES,
   NOTE_RARITIES,
   noteById,
+  NOTE_TOPICS,
   notesForConcept,
+  notesForTopic,
   RARITY_XP,
   sortedCollection,
 } from '../fieldNotes';
@@ -18,11 +20,45 @@ describe('Katalog', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('jede Karte haengt an einem bekannten Konzept und einer bekannten Stufe', () => {
+  it('jede Karte hat eine bekannte Stufe und ein bekanntes Thema', () => {
     for (const note of FIELD_NOTES) {
-      expect(CONCEPTS, note.id).toContain(note.concept);
       expect(NOTE_RARITIES, note.id).toContain(note.rarity);
+      expect(NOTE_TOPICS, note.id).toContain(note.topic);
     }
+  });
+
+  /**
+   * concept ist optional, aber wenn es dasteht, muss es echt sein — sonst
+   * verweist die Bruecke zur Mastery auf ein Konzept, das es nicht gibt.
+   */
+  it('ein gesetztes Konzept ist immer ein echtes', () => {
+    for (const note of FIELD_NOTES) {
+      if (note.concept !== undefined) expect(CONCEPTS, note.id).toContain(note.concept);
+    }
+  });
+
+  /**
+   * DHCP, DNS und HA entscheiden kein Paket. Ihnen ein Verdict-Konzept
+   * anzudichten wuerde die Mastery-Messung verfaelschen — sie misst, woran man
+   * beim BEURTEILEN von Verkehr scheitert.
+   */
+  it('ops-Karten tragen bewusst KEIN Verdict-Konzept', () => {
+    const ops = notesForTopic('ops');
+    expect(ops.length).toBeGreaterThan(0);
+    for (const note of ops) expect(note.concept, note.id).toBeUndefined();
+  });
+
+  it('forward- und localIn-Karten tragen immer ein Konzept', () => {
+    for (const topic of ['forward', 'localIn'] as const) {
+      const cards = notesForTopic(topic);
+      expect(cards.length, topic).toBeGreaterThan(0);
+      for (const note of cards) expect(note.concept, `${topic}/${note.id}`).toBeDefined();
+    }
+  });
+
+  it('jede Karte gehoert zu genau einem Thema — die Themen ueberdecken alles', () => {
+    const sum = NOTE_TOPICS.reduce((n, topic) => n + notesForTopic(topic).length, 0);
+    expect(sum).toBe(FIELD_NOTES.length);
   });
 
   /**
@@ -40,6 +76,23 @@ describe('Katalog', () => {
         expect(body, `${locale}/${note.id}/body`).not.toBe(`notes.card.${note.id}.body`);
         // Ein Satz ist keine Feldnotiz; die Landung braucht Platz
         expect(String(body).length, `${locale}/${note.id}/body`).toBeGreaterThan(80);
+      }
+    }
+  });
+
+  /**
+   * Die Karte zeigt oben rechts das Konzept — oder, wenn es keines gibt, das
+   * Thema. Fehlt beides in i18n, stand dort „mastery.concept.undefined" im GUI.
+   * Genau das ist beim Einbau der ops-Karten passiert.
+   */
+  it('jede Karte hat eine aufloesbare Kopfzeile in beiden Sprachen', () => {
+    for (const locale of ['de', 'en'] as const) {
+      const t = i18n.getFixedT(locale);
+      for (const note of FIELD_NOTES) {
+        const key = note.concept ? `mastery.concept.${note.concept}` : `notes.topic.${note.topic}`;
+        const label = t(key);
+        expect(label, `${locale}/${note.id}`).not.toBe(key);
+        expect(String(label).toLowerCase(), `${locale}/${note.id}`).not.toContain('undefined');
       }
     }
   });

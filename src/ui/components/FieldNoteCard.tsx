@@ -57,8 +57,10 @@ export function FieldNoteCard({ note, owned, size = 'compact' }: Props) {
         <span className="font-mono text-[9px] uppercase tracking-widest text-rarity">
           {t(`notes.rarity.${note.rarity}`)}
         </span>
+        {/* Karten ohne Verdict-Konzept (DHCP/DNS/HA) nennen ihr Thema — sonst
+            stünde dort „mastery.concept.undefined" */}
         <span className="font-mono text-[9px] uppercase tracking-widest text-dim/60">
-          {t(`mastery.concept.${note.concept}`)}
+          {note.concept ? t(`mastery.concept.${note.concept}`) : t(`notes.topic.${note.topic}`)}
         </span>
       </div>
       <h3 className={`font-display font-bold text-ink ${full ? 'text-xl' : 'text-sm'}`}>

@@ -713,6 +713,11 @@
     "filterNothing": "Nichts in dieser Auswahl.",
     "fromArchive": "Aus dem Archiv",
     "hasOneFor": "Zu diesem Konzept gibt es {{count}} Feldnotiz(en) — noch in einer Truhe.",
+    "topic": {
+      "forward": "Forward",
+      "localIn": "Local-In",
+      "ops": "Betrieb"
+    },
     "card": {
       "policy0": {
         "title": "Policy 0",
@@ -821,6 +826,42 @@
       "trusthost": {
         "title": "trusthost",
         "body": "Ein zweites, unabhängiges Tor am Admin-Konto: von welchen Adressen darf sich jemand anmelden. Nicht gesetzt heißt von überall. Falsch gesetzt heißt von nirgends, und das merkt man erst nach der Netzumstellung, wenn die Firewall noch auf Besuch aus einem Netz wartet, das es nicht mehr gibt."
+      },
+      "haSyncNotConfig": {
+        "title": "HA synchronisiert nicht alles",
+        "body": "Der Cluster gleicht die Konfiguration ab, aber nicht jede Kleinigkeit: Hostname, HA-Prioritaet und die Interface-Rollen bleiben pro Geraet. Wer das uebersieht, konfiguriert eine Nacht lang auf dem passiven Knoten und wundert sich, dass sich nichts aendert."
+      },
+      "haOverride": {
+        "title": "override",
+        "body": "Ohne override entscheidet bei gleichem Zustand die Betriebszeit, wer Primary ist — nach einem Reboot also gern das andere Geraet. Mit override gewinnt die Prioritaet, dafuer wechselt der Cluster bereitwilliger. Beide Varianten sind richtig; nur eine passt zu deinem Wartungsfenster."
+      },
+      "dhcpLease": {
+        "title": "Lease",
+        "body": "Eine Lease ist geliehen, nicht vergeben. Sie laeuft ab, wird verlaengert und kann nach einem Neustart an jemand anderen gehen. Wer eine Regel auf eine per DHCP bezogene Adresse schreibt, hat eine Regel geschrieben, die naechste Woche jemand anderen meint."
+      },
+      "dnsResolverVsProxy": {
+        "title": "Resolver oder DNS-Proxy",
+        "body": "Die FortiGate hat zwei getrennte Rollen: Was sie selbst aufloest (fuer FQDN-Objekte und Updates) und was sie fuer Clients uebernimmt. Der eine Dienst zu konfigurieren aendert am anderen nichts, was jedes Mal genau ein Mal ueberrascht."
+      },
+      "dhcpRelay": {
+        "title": "DHCP-Relay",
+        "body": "Broadcasts kommen nicht ueber die Firewall. Wenn der Server in einem anderen Netz steht, braucht das Client-Interface ein Relay, das die Anfrage gezielt weiterschickt. Ohne Relay sucht der Client bis zum Timeout und meldet danach hilfreich, es sei kein Server da."
+      },
+      "dnsTtl": {
+        "title": "TTL",
+        "body": "Ein DNS-Eintrag gilt so lange, wie seine TTL sagt — bei Clients, bei Zwischenstellen und im Cache der Firewall. Nach der Umstellung ist die Aenderung deshalb nicht falsch, sondern nur noch nicht ueberall angekommen. Vier Stunden TTL sind vier Stunden Erklaerbedarf."
+      },
+      "dhcpReserve": {
+        "title": "Reservierung",
+        "body": "Eine Reservierung bindet eine Adresse an eine MAC und macht sie damit vorhersehbar genug, um sie in einer Regel zu nennen. Sie ist auch das Einzige an DHCP, worauf man sich in einem Audit berufen kann."
+      },
+      "haHeartbeat": {
+        "title": "Heartbeat",
+        "body": "Ueber die Heartbeat-Verbindung merken die Knoten, dass der andere noch da ist. Faellt sie aus, waehrend beide laufen, halten sich beide fuer den Primary — und das Netz bekommt zwei Firewalls mit derselben Adresse. Ein zweiter Heartbeat-Link kostet einen Port und spart einen Abend."
+      },
+      "dnsSplit": {
+        "title": "Split-DNS",
+        "body": "Derselbe Name, innen und aussen verschiedene Adressen. Sinnvoll, damit interne Clients nicht ueber das eigene VIP nach draussen und wieder herein muessen. Auch die eleganteste Methode, ein Problem zu erzeugen, das nur an einem der beiden Standorte auftritt."
       }
     }
   },

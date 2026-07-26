@@ -21,11 +21,29 @@ import type { Concept } from './mastery';
 export const NOTE_RARITIES = ['common', 'rare', 'epic', 'legendary'] as const;
 export type NoteRarity = (typeof NOTE_RARITIES)[number];
 
+/**
+ * Themenbereiche der Sammlung. `forward` und `localIn` haben ein
+ * Mastery-Konzept; `ops` ist Betriebswissen, das mit der Paketentscheidung
+ * nichts zu tun hat (DHCP, DNS, HA).
+ */
+export const NOTE_TOPICS = ['forward', 'localIn', 'ops'] as const;
+export type NoteTopic = (typeof NOTE_TOPICS)[number];
+
 export interface FieldNote {
   id: string;
   rarity: NoteRarity;
-  /** Das Konzept, zu dem die Karte gehört — verbindet Sammlung und Mastery */
-  concept: Concept;
+  /**
+   * Das Konzept, zu dem die Karte gehört — die Brücke zwischen Sammlung und
+   * Mastery.
+   *
+   * OPTIONAL, und das ist eine bewusste Entscheidung: DHCP, DNS und HA sind
+   * echtes FortiGate-Wissen, aber sie entscheiden kein Paket. Ihnen ein
+   * Verdict-Konzept anzudichten, damit das Feld gefüllt ist, würde die
+   * Mastery-Messung verfälschen — sie misst, woran man beim Beurteilen von
+   * Verkehr scheitert. Karten ohne Konzept sind Nachschlagewerk, kein Messwert.
+   */
+  concept?: Concept;
+  topic: NoteTopic;
 }
 
 /**
@@ -35,41 +53,52 @@ export interface FieldNote {
  */
 export const FIELD_NOTES: FieldNote[] = [
   // legendary — die zwei Lektionen, die alles andere sortieren
-  { id: 'policy0', rarity: 'legendary', concept: 'implicitDeny' },
-  { id: 'routeFirst', rarity: 'legendary', concept: 'routing' },
+  { id: 'policy0', rarity: 'legendary', concept: 'implicitDeny', topic: 'forward' },
+  { id: 'routeFirst', rarity: 'legendary', concept: 'routing', topic: 'forward' },
 
   // Local-In: die Asymmetrie ist so grundlegend wie Policy 0 selbst
-  { id: 'localInAccept', rarity: 'legendary', concept: 'interface' },
+  { id: 'localInAccept', rarity: 'legendary', concept: 'interface', topic: 'localIn' },
 
   // epic
-  { id: 'allowaccess', rarity: 'epic', concept: 'interface' },
-  { id: 'trusthost', rarity: 'epic', concept: 'interface' },
-  { id: 'vipOnly', rarity: 'epic', concept: 'vip' },
-  { id: 'prednatPort', rarity: 'epic', concept: 'service' },
-  { id: 'shadowing', rarity: 'epic', concept: 'firstMatch' },
-  { id: 'sessionTable', rarity: 'epic', concept: 'firstMatch' },
+  { id: 'allowaccess', rarity: 'epic', concept: 'interface', topic: 'localIn' },
+  { id: 'trusthost', rarity: 'epic', concept: 'interface', topic: 'localIn' },
+  { id: 'vipOnly', rarity: 'epic', concept: 'vip', topic: 'forward' },
+  { id: 'prednatPort', rarity: 'epic', concept: 'service', topic: 'forward' },
+  { id: 'shadowing', rarity: 'epic', concept: 'firstMatch', topic: 'forward' },
+  { id: 'sessionTable', rarity: 'epic', concept: 'firstMatch', topic: 'forward' },
 
   // rare
-  { id: 'firstMatch', rarity: 'rare', concept: 'firstMatch' },
-  { id: 'objectNotName', rarity: 'rare', concept: 'address' },
-  { id: 'noNatNoReturn', rarity: 'rare', concept: 'snat' },
-  { id: 'debugFlow', rarity: 'rare', concept: 'routing' },
-  { id: 'intrazone', rarity: 'rare', concept: 'interface' },
-  { id: 'anyAnyAll', rarity: 'rare', concept: 'service' },
-  { id: 'fqdnMoves', rarity: 'rare', concept: 'address' },
-  { id: 'midnightSchedule', rarity: 'rare', concept: 'schedule' },
+  { id: 'firstMatch', rarity: 'rare', concept: 'firstMatch', topic: 'forward' },
+  { id: 'objectNotName', rarity: 'rare', concept: 'address', topic: 'forward' },
+  { id: 'noNatNoReturn', rarity: 'rare', concept: 'snat', topic: 'forward' },
+  { id: 'debugFlow', rarity: 'rare', concept: 'routing', topic: 'forward' },
+  { id: 'intrazone', rarity: 'rare', concept: 'interface', topic: 'forward' },
+  { id: 'anyAnyAll', rarity: 'rare', concept: 'service', topic: 'forward' },
+  { id: 'fqdnMoves', rarity: 'rare', concept: 'address', topic: 'forward' },
+  { id: 'midnightSchedule', rarity: 'rare', concept: 'schedule', topic: 'forward' },
+
+  // ops — echtes Betriebswissen ohne Verdict-Konzept (DHCP, DNS, HA)
+  { id: 'haSyncNotConfig', rarity: 'legendary', topic: 'ops' },
+  { id: 'haOverride', rarity: 'epic', topic: 'ops' },
+  { id: 'dhcpLease', rarity: 'epic', topic: 'ops' },
+  { id: 'dnsResolverVsProxy', rarity: 'rare', topic: 'ops' },
+  { id: 'dhcpRelay', rarity: 'rare', topic: 'ops' },
+  { id: 'dnsTtl', rarity: 'rare', topic: 'ops' },
+  { id: 'dhcpReserve', rarity: 'common', topic: 'ops' },
+  { id: 'haHeartbeat', rarity: 'common', topic: 'ops' },
+  { id: 'dnsSplit', rarity: 'common', topic: 'ops' },
 
   // common
-  { id: 'interfaceAny', rarity: 'common', concept: 'interface' },
-  { id: 'zoneTradeoff', rarity: 'common', concept: 'interface' },
-  { id: 'hitCountZero', rarity: 'common', concept: 'firstMatch' },
-  { id: 'policyIdNotOrder', rarity: 'common', concept: 'firstMatch' },
-  { id: 'disabledRule', rarity: 'common', concept: 'firstMatch' },
-  { id: 'addressGroup', rarity: 'common', concept: 'address' },
-  { id: 'denyNoLog', rarity: 'common', concept: 'implicitDeny' },
-  { id: 'serviceAll', rarity: 'common', concept: 'service' },
-  { id: 'policyLookup', rarity: 'common', concept: 'routing' },
-  { id: 'scheduleLooksOn', rarity: 'common', concept: 'schedule' },
+  { id: 'interfaceAny', rarity: 'common', concept: 'interface', topic: 'forward' },
+  { id: 'zoneTradeoff', rarity: 'common', concept: 'interface', topic: 'forward' },
+  { id: 'hitCountZero', rarity: 'common', concept: 'firstMatch', topic: 'forward' },
+  { id: 'policyIdNotOrder', rarity: 'common', concept: 'firstMatch', topic: 'forward' },
+  { id: 'disabledRule', rarity: 'common', concept: 'firstMatch', topic: 'forward' },
+  { id: 'addressGroup', rarity: 'common', concept: 'address', topic: 'forward' },
+  { id: 'denyNoLog', rarity: 'common', concept: 'implicitDeny', topic: 'forward' },
+  { id: 'serviceAll', rarity: 'common', concept: 'service', topic: 'forward' },
+  { id: 'policyLookup', rarity: 'common', concept: 'routing', topic: 'forward' },
+  { id: 'scheduleLooksOn', rarity: 'common', concept: 'schedule', topic: 'forward' },
 ];
 
 /** Zusatz-XP nach Seltenheit — die Karte ist der Lohn, das XP nur die Beilage. */
@@ -163,4 +192,9 @@ export function sortedCollection(owned: readonly string[]): (FieldNote & { owned
 /** Karten zu einem Konzept — verbindet die Schwachstellen-Anzeige mit der Sammlung. */
 export function notesForConcept(concept: Concept): FieldNote[] {
   return FIELD_NOTES.filter((n) => n.concept === concept);
+}
+
+/** Karten eines Themenbereichs — fuer die Gliederung im Archiv. */
+export function notesForTopic(topic: NoteTopic): FieldNote[] {
+  return FIELD_NOTES.filter((n) => n.topic === topic);
 }

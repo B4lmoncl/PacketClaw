@@ -1040,3 +1040,28 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
     Tests: 437 gruen, Lint 0 Fehler, Build ok, E2E: perfekter Lauf zeigt
     legendary-Rahmen, Flawless-Zeile und Serie, Streifen mit echten Luecken,
     0 Konsolenfehler.
+- 2026-07-26 (Forts. 47): DHCP, DNS UND HA — als Feldnotizen, nicht als
+  Engine-Fake (#54). Der Nutzer hatte diese Themen ausdruecklich gewuenscht.
+  Sie entscheiden aber KEIN Paket: die Engine ist die Wahrheit ueber
+  Paketfluss, und ihr DHCP oder HA anzudichten waere eine Behauptung, die sie
+  nicht einloest. Der ehrliche Traeger ist das Nachschlagewerk.
+  NEUN neue Karten (Katalog jetzt 36): HA-sync-nicht-alles (legendary),
+  override, Lease, Resolver-vs-Proxy, DHCP-Relay, TTL, Reservierung, Heartbeat,
+  Split-DNS. Alle mit echtem Betriebswissen und in der Lyra-Stimme.
+  MODELL-ENTSCHEIDUNG: `concept` an der Karte ist jetzt OPTIONAL, dafuer gibt es
+  `topic` (forward | localIn | ops). Diesen Karten ein Verdict-Konzept
+  anzudichten, nur damit das Feld gefuellt ist, wuerde die Mastery-Messung
+  verfaelschen — sie misst, woran man beim BEURTEILEN von Verkehr scheitert.
+  Karten ohne Konzept sind Nachschlagewerk, kein Messwert. Vier Tests sichern
+  die Invarianten (ops ohne Konzept, forward/localIn immer mit, Themen
+  ueberdecken den Katalog vollstaendig, gesetzte Konzepte sind echt).
+  Nebenbei korrigiert: `intrazone` lag beim Einsortieren auf localIn, gehoert
+  aber zu forward — Intra-Zone-Deny betrifft WEITERGELEITETEN Verkehr.
+  FEHLER GEFUNDEN UND BEHOBEN: die Karte zeigte oben rechts
+  „MASTERY.CONCEPT.UNDEFINED", weil sie ein Konzept voraussetzte. Jetzt nennt
+  sie das Thema, wenn es kein Konzept gibt — plus ein Test, der fuer ALLE Karten
+  in BEIDEN Sprachen prueft, dass die Kopfzeile aufloest.
+  Archiv: Themen-Filter vor den Stufen-Filtern („wovon handelt das?" ist die
+  naheliegendere Frage als „wie selten ist das?").
+  Tests: 442 gruen, Lint 0 Fehler, Build ok, E2E: Ops-Filter zeigt die neuen
+  Karten mit korrekter Kopfzeile.
