@@ -586,7 +586,14 @@
       "epic": "deep archive"
     },
     "unlockKicker": "New mode unlocked",
-    "nice": "Take it"
+    "nice": "Take it",
+    "rank": {
+      "common": "common",
+      "uncommon": "uncommon",
+      "rare": "rare",
+      "epic": "epic",
+      "legendary": "legendary"
+    }
   },
   "unlock": {
     "locked": "Locked",

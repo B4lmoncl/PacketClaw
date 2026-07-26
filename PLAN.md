@@ -618,3 +618,28 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   1440x900 = 1.07, Mobil 2.43 wie vorher; 0 abgeschnittene Textzeilen auf
   allen drei Breiten, kein horizontaler Overflow.
   Tests: 291 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-25 (Forts. 28, Nutzerfeedback „Belohnungen zu wenig abgegrenzt,
+  alles gleiches Design, monoton"): VISUELLE MATERIALIEN (#59). Referenz war
+  QuestHall selbst (/workspace/questhall): dessen RARITY_COLORS in
+  app/constants.ts plus die Karten-Signatur aus ItemTooltip.tsx
+  (border-top 3px in Rarity-Farbe, getoenter Hintergrund, mit der Seltenheit
+  wachsender Glow). Unsere tokens.ts-Rarity-Farben sind jetzt 1:1 QuestHalls,
+  damit beide Spiele dieselbe Bildsprache sprechen.
+  Statt EINEM .glass fuer alles gibt es vier Materialien, und die Oberflaeche
+  traegt die Bedeutung:
+    .panel-hero    farbige Oberkante in Markenfarbe → die EINE Hauptaktion
+    .panel-action  erhaben, Innen-Highlight, Hover-Lift → Navigation/Modi
+    .panel-inset   vertieft, Innenschatten, kein Hover → Status/Anzeigen
+    .panel-reward  Rarity-Rahmen + Glow → Belohnungen/Abzeichen
+  Dazu .rarity-common/uncommon/rare/epic/legendary (setzen --rarity und
+  --rarity-glow) und .medallion (runde Plakette mit Rarity-Ring statt
+  Emoji-Zeile); legendaere Plaketten bekommen einen wandernden Schimmer
+  (.medallion-shine, reduced-motion-gated).
+  NextBadges nutzt jetzt die ECHTE Rarity jedes Achievements: Rahmen,
+  Medaillon, Fortschrittsbalken und Rang-Label faerben sich danach. Gesperrte
+  Modi sind vertieft (sehen unanfassbar aus), „Depot bereit" ist legendaer
+  gerahmt, eine frische Freischaltung episch.
+  Verifiziert per DOM-Zaehlung: 8x panel-action, 5x panel-inset, 5x
+  panel-reward, 3 Medaillons, drei verschiedene Rarity-Stufen gleichzeitig
+  sichtbar; 0 verbleibende .glass-Nutzungen im HomeScreen.
+  Tests: 291 gruen, Lint 0 Fehler, Build ok.

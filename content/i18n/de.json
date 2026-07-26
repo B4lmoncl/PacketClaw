@@ -586,7 +586,14 @@
       "epic": "Tiefenarchiv"
     },
     "unlockKicker": "Neuer Modus freigeschaltet",
-    "nice": "Nehm ich"
+    "nice": "Nehm ich",
+    "rank": {
+      "common": "gewöhnlich",
+      "uncommon": "ungewöhnlich",
+      "rare": "selten",
+      "epic": "episch",
+      "legendary": "legendär"
+    }
   },
   "unlock": {
     "locked": "Gesperrt",

@@ -417,3 +417,151 @@ body {
     font-size: 18px;
   }
 }
+
+/* ===========================================================================
+   Drei Karten-MATERIALIEN statt eines .glass fuer alles. Vorher sah jede
+   Karte gleich aus — Modus, Status und Belohnung waren visuell nicht zu
+   unterscheiden, das Menue wirkte monoton. Jetzt traegt die Oberflaeche die
+   Bedeutung:
+
+     .panel-action  erhaben, anfassbar   → Navigation, Modi, CTAs
+     .panel-inset   vertieft, ruhig      → Status und Anzeigen ohne Aktion
+     .panel-reward  gerahmt, leuchtend   → Belohnungen, Abzeichen (Rarity)
+
+   Die Rarity-Signatur (3px farbige Oberkante + skalierender Glow) ist aus
+   QuestHall uebernommen, damit beide Spiele zusammengehoerig aussehen.
+   ========================================================================= */
+
+/* Anfassbar: Innen-Highlight oben, hebt sich beim Hover deutlich ab */
+.panel-action {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 45%),
+    rgba(22, 34, 58, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 10px 26px -14px rgba(0, 0, 0, 0.85);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.25s ease,
+    border-color 0.18s ease;
+}
+.panel-action:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 16px 34px -14px rgba(0, 0, 0, 0.9);
+}
+
+/* Vertieft: sitzt IM Hintergrund statt darauf, kein Hover-Versprechen */
+.panel-inset {
+  background: rgba(11, 18, 32, 0.72);
+  border: 1px solid rgba(34, 48, 74, 0.9);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.35) inset,
+    0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Belohnung: Rarity-Rahmen. --rarity kommt von den .rarity-*-Klassen. */
+.panel-reward {
+  position: relative;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--rarity) 12%, transparent), transparent 60%),
+    rgba(17, 26, 46, 0.96);
+  border: 1px solid color-mix(in srgb, var(--rarity) 32%, transparent);
+  border-top: 3px solid var(--rarity);
+  box-shadow: 0 0 var(--rarity-glow, 6px) color-mix(in srgb, var(--rarity) 22%, transparent);
+}
+
+/* Rarity-Stufen: Farbe + Glow-Staerke steigen zusammen */
+.rarity-common {
+  --rarity: #9ca3af;
+  --rarity-glow: 4px;
+}
+.rarity-uncommon {
+  --rarity: #22c55e;
+  --rarity-glow: 6px;
+}
+.rarity-rare {
+  --rarity: #3b82f6;
+  --rarity-glow: 8px;
+}
+.rarity-epic {
+  --rarity: #a855f7;
+  --rarity-glow: 14px;
+}
+.rarity-legendary {
+  --rarity: #f97316;
+  --rarity-glow: 22px;
+}
+
+/* Medaillon fuer Abzeichen: runde Plakette mit Rarity-Ring statt Emoji-Zeile */
+.medallion {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 30% 25%,
+    color-mix(in srgb, var(--rarity) 40%, transparent),
+    rgba(11, 18, 32, 0.9) 70%
+  );
+  border: 1.5px solid color-mix(in srgb, var(--rarity) 70%, transparent);
+  box-shadow: 0 0 var(--rarity-glow, 6px) color-mix(in srgb, var(--rarity) 45%, transparent);
+  color: var(--rarity);
+  font-size: 0.9rem;
+}
+
+/* Legendaere Plaketten bekommen einen langsam wandernden Schimmer */
+.medallion-shine::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--rarity) 55%, transparent) 40deg,
+    transparent 90deg
+  );
+  animation: medallion-spin 4.5s linear infinite;
+  pointer-events: none;
+}
+@keyframes medallion-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .medallion-shine::after {
+    animation: none;
+  }
+}
+
+/* Die EINE Hauptaktion. Gleiche Signatur wie ein Rarity-Rahmen, aber in der
+   Markenfarbe — damit „Weiterspielen" ueber allem anderen steht, ohne ein
+   viertes Formvokabular einzufuehren. */
+.panel-hero {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 90, 60, 0.14), rgba(255, 90, 60, 0) 55%),
+    rgba(22, 34, 58, 0.96);
+  border: 1px solid rgba(255, 90, 60, 0.34);
+  border-top: 3px solid #ff5a3c;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 0 26px -6px rgba(255, 90, 60, 0.35),
+    0 14px 30px -16px rgba(0, 0, 0, 0.9);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.25s ease;
+}
+.panel-hero:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 0 38px -4px rgba(255, 90, 60, 0.5),
+    0 18px 36px -16px rgba(0, 0, 0, 0.95);
+}

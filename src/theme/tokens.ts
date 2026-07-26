@@ -28,12 +28,16 @@ export const colors = {
   aura: '#8B7BFF',
   /** Leicht erhöhte Panel-Fläche (Karten-Hover, Popovers) */
   panelHi: '#16223A',
-  /** Rarity-Glows für Achievements (QuestHall-Anleihe) */
+  /**
+   * Rarity-Farben — 1:1 aus QuestHalls RARITY_COLORS, damit beide Spiele
+   * dieselbe Bildsprache sprechen (app/constants.ts dort).
+   */
   rarity: {
-    common: '#8A97AD',
-    rare: '#4FA8FF',
-    epic: '#A78BFA',
-    legendary: '#F59E0B',
+    common: '#9CA3AF',
+    uncommon: '#22C55E',
+    rare: '#3B82F6',
+    epic: '#A855F7',
+    legendary: '#F97316',
   },
 } as const;
 

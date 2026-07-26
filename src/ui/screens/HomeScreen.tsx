@@ -154,7 +154,7 @@ export function HomeScreen() {
           {/* Spieler-Statusleiste: Rang + XP-Fortschritt + Bestwerte */}
           <button
             onClick={() => navigate({ name: 'profile' })}
-            className="glass card-mode group flex w-full items-center gap-4 rounded-panel px-4 py-3 text-left hover:border-aura/50 hover:shadow-glow-aura lg:px-6"
+            className="panel-action card-mode group flex w-full items-center gap-4 rounded-panel px-4 py-3 text-left hover:border-aura/50 hover:shadow-glow-aura lg:px-6"
             aria-label={t('nav.profile')}
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-aura/15 text-lg">
@@ -193,14 +193,14 @@ export function HomeScreen() {
           {/* Belohnungs-Leiste: Tagesziel, wartende Truhe, naechste Freischaltung.
           Das ist die Vorfreude-Ebene — sie beantwortet „warum noch eine Runde?" */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="glass flex items-center rounded-panel px-4 py-3">
+            <div className="panel-inset flex items-center rounded-panel px-4 py-3">
               <DailyGoalRing goal={goal} />
             </div>
 
             {chestsReady > 0 ? (
               <button
                 onClick={claimChest}
-                className="card-mode glass group flex animate-pulse items-center gap-3 rounded-panel border border-warn/50 px-4 py-3 text-left hover:-translate-y-0.5 hover:border-warn hover:shadow-glow-warn motion-reduce:animate-none"
+                className="card-mode panel-reward rarity-legendary group flex items-center gap-3 rounded-panel px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
               >
                 <span className="text-2xl">🎁</span>
                 <div className="min-w-0">
@@ -213,7 +213,7 @@ export function HomeScreen() {
                 </div>
               </button>
             ) : (
-              <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+              <div className="panel-inset flex items-center gap-3 rounded-panel px-4 py-3">
                 <span className="text-2xl opacity-40">🎁</span>
                 <div className="min-w-0">
                   <div className="font-display text-sm font-bold text-dim">{t('reward.next')}</div>
@@ -227,7 +227,7 @@ export function HomeScreen() {
             {fresh.length > 0 ? (
               <button
                 onClick={celebrateUnlock}
-                className="card-mode glass group flex items-center gap-3 rounded-panel border border-trace/60 px-4 py-3 text-left hover:-translate-y-0.5 hover:shadow-glow-trace"
+                className="card-mode panel-reward rarity-epic group flex items-center gap-3 rounded-panel px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
               >
                 <span className="text-2xl">🔓</span>
                 <div className="min-w-0">
@@ -240,7 +240,7 @@ export function HomeScreen() {
                 </div>
               </button>
             ) : upcoming ? (
-              <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+              <div className="panel-inset flex items-center gap-3 rounded-panel px-4 py-3">
                 <span className="text-2xl opacity-60">🔒</span>
                 <div className="min-w-0 flex-1">
                   <div className="font-display text-sm font-bold text-dim">
@@ -255,7 +255,7 @@ export function HomeScreen() {
                 </div>
               </div>
             ) : (
-              <div className="glass flex items-center gap-3 rounded-panel px-4 py-3">
+              <div className="panel-inset flex items-center gap-3 rounded-panel px-4 py-3">
                 <span className="text-2xl">🏅</span>
                 <div className="min-w-0">
                   <div className="font-display text-sm font-bold text-trace">
@@ -283,7 +283,7 @@ export function HomeScreen() {
                     ? navigate({ name: 'level', levelId: campaign.next.id })
                     : navigate({ name: 'chapter', chapter: 1 })
                 }
-                className="card-mode glass group relative flex items-center gap-4 rounded-panel border border-claw/40 px-5 py-5 text-left hover:-translate-y-0.5 hover:border-claw/70 hover:shadow-glow-claw lg:col-span-2 lg:gap-5 lg:px-6"
+                className="card-mode panel-hero group relative flex items-center gap-4 rounded-panel px-5 py-5 text-left hover:-translate-y-0.5 lg:col-span-2 lg:gap-5 lg:px-6"
               >
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-panel bg-claw/15 text-3xl shadow-inner lg:h-16 lg:w-16">
                   🛡️
@@ -331,7 +331,7 @@ export function HomeScreen() {
               {/* Daily mit Heute-Status: beantwortet „habe ich das heute schon?" */}
               <button
                 onClick={() => navigate({ name: 'daily' })}
-                className={`card-mode glass group flex items-center gap-3 rounded-panel border px-4 py-4 text-left hover:-translate-y-0.5 ${
+                className={`card-mode panel-action group flex items-center gap-3 rounded-panel px-4 py-4 text-left hover:-translate-y-0.5 ${
                   dailyDone
                     ? 'border-line hover:border-trace/60 hover:shadow-glow-trace'
                     : 'border-warn/40 hover:border-warn/70 hover:shadow-glow-warn'
@@ -392,7 +392,7 @@ export function HomeScreen() {
                     return (
                       <div
                         key={m.key}
-                        className="glass flex items-center gap-3 rounded-panel border border-line/50 px-3.5 py-3 text-left opacity-60"
+                        className="panel-inset flex items-center gap-3 rounded-panel px-3.5 py-3 text-left opacity-70"
                         aria-label={`${t(`nav.${m.key}`)} — ${t('unlock.locked')}`}
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-panel bg-bg/60 text-lg grayscale">
@@ -415,7 +415,7 @@ export function HomeScreen() {
                     <button
                       key={m.key}
                       onClick={() => navigate(m.screen)}
-                      className={`card-mode glass group flex items-center gap-3 rounded-panel border border-line px-3.5 py-3 text-left hover:-translate-y-0.5 ${a.ring}`}
+                      className={`card-mode panel-action group flex items-center gap-3 rounded-panel px-3.5 py-3 text-left hover:-translate-y-0.5 ${a.ring}`}
                     >
                       <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-panel text-lg ${a.chip}`}
