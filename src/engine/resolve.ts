@@ -53,6 +53,10 @@ export function addressObjectContainsIp(obj: AddressObject, ip: IPv4): boolean {
       if (!obj.host) return false;
       return n === ipToInt(obj.host);
     }
+    case 'fqdn': {
+      // Ohne DNS-Auflösung matcht ein FQDN-Objekt nichts (FortiOS-Verhalten)
+      return (obj.resolvedIps ?? []).some((ip) => n === ipToInt(ip));
+    }
   }
 }
 

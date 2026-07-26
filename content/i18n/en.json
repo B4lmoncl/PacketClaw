@@ -305,7 +305,8 @@
       "allService": "Matches any service (all protocols and ports).",
       "anyIface": "Matches any interface.",
       "vip": "Policies match on the VIP object, not the internal IP.",
-      "unknown": "Not defined anywhere — matches nothing."
+      "unknown": "Not defined anywhere — matches nothing.",
+      "fqdnUnresolved": "FQDN object with no resolved address — matches nothing until DNS answers."
     },
     "inZone": "Zone: {{zone}}",
     "schedule": "Mon–Fri 08:00–17:59 (wall clock). Outside of that the rule does not match.",
@@ -420,7 +421,8 @@
       "order": "A broad deny above the allow rule shadowed it — first match wins.",
       "wrong-service": "The allow rule permitted the wrong service — web traffic never matched it.",
       "wrong-srcaddr": "The allow rule's source didn't cover the LAN — the packets never matched.",
-      "wrong-dstintf": "The allow rule's destination interface didn't match the route to the internet."
+      "wrong-dstintf": "The allow rule's destination interface didn't match the route to the internet.",
+      "fqdn-unresolved": "The destination was an FQDN object that had not resolved a single address — an empty set matches nothing. The rule was never wrong. It just had nothing to match against."
     },
     "concept": {
       "snat": "Concept: SNAT",
@@ -428,7 +430,8 @@
       "firstMatch": "Concept: first match / order",
       "service": "Concept: service objects / ports",
       "address": "Concept: address objects",
-      "interface": "Concept: interfaces & routing"
+      "interface": "Concept: interfaces & routing",
+      "fqdn": "Concept: FQDN objects / DNS resolution"
     },
     "editsUsed": "{{edits}} edit(s)",
     "next": "Next case",
@@ -438,7 +441,8 @@
       "order": "There is an allow rule for LAN web access, but it never takes effect — everything outbound gets blocked.",
       "wrong-service": "Web browsing from the LAN is dead, yet there IS an allow rule for outbound traffic. Maybe it permits the wrong thing?",
       "wrong-srcaddr": "Web works from some machines but not the LAN — as if the allow rule is scoped to the wrong source.",
-      "wrong-dstintf": "The LAN can't reach the internet. The allow rule looks fine, but seems to send traffic out the wrong door."
+      "wrong-dstintf": "The LAN can't reach the internet. The allow rule looks fine, but seems to send traffic out the wrong door.",
+      "fqdn-unresolved": "The vendor portal is unreachable from the LAN. There is an allow rule, it names the right object, and the object looks perfectly reasonable."
     }
   },
   "matchLogic": {

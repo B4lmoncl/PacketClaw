@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeConfig } from '../../engine';
 import type { NetworkConfig } from '../../engine';
-import { resolveObjectInfo } from '../objectInfo';
+import { isUnresolvedFqdn, resolveObjectInfo } from '../objectInfo';
 
 const config: NetworkConfig = makeConfig({
   interfaces: [
@@ -111,5 +111,48 @@ describe('resolveObjectInfo — Services & Interfaces', () => {
   it('any/ALL werden markiert', () => {
     expect(resolveObjectInfo(config, 'srcintf', 'any').noteKey).toBe('anyIface');
     expect(resolveObjectInfo(config, 'service', 'ALL').noteKey).toBe('allService');
+  });
+});
+
+describe('FQDN-Objekte in der Inspektion', () => {
+  const net = makeConfig({
+    addresses: [
+      {
+        id: 'ok',
+        name: 'VENDOR_PORTAL',
+        type: 'fqdn',
+        fqdn: 'portal.vendor.example',
+        resolvedIps: ['203.0.113.50', '203.0.113.51'],
+      },
+      {
+        id: 'pending',
+        name: 'PORTAL_NEW',
+        type: 'fqdn',
+        fqdn: 'portal-neu.vendor.example',
+        resolvedIps: [],
+      },
+    ],
+  });
+
+  it('zeigt Hostname und aufgeloeste Adressen', () => {
+    const info = resolveObjectInfo(net, 'dstaddr', 'VENDOR_PORTAL');
+    expect(info.kindKey).toBe('address');
+    expect(info.value).toBe('portal.vendor.example → 203.0.113.50, 203.0.113.51');
+    expect(info.noteKey).toBeUndefined();
+  });
+
+  it('unaufgeloest: Wert zeigt — und es gibt einen erklaerenden Hinweis', () => {
+    const info = resolveObjectInfo(net, 'dstaddr', 'PORTAL_NEW');
+    expect(info.value).toBe('portal-neu.vendor.example → —');
+    // Der Hinweis ist die EINZIGE Stelle, an der der Spieler es merken kann
+    expect(info.noteKey).toBe('fqdnUnresolved');
+  });
+
+  it('isUnresolvedFqdn unterscheidet aufgeloest von unaufgeloest', () => {
+    const [ok, pending] = net.addresses;
+    expect(isUnresolvedFqdn(ok!)).toBe(false);
+    expect(isUnresolvedFqdn(pending!)).toBe(true);
+    // Nicht-FQDN-Objekte sind nie „unaufgeloest"
+    expect(isUnresolvedFqdn({ id: 'h', name: 'H', type: 'host', host: '10.0.0.1' })).toBe(false);
   });
 });

@@ -305,7 +305,8 @@
       "allService": "Matcht jeden Service (alle Protokolle und Ports).",
       "anyIface": "Matcht jedes Interface.",
       "vip": "Policies matchen über das VIP-Objekt, nicht über die interne IP.",
-      "unknown": "Nirgends definiert — matcht nichts."
+      "unknown": "Nirgends definiert — matcht nichts.",
+      "fqdnUnresolved": "FQDN-Objekt ohne aufgelöste Adresse — matcht nichts, solange das DNS nicht antwortet."
     },
     "inZone": "Zone: {{zone}}",
     "schedule": "Mo–Fr 08:00–17:59 (Wanduhrzeit). Außerhalb matcht die Regel nicht.",
@@ -420,7 +421,8 @@
       "order": "Eine breite Deny über der Erlauben-Regel hat sie verschattet — First Match gewinnt.",
       "wrong-service": "Die Erlauben-Regel ließ den falschen Dienst durch — Web-Verkehr hat nie gematcht.",
       "wrong-srcaddr": "Die Quelle der Erlauben-Regel deckte das LAN nicht ab — die Pakete matchten nie.",
-      "wrong-dstintf": "Das Ziel-Interface der Erlauben-Regel passte nicht zur Route ins Internet."
+      "wrong-dstintf": "Das Ziel-Interface der Erlauben-Regel passte nicht zur Route ins Internet.",
+      "fqdn-unresolved": "Das Ziel war ein FQDN-Objekt, das keine einzige Adresse aufgelöst hatte — eine leere Menge matcht nichts. Die Regel war nie falsch. Sie hatte nur nichts, wogegen sie matchen konnte."
     },
     "concept": {
       "snat": "Konzept: SNAT",
@@ -428,7 +430,8 @@
       "firstMatch": "Konzept: First Match / Reihenfolge",
       "service": "Konzept: Service-Objekte / Ports",
       "address": "Konzept: Adressobjekte",
-      "interface": "Konzept: Interfaces & Routing"
+      "interface": "Konzept: Interfaces & Routing",
+      "fqdn": "Konzept: FQDN-Objekte / DNS-Auflösung"
     },
     "editsUsed": "{{edits}} Eingriff(e)",
     "next": "Nächster Fall",
@@ -438,7 +441,8 @@
       "order": "Es gibt eine Erlauben-Regel für LAN-Webzugriff, aber sie greift nie — alles nach draußen wird geblockt.",
       "wrong-service": "Web-Surfen aus dem LAN ist tot, obwohl es eine Erlauben-Regel für ausgehenden Verkehr gibt. Vielleicht erlaubt sie das Falsche?",
       "wrong-srcaddr": "Web geht von manchen Rechnern, aber nicht aus dem LAN — als wäre die Erlauben-Regel auf die falsche Quelle eingeschränkt.",
-      "wrong-dstintf": "Das LAN kommt nicht ins Internet. Die Erlauben-Regel sieht gut aus, schickt den Verkehr aber zur falschen Tür raus."
+      "wrong-dstintf": "Das LAN kommt nicht ins Internet. Die Erlauben-Regel sieht gut aus, schickt den Verkehr aber zur falschen Tür raus.",
+      "fqdn-unresolved": "Das Lieferantenportal ist aus dem LAN nicht erreichbar. Es gibt eine Erlauben-Regel, sie nennt das richtige Objekt, und das Objekt sieht vollkommen vernünftig aus."
     }
   },
   "matchLogic": {

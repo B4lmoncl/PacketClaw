@@ -11,10 +11,19 @@ export type Protocol = 'tcp' | 'udp' | 'icmp';
 export interface AddressObject {
   id: string;
   name: string; // z. B. "LAN_NET", "SRV_WEB01"
-  type: 'subnet' | 'range' | 'host';
+  type: 'subnet' | 'range' | 'host' | 'fqdn';
   subnet?: Cidr;
   range?: { from: IPv4; to: IPv4 };
   host?: IPv4;
+  /** FQDN-Objekt, z. B. "portal.vendor.example" */
+  fqdn?: string;
+  /**
+   * Die per DNS aufgelösten Adressen des FQDN — auf einer echten FortiGate der
+   * gecachte Auflösungsstand. LEER ODER FEHLEND heißt: noch nicht aufgelöst,
+   * und dann matcht das Objekt NICHTS. Genau daran scheitern in der Praxis
+   * Regeln, die syntaktisch völlig korrekt aussehen.
+   */
+  resolvedIps?: IPv4[];
 }
 
 /** Verschachtelbar: members referenzieren AddressObject- und AddressGroup-Namen */

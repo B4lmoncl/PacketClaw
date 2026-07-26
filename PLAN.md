@@ -506,3 +506,38 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 253 gruen, Lint 0 Fehler, Build ok, E2E-Smoke spielt einen Fall
   KOMPLETT durch (Ticket → Route-Lookup → Route reparieren → gruen →
   geloest), 0 JS-Fehler.
+- 2026-07-25 (Forts. 23, autonom): FQDN-ADRESSOBJEKTE (#56) — zweiter
+  Schritt aus ROADMAP v1.3, erste ENGINE-Erweiterung seit Phase 1.
+  types.ts: AddressObject bekommt type 'fqdn' mit fqdn + resolvedIps.
+  Kernsemantik: LEERE/FEHLENDE resolvedIps = noch nicht aufgeloest und
+  matcht NICHTS (FortiOS-Verhalten). Das ist die stille Praxisfehlerquelle
+  schlechthin, weil die Regel in der Tabelle voellig korrekt aussieht.
+  resolve.ts: eigener case im addressObjectContainsIp-Switch.
+  WICHTIG — der neue Typ hat einen exhaustiven Switch in analysis.ts
+  aufgedeckt (addressObjectInterval). Entscheidung: FQDN liefert dort
+  bewusst null = UNBEKANNTE MENGE, nicht ein Intervall aus resolvedIps.
+  Begruendung: ein FQDN kann mehrere Adressen haben und der
+  Aufloesungsstand aendert sich jederzeit; die Analysen arbeiten
+  konservativ (bei Unentscheidbarkeit NICHT markieren), sonst wuerde die
+  Shadow-Erkennung Regeln als tot melden, die morgen wieder greifen.
+  Eigener Engine-Test haelt das fest.
+  Anzeige: formatAddress zeigt „host → ip, ip" bzw. „host → —";
+  resolveObjectInfo setzt bei unaufgeloestem FQDN noteKey
+  'fqdnUnresolved' — das Objekt-Popover ist die EINZIGE Stelle, an der es
+  dem Spieler auffallen kann, also erklaert es den Zustand dort im
+  Klartext. Neues isUnresolvedFqdn() als Helfer. filterMatch: FQDN-Objekte
+  sind zusaetzlich ueber den Hostnamen auffindbar. Validator: fqdn
+  pflicht, resolvedIps DARF leer sein (gueltiger Zustand), enthaltene IPs
+  werden geprueft.
+  SPIELBAR gemacht ueber den Config Doctor statt eines neuen Modus (viel
+  billiger, passt exakt): 7. Fehlertyp 'fqdn-unresolved'. In der
+  Bibliothek liegen jetzt zwei FQDN-Objekte — VENDOR_PORTAL (aufgeloest
+  auf 203.0.113.50) und PORTAL_NEW (unaufgeloest); der Fall setzt
+  PORTAL_NEW ins dstaddr, der Fix ist der Wechsel auf das aufgeloeste
+  Objekt. Tests: 258 gruen (Engine-Coverage-Gate haelt: resolve.ts 100 %,
+  analysis.ts 95,31 % Branches), 80 Level valide, Lint 0 Fehler, Build ok.
+  E2E-Smoke: FQDN-Fall wird gefunden, Regel zeigt PORTAL_NEW, Hover-
+  Popover erklaert „matcht nichts, solange das DNS nicht antwortet".
+  Lerneffekt-Notiz: Die Objekt-Chips reagieren auf HOVER (Lock per Klick);
+  Playwright braucht hover() + einen :visible-Selektor, weil Mobil- und
+  Desktop-Variante der Tabelle beide im DOM liegen.

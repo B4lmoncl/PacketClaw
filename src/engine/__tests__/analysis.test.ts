@@ -440,3 +440,45 @@ describe('findOverbroadPolicies', () => {
     });
   });
 });
+
+describe('FQDN-Objekte in den Analysen (konservativ)', () => {
+  const netWithFqdn = baseConfig({
+    addresses: [
+      { id: 'a-1', name: 'LAN_NET', type: 'subnet', subnet: '10.0.1.0/24' },
+      {
+        id: 'a-9',
+        name: 'PORTAL',
+        type: 'fqdn',
+        fqdn: 'portal.example',
+        resolvedIps: ['203.0.113.50'],
+      },
+    ],
+    addressGroups: [],
+    policies: [
+      makePolicy({
+        id: 1,
+        srcintf: ['port1'],
+        dstintf: ['wan1'],
+        srcaddr: ['LAN_NET'],
+        dstaddr: ['PORTAL'],
+        service: ['HTTPS'],
+        action: 'accept',
+      }),
+      makePolicy({
+        id: 2,
+        srcintf: ['port1'],
+        dstintf: ['wan1'],
+        srcaddr: ['LAN_NET'],
+        dstaddr: ['PORTAL'],
+        service: ['HTTPS'],
+        action: 'deny',
+      }),
+    ],
+  });
+
+  it('meldet FQDN-Regeln NICHT als verschattet — die Aufloesung kann sich aendern', () => {
+    // Waeren beide Ziele feste Intervalle, wuerde Regel 2 als shadowed gelten.
+    // Bei FQDN ist die Menge unbekannt, also darf die Analyse nichts behaupten.
+    expect(findShadowedPolicies(netWithFqdn)).toEqual([]);
+  });
+});

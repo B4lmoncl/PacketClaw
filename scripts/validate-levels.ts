@@ -102,6 +102,16 @@ function validateNetwork(id: string, network: LevelFile['network']) {
     if (addr.type === 'host' && (!addr.host || !isValidIPv4(addr.host))) {
       fail(id, `Adressobjekt ${addr.name}: ungültiger Host`);
     }
+    if (addr.type === 'fqdn') {
+      if (!addr.fqdn) fail(id, `Adressobjekt ${addr.name}: fqdn fehlt`);
+      // resolvedIps DARF leer sein (= noch nicht aufgelöst, ein gültiger
+      // Zustand und didaktisch gewollt) — aber was drinsteht, muss stimmen
+      for (const ip of addr.resolvedIps ?? []) {
+        if (!isValidIPv4(ip)) {
+          fail(id, `Adressobjekt ${addr.name}: ungültige aufgelöste IP ${ip}`);
+        }
+      }
+    }
   }
 
   for (const group of network.addressGroups) {

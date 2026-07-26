@@ -35,13 +35,23 @@ export interface ObjectInfo {
   /** Mitglieder (Gruppen/Zonen), rekursiv mit depth eingerückt */
   lines: InfoLine[];
   /** i18n-Suffix für Sonderhinweise: objectInfo.note.<noteKey> */
-  noteKey?: 'allSrc' | 'allDst' | 'allService' | 'anyIface' | 'vip' | 'unknown';
+  noteKey?: 'allSrc' | 'allDst' | 'allService' | 'anyIface' | 'vip' | 'unknown' | 'fqdnUnresolved';
 }
 
 export function formatAddress(obj: AddressObject): string {
   if (obj.type === 'subnet') return obj.subnet ?? '?';
   if (obj.type === 'range') return obj.range ? `${obj.range.from}–${obj.range.to}` : '?';
+  if (obj.type === 'fqdn') {
+    const ips = obj.resolvedIps ?? [];
+    // „—" statt einer leeren Klammer: unaufgeloest ist ein Zustand, kein Fehler
+    return `${obj.fqdn ?? '?'} → ${ips.length > 0 ? ips.join(', ') : '—'}`;
+  }
   return obj.host ?? '?';
+}
+
+/** true, wenn ein FQDN-Objekt noch keine Adresse aufgeloest hat. */
+export function isUnresolvedFqdn(obj: AddressObject): boolean {
+  return obj.type === 'fqdn' && (obj.resolvedIps ?? []).length === 0;
 }
 
 export function formatService(svc: ServiceObject): string {
@@ -155,6 +165,16 @@ export function resolveObjectInfo(
     };
   }
   const addr = config.addresses.find((a) => a.name === name);
-  if (addr) return { name, kindKey: 'address', value: formatAddress(addr), lines: [] };
+  if (addr) {
+    return {
+      name,
+      kindKey: 'address',
+      value: formatAddress(addr),
+      lines: [],
+      // Unaufgeloestes FQDN sieht in der Tabelle vollkommen korrekt aus —
+      // hier ist die einzige Stelle, an der es dem Spieler auffallen kann
+      ...(isUnresolvedFqdn(addr) && { noteKey: 'fqdnUnresolved' as const }),
+    };
+  }
   return { name, kindKey: 'unknown', lines: [], noteKey: 'unknown' };
 }

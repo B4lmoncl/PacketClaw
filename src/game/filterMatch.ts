@@ -96,10 +96,15 @@ export function entryMatchesQuery(
     const vip = resolver.vipByName.get(entry);
     return !!vip && (vip.extIp === query || vip.mappedIp === query);
   }
-  // Objektname: contains = Gruppe enthält das Objekt (rekursiv aufgelöst)
+  // Objektname: contains = Gruppe enthält das Objekt (rekursiv aufgelöst).
+  // FQDN-Objekte findet man zusätzlich über den Hostnamen selbst.
   if (mode === 'exact') return false;
   if (entry === 'all') return true;
-  return resolver.resolveAddressEntry(entry).some((obj) => sameName(obj.name, query));
+  return resolver
+    .resolveAddressEntry(entry)
+    .some(
+      (obj) => sameName(obj.name, query) || (obj.fqdn !== undefined && sameName(obj.fqdn, query)),
+    );
 }
 
 /** Prüft ein ganzes Policy-Feld (Liste von Einträgen) gegen die Anfrage. */

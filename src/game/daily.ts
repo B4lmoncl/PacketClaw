@@ -36,6 +36,22 @@ export const ADDRESSES = [
     type: 'range' as const,
     range: { from: '10.0.1.10', to: '10.0.1.19' },
   },
+  // FQDN-Objekte wie in echten Regelwerken: eines aufgeloest, eines noch nicht.
+  // Das unaufgeloeste matcht NICHTS und sieht in der Tabelle trotzdem korrekt aus.
+  {
+    id: 'VENDOR_PORTAL',
+    name: 'VENDOR_PORTAL',
+    type: 'fqdn' as const,
+    fqdn: 'portal.vendor.example',
+    resolvedIps: ['203.0.113.50'],
+  },
+  {
+    id: 'PORTAL_NEW',
+    name: 'PORTAL_NEW',
+    type: 'fqdn' as const,
+    fqdn: 'portal-neu.vendor.example',
+    resolvedIps: [],
+  },
 ];
 
 export const SERVICES = [

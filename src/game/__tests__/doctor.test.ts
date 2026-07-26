@@ -70,6 +70,25 @@ describe('Config Doctor', () => {
     expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
   });
 
+  it('fqdn-unresolved: die Regel sieht korrekt aus, das FQDN-Objekt loest aber nichts auf', () => {
+    const c = caseFor('fqdn-unresolved');
+    const rule = c.network.policies.find((p) => p.name === 'lan-web-out');
+    // Syntaktisch tadellos: ein benanntes Adressobjekt im Ziel
+    expect(rule?.dstaddr).toEqual(['PORTAL_NEW']);
+    const obj = c.network.addresses.find((a) => a.name === 'PORTAL_NEW');
+    expect(obj?.type).toBe('fqdn');
+    expect(obj?.resolvedIps ?? []).toEqual([]);
+    expect(failingChecks(c.suite, c.network)).toBeGreaterThan(0);
+  });
+
+  it('fqdn-unresolved: auf das aufgeloeste FQDN-Objekt wechseln macht die Suite gruen', () => {
+    const c = caseFor('fqdn-unresolved');
+    const fixed = c.network.policies.map((p) =>
+      p.name === 'lan-web-out' ? { ...p, dstaddr: ['VENDOR_PORTAL'] } : p,
+    );
+    expect(failingChecks(c.suite, withPolicies(c.network, fixed))).toBe(0);
+  });
+
   it('Kontroll-Check beisst: alles auf service ALL oeffnen laesst RDP durch → bleibt rot', () => {
     const c = caseFor('disabled');
     // Regel aktivieren, aber Service viel zu weit auf ALL — RDP-Deny-Kontrolle faellt

@@ -124,6 +124,33 @@ describe('addressObjectContainsIp', () => {
     expect(addressObjectContainsIp({ id: 'x', name: 'B', type: 'range' }, '10.0.0.1')).toBe(false);
     expect(addressObjectContainsIp({ id: 'x', name: 'B', type: 'host' }, '10.0.0.1')).toBe(false);
   });
+
+  it('fqdn: matcht die aufgeloesten Adressen', () => {
+    const fqdn: AddressObject = {
+      id: 'x',
+      name: 'PORTAL',
+      type: 'fqdn',
+      fqdn: 'portal.vendor.example',
+      resolvedIps: ['203.0.113.50', '203.0.113.51'],
+    };
+    expect(addressObjectContainsIp(fqdn, '203.0.113.50')).toBe(true);
+    expect(addressObjectContainsIp(fqdn, '203.0.113.51')).toBe(true);
+    expect(addressObjectContainsIp(fqdn, '203.0.113.52')).toBe(false);
+  });
+
+  it('fqdn: UNAUFGELOEST matcht nichts — der stille Praxisfehler', () => {
+    const pending: AddressObject = {
+      id: 'x',
+      name: 'PORTAL',
+      type: 'fqdn',
+      fqdn: 'portal.vendor.example',
+      resolvedIps: [],
+    };
+    expect(addressObjectContainsIp(pending, '203.0.113.50')).toBe(false);
+    // resolvedIps fehlt komplett: genauso wenig Match, kein Absturz
+    const missing: AddressObject = { id: 'y', name: 'P2', type: 'fqdn', fqdn: 'a.example' };
+    expect(addressObjectContainsIp(missing, '203.0.113.50')).toBe(false);
+  });
 });
 
 describe('serviceObjectMatches', () => {

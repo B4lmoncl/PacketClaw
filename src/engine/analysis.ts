@@ -59,6 +59,13 @@ function addressObjectInterval(obj: AddressObject): Interval | null {
       return obj.range ? [ipToInt(obj.range.from), ipToInt(obj.range.to)] : null;
     case 'host':
       return obj.host ? [ipToInt(obj.host), ipToInt(obj.host)] : null;
+    case 'fqdn':
+      // Ein FQDN ist kein festes Intervall: mehrere Adressen möglich, und der
+      // Auflösungsstand kann sich jederzeit ändern. Die Analysen arbeiten
+      // konservativ (bei Unentscheidbarkeit NICHT markieren), also gilt ein
+      // FQDN-Objekt hier als unbekannte Menge — sonst würde die
+      // Shadow-Erkennung Regeln melden, die morgen wieder greifen.
+      return null;
   }
 }
 

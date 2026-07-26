@@ -25,7 +25,13 @@ import {
 } from './daily';
 
 export type DoctorBug =
-  'nat-missing' | 'disabled' | 'order' | 'wrong-service' | 'wrong-srcaddr' | 'wrong-dstintf';
+  | 'nat-missing'
+  | 'disabled'
+  | 'order'
+  | 'wrong-service'
+  | 'wrong-srcaddr'
+  | 'wrong-dstintf'
+  | 'fqdn-unresolved';
 export const DOCTOR_BUGS: DoctorBug[] = [
   'nat-missing',
   'disabled',
@@ -33,6 +39,7 @@ export const DOCTOR_BUGS: DoctorBug[] = [
   'wrong-service',
   'wrong-srcaddr',
   'wrong-dstintf',
+  'fqdn-unresolved',
 ];
 
 /** Welches Konzept der Fall trainiert (für Debrief/Anzeige). */
@@ -43,6 +50,7 @@ export const BUG_CONCEPT: Record<DoctorBug, string> = {
   'wrong-service': 'service',
   'wrong-srcaddr': 'address',
   'wrong-dstintf': 'interface',
+  'fqdn-unresolved': 'fqdn',
 };
 
 export interface DoctorCase {
@@ -59,7 +67,12 @@ export function generateDoctorCase(seed: string): DoctorCase {
   const rng = createRng(`aethergate-doctor-${seed}`);
   const bug = rng.pick(DOCTOR_BUGS);
   const srcIp = rng.pick(['10.0.1.5', '10.0.1.10', '10.0.1.200']);
-  const dstIp = rng.pick(['203.0.113.50', '9.9.9.9', '198.51.100.20']);
+  // Beim FQDN-Fall muss das Ziel die aufgeloeste Adresse von VENDOR_PORTAL sein,
+  // sonst gibt es kein sinnvolles „richtiges Objekt" als Fix.
+  const dstIp =
+    bug === 'fqdn-unresolved'
+      ? '203.0.113.50'
+      : rng.pick(['203.0.113.50', '9.9.9.9', '198.51.100.20']);
   const port = rng.next() < 0.5 ? 443 : 80;
 
   // Gesunde Egress-Regel: LAN darf Web ins Internet (mit SNAT)
@@ -89,6 +102,10 @@ export function generateDoctorCase(seed: string): DoctorCase {
   } else if (bug === 'wrong-srcaddr') {
     // Quelle deckt das LAN nicht ab → Pakete matchen nie
     policies = [{ ...allow, srcaddr: [rng.pick(['DMZ_NET', 'GUEST_NET'])] }, denyRest];
+  } else if (bug === 'fqdn-unresolved') {
+    // Die Regel referenziert ein FQDN-Objekt, das noch nichts aufgeloest hat.
+    // Sie sieht in der Tabelle vollkommen korrekt aus und matcht trotzdem nie.
+    policies = [{ ...allow, dstaddr: ['PORTAL_NEW'] }, denyRest];
   } else if (bug === 'wrong-dstintf') {
     // Ziel-Interface passt nicht zur Route ins Internet
     policies = [{ ...allow, dstintf: [rng.pick(['port2', 'vlan20'])] }, denyRest];
