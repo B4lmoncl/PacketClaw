@@ -44,7 +44,9 @@
     "targetTime": "Target time {{seconds}} s",
     "packetOf": "Packet {{current}} / {{total}}",
     "start": "Start",
-    "timeUsed": "⏱ took {{seconds}}s · target {{target}}s"
+    "timeUsed": "⏱ took {{seconds}}s · target {{target}}s",
+    "youAreHere": "you are here",
+    "perfect": "perfect"
   },
   "verdict": {
     "question1": "What happens to this packet?",

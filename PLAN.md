@@ -627,10 +627,10 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   damit beide Spiele dieselbe Bildsprache sprechen.
   Statt EINEM .glass fuer alles gibt es vier Materialien, und die Oberflaeche
   traegt die Bedeutung:
-    .panel-hero    farbige Oberkante in Markenfarbe → die EINE Hauptaktion
-    .panel-action  erhaben, Innen-Highlight, Hover-Lift → Navigation/Modi
-    .panel-inset   vertieft, Innenschatten, kein Hover → Status/Anzeigen
-    .panel-reward  Rarity-Rahmen + Glow → Belohnungen/Abzeichen
+  .panel-hero farbige Oberkante in Markenfarbe → die EINE Hauptaktion
+  .panel-action erhaben, Innen-Highlight, Hover-Lift → Navigation/Modi
+  .panel-inset vertieft, Innenschatten, kein Hover → Status/Anzeigen
+  .panel-reward Rarity-Rahmen + Glow → Belohnungen/Abzeichen
   Dazu .rarity-common/uncommon/rare/epic/legendary (setzen --rarity und
   --rarity-glow) und .medallion (runde Plakette mit Rarity-Ring statt
   Emoji-Zeile); legendaere Plaketten bekommen einen wandernden Schimmer
@@ -642,4 +642,20 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Verifiziert per DOM-Zaehlung: 8x panel-action, 5x panel-inset, 5x
   panel-reward, 3 Medaillons, drei verschiedene Rarity-Stufen gleichzeitig
   sichtbar; 0 verbleibende .glass-Nutzungen im HomeScreen.
+  Tests: 291 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-25 (Forts. 29): CHAPTERSCREEN ALS FORTSCHRITTSPFAD. Die
+  Levelauswahl war ein flaches Raster gleich aussehender Knoepfe — man sah
+  nicht, wo man steht. Jetzt tragen die Karten ihren Zustand ueber die neuen
+  Materialien: 3 Sterne = panel-reward rarity-legendary (goldene Kante),
+  teilweise geschafft = rarity-uncommon (gruen), das naechste offene Level =
+  panel-hero mit „du bist hier"-Marke, gesperrt = panel-inset. Dazu eine
+  Kapitel-Schiene, die pro Kapitel den Stand zeigt (✓ bei komplett, sonst
+  n/10) statt nur der Nummer, und ein Kapitel-Kopf mit Fortschrittsbalken
+  und Sternestand.
+  STOLPERSTEIN dokumentiert: die „du bist hier"-Marke war zuerst als
+  ueberstehendes Badge (absolute -top-2) gebaut und wurde ABGESCHNITTEN —
+  Ursache ist `cv-auto` (content-visibility: auto) auf den Level-Karten,
+  dessen Containment absolut positionierte Kinder clippt. Loesung: Marke
+  inline in die Kopfzeile. Wer dort kuenftig etwas ueberstehen lassen will,
+  muss cv-auto auf der Karte entfernen.
   Tests: 291 gruen, Lint 0 Fehler, Build ok.

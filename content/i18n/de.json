@@ -44,7 +44,9 @@
     "targetTime": "Zielzeit {{seconds}} s",
     "packetOf": "Paket {{current}} / {{total}}",
     "start": "Start",
-    "timeUsed": "⏱ {{seconds}}s gebraucht · Ziel {{target}}s"
+    "timeUsed": "⏱ {{seconds}}s gebraucht · Ziel {{target}}s",
+    "youAreHere": "du bist hier",
+    "perfect": "perfekt"
   },
   "verdict": {
     "question1": "Was passiert mit diesem Paket?",
