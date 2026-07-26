@@ -299,3 +299,69 @@ export function buildShareText(date: string, results: boolean[]): string {
   const grid = results.map((r) => (r ? '🟩' : '🟥')).join('');
   return `AetherGate Daily ${date} · ${correct}/${results.length} · 🛡️${grid}`;
 }
+
+// ---------------------------------------------------------------------------
+// Historie
+// ---------------------------------------------------------------------------
+
+export interface DailyDay {
+  date: string;
+  /** Anzahl richtig, oder null wenn an dem Tag nicht gespielt wurde */
+  correct: number | null;
+  total: number;
+  /** heute — für die Hervorhebung */
+  isToday: boolean;
+}
+
+/** Ein Tag zurück, in derselben Kalender-Arithmetik wie todayString(). */
+function dayBefore(date: string): string {
+  const [y, m, d] = date.split('-').map(Number);
+  const dt = new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+  dt.setDate(dt.getDate() - 1);
+  return todayString(dt);
+}
+
+/**
+ * Die letzten `days` Tage als Streifen — LÜCKEN INKLUSIVE.
+ *
+ * Ausgelassene Tage müssen sichtbar sein. Eine Liste, die nur die gespielten
+ * Tage zeigt, sieht immer nach einer lückenlosen Serie aus; erst der Streifen
+ * mit Löchern sagt die Wahrheit. Neuester Tag zuletzt, damit sich der Streifen
+ * wie ein Kalender liest.
+ */
+export function dailyStrip(
+  history: Record<string, boolean[]>,
+  days = 14,
+  today = todayString(),
+): DailyDay[] {
+  const out: DailyDay[] = [];
+  let cursor = today;
+  for (let i = 0; i < Math.max(1, days); i++) {
+    const results = history[cursor];
+    out.push({
+      date: cursor,
+      correct: results ? results.filter(Boolean).length : null,
+      total: results?.length ?? 0,
+      isToday: cursor === today,
+    });
+    cursor = dayBefore(cursor);
+  }
+  return out.reverse();
+}
+
+/**
+ * Wie viele Tage in Folge wurde der Daily gespielt, heute eingeschlossen?
+ *
+ * Zählt ab heute rückwärts und bricht beim ersten Loch ab. Wurde heute noch
+ * nicht gespielt, zählt ab gestern — sonst stünde die Serie bis zum ersten Lauf
+ * des Tages fälschlich auf 0, obwohl sie noch intakt ist.
+ */
+export function dailyPlayStreak(history: Record<string, boolean[]>, today = todayString()): number {
+  let cursor = history[today] ? today : dayBefore(today);
+  let count = 0;
+  while (history[cursor]) {
+    count += 1;
+    cursor = dayBefore(cursor);
+  }
+  return count;
+}

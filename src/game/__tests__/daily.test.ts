@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evaluate } from '../../engine';
-import { buildShareText, generateDaily, todayString } from '../daily';
+import { dailyPlayStreak, dailyStrip, buildShareText, generateDaily, todayString } from '../daily';
 
 describe('generateDaily', () => {
   it('gleiches Datum → identischer Run (deterministisch)', () => {
@@ -82,5 +82,69 @@ describe('buildShareText', () => {
   it('baut den Share-Text im vereinbarten Format', () => {
     const text = buildShareText('2026-07-10', [true, true, false, true]);
     expect(text).toBe('AetherGate Daily 2026-07-10 · 3/4 · 🛡️🟩🟩🟥🟩');
+  });
+});
+
+describe('Daily-Historie', () => {
+  const H = (entries: Record<string, number>): Record<string, boolean[]> =>
+    Object.fromEntries(
+      Object.entries(entries).map(([d, correct]) => [
+        d,
+        Array.from({ length: 10 }, (_, i) => i < correct),
+      ]),
+    );
+
+  it('der Streifen ist so lang wie verlangt und endet heute', () => {
+    const strip = dailyStrip({}, 14, '2026-07-26');
+    expect(strip).toHaveLength(14);
+    expect(strip[13]).toMatchObject({ date: '2026-07-26', isToday: true, correct: null });
+    expect(strip[0]?.date).toBe('2026-07-13');
+  });
+
+  /**
+   * DAS ist der Punkt des Streifens: ausgelassene Tage muessen sichtbar sein.
+   * Eine Liste nur der gespielten Tage sieht immer nach einer lueckenlosen
+   * Serie aus.
+   */
+  it('Luecken bleiben als Luecken erhalten', () => {
+    const strip = dailyStrip(H({ '2026-07-26': 9, '2026-07-24': 7 }), 4, '2026-07-26');
+    expect(strip.map((d) => d.correct)).toEqual([null, 7, null, 9]);
+  });
+
+  it('ueberquert Monats- und Jahresgrenzen korrekt', () => {
+    expect(dailyStrip({}, 3, '2026-03-01').map((d) => d.date)).toEqual([
+      '2026-02-27',
+      '2026-02-28',
+      '2026-03-01',
+    ]);
+    expect(dailyStrip({}, 2, '2026-01-01').map((d) => d.date)).toEqual([
+      '2025-12-31',
+      '2026-01-01',
+    ]);
+  });
+
+  it('mindestens ein Tag, auch bei unsinniger Laenge', () => {
+    expect(dailyStrip({}, 0, '2026-07-26')).toHaveLength(1);
+    expect(dailyStrip({}, -5, '2026-07-26')).toHaveLength(1);
+  });
+
+  it('die Spielserie zaehlt ab heute rueckwaerts bis zum ersten Loch', () => {
+    const history = H({ '2026-07-26': 9, '2026-07-25': 8, '2026-07-24': 10, '2026-07-22': 5 });
+    expect(dailyPlayStreak(history, '2026-07-26')).toBe(3);
+  });
+
+  /**
+   * Wichtig fuers Gefuehl: wer heute noch nicht gespielt hat, hat die Serie
+   * nicht verloren. Sie steht bis zum ersten Lauf des Tages auf dem Stand von
+   * gestern, nicht auf 0.
+   */
+  it('heute noch nicht gespielt ⇒ Serie zaehlt ab gestern', () => {
+    const history = H({ '2026-07-25': 8, '2026-07-24': 10 });
+    expect(dailyPlayStreak(history, '2026-07-26')).toBe(2);
+  });
+
+  it('gestern und heute fehlen ⇒ Serie ist 0', () => {
+    expect(dailyPlayStreak(H({ '2026-07-20': 9 }), '2026-07-26')).toBe(0);
+    expect(dailyPlayStreak({}, '2026-07-26')).toBe(0);
   });
 });

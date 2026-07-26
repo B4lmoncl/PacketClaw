@@ -215,7 +215,10 @@
     "share": "Copy result",
     "copied": "Copied!",
     "best": "Best: {{best}}/10",
-    "history": "History"
+    "history": "History",
+    "flawless": "Ten out of ten. The ruleset had no questions left and you needed no excuses.",
+    "playStreak": "{{count}} day(s) in a row",
+    "missed": "not played"
   },
   "sandbox": {
     "packetForm": "Test packet",

@@ -5,7 +5,15 @@
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { buildShareText, generateDaily, todayString } from '../../game/daily';
+import {
+  buildShareText,
+  dailyPlayStreak,
+  dailyStrip,
+  generateDaily,
+  todayString,
+} from '../../game/daily';
+import { ParticleBurst } from '../components/ParticleBurst';
+import { XpGain } from '../components/XpGain';
 import type { VerdictLevel } from '../../game/levels';
 import { useGame } from '../../game/store';
 import { VerdictScreen } from './VerdictScreen';
@@ -47,24 +55,60 @@ export function DailyScreen() {
   if (results) {
     const correct = results.filter(Boolean).length;
     const shareText = buildShareText(date, results);
-    const history = Object.entries(dailyHistory).sort(([a], [b]) => b.localeCompare(a));
+    const history = Object.entries(dailyHistory);
     const best = history.reduce(
       (max, [, r]) => Math.max(max, r.filter(Boolean).length),
       justFinished ? correct : 0,
     );
+    /**
+     * Die Stufe folgt dem Ergebnis. Ein 10/10 muss anders AUSSEHEN als ein
+     * 5/10 — vorher war beides derselbe graue Rahmen, und damit war der
+     * perfekte Lauf ein Ergebnis ohne Moment.
+     */
+    const share = correct / results.length;
+    const rarity =
+      correct === results.length
+        ? 'rarity-legendary'
+        : share >= 0.8
+          ? 'rarity-epic'
+          : share >= 0.6
+            ? 'rarity-rare'
+            : 'rarity-common';
+    // Der Streifen enthaelt heute schon; bei einem frischen Lauf steht das
+    // Ergebnis aber noch nicht im Save, also hier nachtragen
+    const strip = dailyStrip(
+      justFinished ? { ...dailyHistory, [date]: justFinished } : dailyHistory,
+      14,
+      date,
+    );
+    const playStreak = dailyPlayStreak(
+      justFinished ? { ...dailyHistory, [date]: justFinished } : dailyHistory,
+      date,
+    );
+
     return (
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pt-6 lg:max-w-lg">
-        <section className="flex flex-col items-center gap-3 rounded-panel border border-claw/50 bg-panel px-6 py-6 text-center">
-          <div className="font-display text-xl font-bold text-claw">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-4 px-4 pb-12 pt-6 lg:max-w-lg">
+        <section
+          className={`panel-reward ${rarity} relative flex flex-col items-center gap-3 rounded-panel px-6 py-6 text-center`}
+        >
+          {/* Nur bei einem guten Lauf — sonst waere der Jubel unglaubwuerdig */}
+          {share >= 0.8 && <ParticleBurst variant="celebration" />}
+          <div className="font-display text-xl font-bold text-rarity">
             {t('daily.result', { date })}
           </div>
-          <div className="font-mono text-3xl font-bold text-ink">
+          <div className="font-display text-4xl font-bold text-ink">
             {correct}
             <span className="text-dim">/{results.length}</span>
           </div>
           <div className="font-mono text-lg tracking-wider" aria-hidden>
             {results.map((r) => (r ? '🟩' : '🟥')).join('')}
           </div>
+          {correct === results.length && (
+            <div className="font-mono text-[11px] leading-relaxed text-trace">
+              {t('daily.flawless')}
+            </div>
+          )}
+          {justFinished && <XpGain gained={correct * 40} />}
           <button
             onClick={() => {
               void navigator.clipboard.writeText(shareText).then(() => setCopied(true));
@@ -76,23 +120,63 @@ export function DailyScreen() {
           <div className="font-mono text-xs text-dim">{t('daily.best', { best })}</div>
         </section>
 
-        {history.length > 0 && (
-          <section className="rounded-panel border border-line bg-panel px-4 py-3">
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-dim">
+        {/*
+          Der Streifen statt einer Liste. Ausgelassene Tage bleiben als Loecher
+          sichtbar — eine Liste nur der gespielten Tage sieht immer nach einer
+          lueckenlosen Serie aus und waere damit eine Schmeichelei.
+        */}
+        <section className="panel-inset rounded-panel px-4 py-3">
+          <div className="mb-2 flex items-baseline justify-between gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-dim">
               {t('daily.history')}
-            </div>
-            <ul className="space-y-1 font-mono text-xs">
-              {history.slice(0, 14).map(([day, dayResults]) => (
-                <li key={day} className="flex justify-between">
-                  <span className="text-dim">{day}</span>
-                  <span>
-                    {dayResults.filter(Boolean).length}/{dayResults.length}
+            </span>
+            {playStreak > 0 && (
+              <span className="font-mono text-[11px] text-warn">
+                🔥 {t('daily.playStreak', { count: playStreak })}
+              </span>
+            )}
+          </div>
+          <ol className="flex items-end gap-1">
+            {strip.map((day) => {
+              const ratio = day.correct !== null && day.total > 0 ? day.correct / day.total : 0;
+              const tone =
+                day.correct === null
+                  ? 'bg-bg/70'
+                  : ratio === 1
+                    ? 'bg-trace'
+                    : ratio >= 0.6
+                      ? 'bg-warn'
+                      : 'bg-deny';
+              return (
+                <li
+                  key={day.date}
+                  className="flex flex-1 flex-col items-center gap-1"
+                  title={
+                    day.correct === null
+                      ? `${day.date} — ${t('daily.missed')}`
+                      : `${day.date} — ${day.correct}/${day.total}`
+                  }
+                >
+                  <div className="flex h-10 w-full items-end justify-center rounded-sm bg-bg/40">
+                    <div
+                      className={`w-full rounded-sm ${tone} transition-[height] duration-500`}
+                      style={{
+                        height: day.correct === null ? '3px' : `${Math.max(12, ratio * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={`font-mono text-[9px] tabular-nums ${
+                      day.isToday ? 'font-bold text-aura' : 'text-dim/60'
+                    }`}
+                  >
+                    {day.date.slice(8)}
                   </span>
                 </li>
-              ))}
-            </ul>
-          </section>
-        )}
+              );
+            })}
+          </ol>
+        </section>
 
         <button
           onClick={() => navigate({ name: 'home' })}

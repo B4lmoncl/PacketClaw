@@ -1022,3 +1022,21 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   freshUnlocks nie widersprechen.
   Tests: 430 gruen, Lint 0 Fehler, Build ok, E2E: die alte Falschmeldung ist weg,
   stattdessen steht dort die naechste echte Freischaltung.
+- 2026-07-26 (Forts. 46): DAILY-ERGEBNIS AUFGEWERTET. Der Daily Run ist der EINE
+  Modus, der taeglich gespielt werden soll — und sein Ergebnisschirm war der
+  einzige im Spiel, der noch NICHT am Material-System haengt: nackter
+  border-claw-Rahmen, kein XP, keine Feier, und die Historie eine
+  Textliste. Ein 10/10 sah damit genauso aus wie ein 5/10.
+  - Die Stufe folgt jetzt dem Ergebnis: 10/10 legendary, ab 80 % epic, ab 60 %
+    rare, sonst common. Partikel nur ab 80 % — sonst waere der Jubel
+    unglaubwuerdig. XpGain bei einem frischen Lauf, Extra-Zeile beim perfekten.
+  - NEU dailyStrip() und dailyPlayStreak() (pure, 7 Tests) + Balkenstreifen
+    ueber 14 Tage statt Liste. Ausgelassene Tage bleiben als LOECHER sichtbar:
+    eine Liste nur der gespielten Tage sieht immer nach einer lueckenlosen Serie
+    aus und waere damit eine Schmeichelei. Heute ist hervorgehoben.
+  - dailyPlayStreak zaehlt ab gestern, wenn heute noch nicht gespielt wurde —
+    sonst stuende die Serie bis zum ersten Lauf des Tages faelschlich auf 0,
+    obwohl sie intakt ist. Eigener Test, ebenso fuer Monats- und Jahresgrenzen.
+    Tests: 437 gruen, Lint 0 Fehler, Build ok, E2E: perfekter Lauf zeigt
+    legendary-Rahmen, Flawless-Zeile und Serie, Streifen mit echten Luecken,
+    0 Konsolenfehler.

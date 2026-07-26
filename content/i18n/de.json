@@ -215,7 +215,10 @@
     "share": "Ergebnis kopieren",
     "copied": "Kopiert!",
     "best": "Bestwert: {{best}}/10",
-    "history": "Historie"
+    "history": "Historie",
+    "flawless": "Zehn von zehn. Das Regelwerk hatte keine Fragen offen und du keine Ausreden nötig.",
+    "playStreak": "{{count}} Tag(e) in Folge",
+    "missed": "nicht gespielt"
   },
   "sandbox": {
     "packetForm": "Testpaket",
