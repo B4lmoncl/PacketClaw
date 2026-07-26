@@ -1,13 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
 import { nearestAchievements, rankFor } from '../../game/progression';
 import { CHEST_EVERY, chestsEarned, dailyGoal } from '../../game/rewards';
-import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor } from '../../game/unlocks';
-import { useGame } from '../../game/store';
+import {
+  ALL_DONE_BONUS_XP,
+  allQuestsDone,
+  QUEST_POOL,
+  questProgress,
+  weekMilestone,
+} from '../../game/dailyQuests';
+import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor, UNLOCKS } from '../../game/unlocks';
+import { readQuestCounters, useGame } from '../../game/store';
 import type { Screen } from '../../game/store';
 import { DailyGoalRing } from '../components/DailyGoalRing';
+import { DailyQuests } from '../components/DailyQuests';
 import { Mascot } from '../components/Mascot';
 import { NextBadges } from '../components/NextBadges';
 import { RewardOverlay } from '../components/RewardOverlay';
@@ -100,6 +108,13 @@ export function HomeScreen() {
   const seenUnlocks = useGame((s) => s.seenUnlocks);
   const stats = useGame((s) => s.stats);
   const achievements = useGame((s) => s.achievements);
+  const questDay = useGame((s) => s.questDay);
+  const ensureQuestDay = useGame((s) => s.ensureQuestDay);
+  const claimQuest = useGame((s) => s.claimQuest);
+  const doctorSolved = useGame((s) => s.doctorSolved);
+  const routingSolved = useGame((s) => s.routingSolved);
+  const designSolved = useGame((s) => s.designSolved);
+  const dnatSolved = useGame((s) => s.dnatSolved);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
 
@@ -116,12 +131,56 @@ export function HomeScreen() {
   const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
   const upcoming = nextUnlock(campaign.completed, xp);
   const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
+
+  // Tagesauftraege: nur aus offenen Modi ziehen, sonst waere der Tag unschaffbar
+  const unlockedModes = UNLOCKS.filter((u) => isUnlocked(u.key, campaign.completed, xp)).map(
+    (u) => u.key,
+  );
+  useEffect(() => {
+    ensureQuestDay(today, unlockedModes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today, unlockedModes.join(',')]);
+
+  const questTemplates = questDay.ids
+    .map((id) => QUEST_POOL.find((q) => q.id === id))
+    .filter((q): q is (typeof QUEST_POOL)[number] => q !== undefined);
+  const quests =
+    questDay.date === today
+      ? questProgress(
+          questTemplates,
+          questDay.snapshot,
+          readQuestCounters({
+            tasksSolved,
+            stars,
+            stats,
+            doctorSolved,
+            routingSolved,
+            designSolved,
+            dnatSolved,
+          }),
+          questDay.claimed,
+        )
+      : [];
+  const week = weekMilestone(streak.current);
   // Frisch freigeschaltete Modi feiern, sobald der Spieler wieder hier landet
   const fresh = freshUnlocks(campaign.completed, xp, seenUnlocks);
 
   function claimChest() {
     const got = openNextChest();
     if (got) setReward({ kind: 'chest', xp: got.xp, rarity: got.rarity as 'common' });
+  }
+
+  function claimQuestReward(p: (typeof quests)[number]) {
+    const got = claimQuest(p.quest.id, p.quest.xp);
+    if (got === null) return;
+    // Waren das die letzten offenen? Dann gibt es den Tagesbonus obendrauf
+    const after = quests.map((q) => (q.quest.id === p.quest.id ? { ...q, claimed: true } : q));
+    if (allQuestsDone(after) && after.every((q) => q.claimed)) {
+      claimQuest('__all__', ALL_DONE_BONUS_XP);
+      setReward({ kind: 'chest', xp: got + ALL_DONE_BONUS_XP, rarity: 'epic' });
+    } else {
+      setReward({ kind: 'chest', xp: got, rarity: 'common' });
+    }
   }
 
   function celebrateUnlock() {
@@ -267,6 +326,12 @@ export function HomeScreen() {
             )}
           </div>
 
+          <DailyQuests
+            progress={quests}
+            week={week}
+            streak={streak.current}
+            onClaim={claimQuestReward}
+          />
           <NextBadges items={nearBadges} />
         </aside>
 

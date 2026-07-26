@@ -6,6 +6,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { todayString } from './daily';
+import { pickQuests } from './dailyQuests';
+import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
 import { getLevel, levelsForChapter } from './levels';
 import {
@@ -79,6 +81,17 @@ interface GameState {
   chestsOpened: number;
   /** Freischaltungen, die der Spieler schon gefeiert bekommen hat */
   seenUnlocks: string[];
+  /**
+   * Tagesauftraege. Einmal pro Tag gezogen und dann STABIL — sonst wuerden
+   * sie sich mitten am Tag aendern, wenn ein Modus freigeschaltet wird.
+   * snapshot = Zaehlerstand bei Tagesbeginn, alles darueber ist von heute.
+   */
+  questDay: {
+    date: string;
+    ids: string[];
+    snapshot: QuestCounters;
+    claimed: string[];
+  };
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -105,6 +118,10 @@ interface GameState {
   addTaskXp(score: number, date: string): void;
   openNextChest(): { xp: number; rarity: string } | null;
   markUnlocksSeen(keys: string[]): void;
+  /** Legt die Auftraege des Tages an bzw. rollt auf einen neuen Tag um */
+  ensureQuestDay(date: string, unlockedModes: string[]): void;
+  /** Erfuellten Auftrag einloesen; gibt die XP zurueck oder null */
+  claimQuest(id: string, xp: number): number | null;
   bumpStats(increments: Partial<Stats>, maxima?: Partial<Stats>): void;
   setOnboarded(): void;
   clearUnlocked(): void;
@@ -119,6 +136,41 @@ interface GameState {
  * Truhen-Zähler, Achievements. Zentral, damit wirklich jeder Modus den
  * Belohnungs-Loop füttert und nicht nur die, an die man gerade gedacht hat.
  */
+
+/** Nulllinie fuer Tagesauftraege, wenn noch nichts gespielt wurde. */
+const EMPTY_QUEST_COUNTERS: QuestCounters = {
+  tasksSolved: 0,
+  starsTotal: 0,
+  implicitDenyCorrect: 0,
+  doctorSolved: 0,
+  routingSolved: 0,
+  designSolved: 0,
+  dnatSolved: 0,
+  dailiesPlayed: 0,
+};
+
+/** Liest die auftragsrelevanten Zaehler aus dem Zustand. */
+export function readQuestCounters(state: {
+  tasksSolved: number;
+  stars: Record<string, number>;
+  stats: Stats;
+  doctorSolved: number;
+  routingSolved: number;
+  designSolved: number;
+  dnatSolved: number;
+}): QuestCounters {
+  return {
+    tasksSolved: state.tasksSolved,
+    starsTotal: Object.values(state.stars).reduce((sum, n) => sum + Math.min(3, n), 0),
+    implicitDenyCorrect: state.stats.implicitDenyCorrect,
+    doctorSolved: state.doctorSolved,
+    routingSolved: state.routingSolved,
+    designSolved: state.designSolved,
+    dnatSolved: state.dnatSolved,
+    dailiesPlayed: state.stats.dailiesPlayed,
+  };
+}
+
 function rewardPatch(state: GameState, score: number, date = todayString()) {
   const xp = state.xp + score;
   const sameDay = state.dailyXp.date === date;
@@ -154,6 +206,7 @@ export const useGame = create<GameState>()(
       tasksSolved: 0,
       chestsOpened: 0,
       seenUnlocks: [],
+      questDay: { date: '', ids: [], snapshot: EMPTY_QUEST_COUNTERS, claimed: [] },
       stats: { ...EMPTY_STATS },
       achievements: [],
       streak: { ...EMPTY_STREAK },
@@ -298,6 +351,30 @@ export const useGame = create<GameState>()(
           seenUnlocks: [...new Set([...state.seenUnlocks, ...keys])],
         })),
 
+      ensureQuestDay: (date, unlockedModes) =>
+        set((state) => {
+          if (state.questDay.date === date && state.questDay.ids.length > 0) return state;
+          // Neuer Tag: Auftraege ziehen und den Zaehlerstand als Nulllinie merken
+          return {
+            questDay: {
+              date,
+              ids: pickQuests(date, unlockedModes).map((q) => q.id),
+              snapshot: readQuestCounters(state),
+              claimed: [],
+            },
+          };
+        }),
+
+      claimQuest: (id, xp) => {
+        const state = get();
+        if (state.questDay.claimed.includes(id)) return null;
+        set({
+          xp: state.xp + xp,
+          questDay: { ...state.questDay, claimed: [...state.questDay.claimed, id] },
+        });
+        return xp;
+      },
+
       recordDoctor: (score) =>
         set((state) => ({
           ...rewardPatch(state, score),
@@ -354,6 +431,7 @@ export const useGame = create<GameState>()(
           tasksSolved,
           chestsOpened,
           seenUnlocks,
+          questDay,
           stats,
           achievements,
           streak,
@@ -378,6 +456,7 @@ export const useGame = create<GameState>()(
             tasksSolved,
             chestsOpened,
             seenUnlocks,
+            questDay,
             stats,
             achievements,
             streak,
@@ -427,6 +506,7 @@ export const useGame = create<GameState>()(
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
         seenUnlocks: state.seenUnlocks,
+        questDay: state.questDay,
         stats: state.stats,
         achievements: state.achievements,
         streak: state.streak,
@@ -462,6 +542,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   tasksSolved: number;
   chestsOpened: number;
   seenUnlocks: string[];
+  questDay: { date: string; ids: string[]; snapshot: QuestCounters; claimed: string[] };
   stats: Stats;
   achievements: string[];
   streak: StreakState;
@@ -490,6 +571,13 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
     chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,
     seenUnlocks: Array.isArray(save.seenUnlocks) ? (save.seenUnlocks as string[]) : [],
+    questDay: {
+      date: '',
+      ids: [],
+      snapshot: EMPTY_QUEST_COUNTERS,
+      claimed: [],
+      ...((save.questDay as Record<string, unknown> | null) ?? {}),
+    } as GameState['questDay'],
     stats: { ...EMPTY_STATS, ...((save.stats as Partial<Stats> | null) ?? {}) },
     achievements: Array.isArray(save.achievements) ? (save.achievements as string[]) : [],
     streak: { ...EMPTY_STREAK, ...((save.streak as Partial<StreakState> | null) ?? {}) },

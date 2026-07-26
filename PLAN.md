@@ -659,3 +659,29 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   inline in die Kopfzeile. Wer dort kuenftig etwas ueberstehen lassen will,
   muss cv-auto auf der Karte entfernen.
   Tests: 291 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-25 (Forts. 30, Retention-Auftrag): TAGESAUFTRAEGE (#60). Recherche
+  zuerst: Tagesauftraege sind laut Analysen der staerkste Einzelhebel fuers
+  taegliche Spielen (+40 % Engagement), muessen aber in EINER Sitzung
+  schaffbar sein; 7-Tage-Streak mit steigender Belohnung bringt ~25 % mehr
+  taeglich Aktive. Wir hatten nur EINEN Daily Run — keine Tages-To-do-Liste.
+  NEU src/game/dailyQuests.ts (pure, 16 Tests): drei Auftraege pro Tag,
+  deterministisch aus dem Datum. Drei Entwurfsentscheidungen, alle getestet:
+  (1) NUR aus freigeschalteten Modi ziehen — ein „reparier ein Regelwerk"
+  bei gesperrtem Doctor waere eine Sackgasse; (2) einmal gezogen, dann im
+  Save STABIL, sonst wechseln die Auftraege mitten am Tag, wenn ein Modus
+  aufgeht, und der Fortschritt ist weg; (3) nur KUMULATIVE Zaehler im Pool,
+  weil Fortschritt = heutiger Stand minus Tagesbeginn-Snapshot — Maxima wie
+  „bester Combo" lassen sich so nicht messen und sind bewusst draussen.
+  Dazu keine zwei Auftraege auf dieselbe Metrik, Ziele klein (1-3 Einheiten),
+  Bonus wenn alle drei erfuellt sind, und ein Wochenmeilenstein
+  (WEEK_REWARDS 60→500 ueber sieben Tage, Zyklus danach neu).
+  Store: questDay {date, ids, snapshot, claimed} + ensureQuestDay() (rollt
+  den Tag um und setzt die Nulllinie) + claimQuest(); readQuestCounters()
+  liest die relevanten Zaehler aus dem Zustand.
+  UI: DailyQuests-Panel in der Sidebar im Belohnungs-Material — erfuellte
+  Auftraege stehen legendaer gerahmt mit Abhol-Knopf da (das Einloesen ist
+  Teil der Belohnung, deshalb nichts automatisch verbuchen), offene vertieft
+  mit Balken. Wochenmeilenstein als sieben Punkte, damit man den siebten Tag
+  SIEHT. Texte im Lyra-Kanon.
+  Tests: 307 gruen, Lint 0 Fehler, Build ok, E2E: 2/3 erfuellt → zwei
+  Abhol-Knoepfe, Abholen oeffnet die Belohnung und der Knopf verschwindet.

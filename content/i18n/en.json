@@ -608,5 +608,22 @@
   "badges": {
     "nextTitle": "Almost there",
     "toGo": "{{count}} to go"
+  },
+  "quests": {
+    "title": "Today",
+    "week": "Day {{day}} of seven",
+    "allDone": "All three done. The shift log will record this as unremarkable, which is the highest praise it gives.",
+    "desc": {
+      "tasks3": "Solve 3 tasks",
+      "tasks6": "Solve 6 tasks",
+      "stars3": "Earn 3 stars",
+      "deny3": "Catch the implicit deny 3 times",
+      "daily1": "Run the daily set",
+      "doctor1": "Repair one ruleset",
+      "doctor2": "Repair two rulesets",
+      "routing1": "Put one routing table back on course",
+      "design1": "Get one change request approved",
+      "dnat1": "Publish one server"
+    }
   }
 }

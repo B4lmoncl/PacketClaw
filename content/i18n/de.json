@@ -608,5 +608,22 @@
   "badges": {
     "nextTitle": "Kurz davor",
     "toGo": "noch {{count}}"
+  },
+  "quests": {
+    "title": "Heute",
+    "week": "Tag {{day}} von sieben",
+    "allDone": "Alle drei erledigt. Das Schichtbuch verbucht das als unauffällig, was dort das höchste Lob ist.",
+    "desc": {
+      "tasks3": "Löse 3 Aufgaben",
+      "tasks6": "Löse 6 Aufgaben",
+      "stars3": "Hol 3 Sterne",
+      "deny3": "Erkenne 3× das Implicit Deny",
+      "daily1": "Spiel den Tagessatz",
+      "doctor1": "Reparier ein Regelwerk",
+      "doctor2": "Reparier zwei Regelwerke",
+      "routing1": "Bring eine Routing-Tabelle zurück auf Kurs",
+      "design1": "Bring einen Change Request durch",
+      "dnat1": "Veröffentliche einen Server"
+    }
   }
 }
