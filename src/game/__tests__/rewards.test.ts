@@ -8,38 +8,46 @@ import {
   DEFAULT_DAILY_GOAL,
   openChest,
 } from '../rewards';
+import { COMBO_MAX, comboMultiplier } from '../scoring';
 
 describe('Combo', () => {
-  it('unter 3 richtigen gibt es keinen Bonus', () => {
-    for (const streak of [0, 1, 2]) {
-      expect(comboTier(streak).level).toBe(0);
-      expect(comboTier(streak).multiplier).toBe(1);
+  it('DER Vertrag: comboTier zeigt IMMER den Multiplikator, mit dem auch\n     gerechnet wird — sonst luegt die Anzeige ueber die Belohnung', () => {
+    for (let streak = 0; streak <= 30; streak++) {
+      expect(comboTier(streak).multiplier, `Serie ${streak}`).toBe(comboMultiplier(streak));
     }
   });
 
-  it('eskaliert in Stufen und deckelt bei 2x', () => {
-    expect(comboTier(3).multiplier).toBe(1.25);
-    expect(comboTier(5).multiplier).toBe(1.5);
-    expect(comboTier(8).multiplier).toBe(1.75);
-    expect(comboTier(12).multiplier).toBe(2);
-    expect(comboTier(999).multiplier).toBe(2);
+  it('die Stufen-BENENNUNG beginnt bei 3 und endet bei 12', () => {
+    expect(comboTier(2).level).toBe(0);
+    expect(comboTier(2).key).toBe('');
+    expect(comboTier(3).level).toBe(1);
+    expect(comboTier(5).level).toBe(2);
+    expect(comboTier(8).level).toBe(3);
+    expect(comboTier(12).level).toBe(4);
+    expect(comboTier(99).level).toBe(4);
   });
 
-  it('Stufen steigen monoton — nie ein Rueckschritt bei laengerer Serie', () => {
+  it('Multiplikator steigt monoton und deckelt beim Cap der Kurve', () => {
     let last = 0;
-    for (let s = 0; s <= 30; s++) {
+    for (let s = 0; s <= 40; s++) {
       const m = comboTier(s).multiplier;
       expect(m).toBeGreaterThanOrEqual(last);
       last = m;
     }
+    expect(comboTier(40).multiplier).toBe(COMBO_MAX);
   });
 
-  it('applyCombo rechnet ganzzahlig', () => {
-    expect(applyCombo(100, 0)).toBe(100);
-    expect(applyCombo(100, 3)).toBe(125);
-    expect(applyCombo(90, 5)).toBe(135);
-    expect(applyCombo(101, 8)).toBe(177); // 176.75 gerundet
-    expect(Number.isInteger(applyCombo(77, 12))).toBe(true);
+  it('applyCombo rechnet mit derselben Kurve und liefert Ganzzahlen', () => {
+    for (const [base, streak] of [
+      [100, 0],
+      [100, 3],
+      [90, 5],
+      [101, 8],
+      [77, 21],
+    ] as const) {
+      expect(applyCombo(base, streak)).toBe(Math.round(base * comboMultiplier(streak)));
+      expect(Number.isInteger(applyCombo(base, streak))).toBe(true);
+    }
   });
 });
 

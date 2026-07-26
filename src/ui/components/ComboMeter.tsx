@@ -38,7 +38,8 @@ export function ComboMeter({ streak }: { streak: number }) {
           }`}
           aria-live="polite"
         >
-          <span className="font-display text-sm font-bold">×{tier.multiplier}</span>
+          {/* toFixed, weil 1 + 6*0.1 in JS 1.5999999999999999 ergibt */}
+          <span className="font-display text-sm font-bold">×{tier.multiplier.toFixed(1)}</span>
           <span className="font-mono text-[10px] uppercase tracking-widest">
             {t(`combo.label.${tier.key}`)}
           </span>

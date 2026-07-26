@@ -685,3 +685,27 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   SIEHT. Texte im Lyra-Kanon.
   Tests: 307 gruen, Lint 0 Fehler, Build ok, E2E: 2/3 erfuellt → zwei
   Abhol-Knoepfe, Abholen oeffnet die Belohnung und der Knopf verschwindet.
+- 2026-07-25 (Forts. 31): ZWEI FEHLER BEIM HINTERFRAGEN GEFUNDEN + HUMOR-PASS.
+  (a) COMBO-WIDERSPRUCH, selbst verursacht: es gab ZWEI Combo-Systeme —
+  scoring.ts rechnet die echten Punkte (x1,0 +0,1 je Treffer, Cap x3,0 bei
+  Serie 21; darauf beziehen sich auch die Abzeichen combo-x2/x3 korrekt),
+  waehrend mein rewards.comboTier eigene Stufenwerte x1,25/x1,5/x2,0 erfand.
+  Die Anzeige log also ueber die vergebene Belohnung — genau das, was
+  CLAUDE.md mit „die Engine ist die Wahrheit, nie handgeschrieben
+  duplizieren" verbietet. comboTier delegiert jetzt an comboMultiplier und
+  liefert nur noch die STUFEN-BENENNUNG (warm/hot/blaze/perfect ab 3/5/8/12).
+  Der wichtigste neue Test ist der Vertrag: comboTier(s).multiplier ===
+  comboMultiplier(s) fuer s = 0..30 — damit koennen die beiden nicht wieder
+  auseinanderdriften.
+  (b) FLOAT-ANZEIGE: 1 + 6*0.1 ist in JS 1.5999999999999999, das waere so im
+  ComboMeter gestanden. Anzeige jetzt toFixed(1), Wert bleibt exakt.
+  (c) HUMOR-PASS: alle 27 Abzeichen-Beschreibungen auf den Lyra-Kanon
+  umgeschrieben. Vorher waren es nackte Bedingungen („50x Implicit Deny
+  korrekt erkannt.") — genau das Negativbeispiel aus Playbook-Abschnitt 0.
+  Jetzt bleibt die Bedingung lesbar, aber jeder Text landet („Die Regel, die
+  es nicht gibt, kennst du inzwischen besser als die, die es gibt."). Das ist
+  jetzt sichtbar, weil das „Kurz davor"-Panel die Beschreibungen zeigt.
+  NEU als Gate: achievementText.test.ts prueft, dass keine nackte
+  Bedingungszeile zurueckkommt (Laenge ODER mehr als ein Satz), dass DE und
+  EN wirklich uebersetzt sind, und verbietet Motivationsposter-Floskeln.
+  Tests: 317 gruen, Lint 0 Fehler, Build ok.

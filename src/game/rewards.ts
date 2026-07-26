@@ -17,6 +17,7 @@
  * Ranglisten gegen Fremde. Das Spiel soll ziehen, weil man besser wird.
  */
 import { createRng } from '../engine';
+import { comboMultiplier } from './scoring';
 
 // ---------------------------------------------------------------------------
 // Combo
@@ -32,26 +33,30 @@ export interface ComboTier {
   key: string;
 }
 
-const TIERS: ComboTier[] = [
-  { level: 0, multiplier: 1, key: '' },
-  { level: 1, multiplier: 1.25, key: 'warm' },
-  { level: 2, multiplier: 1.5, key: 'hot' },
-  { level: 3, multiplier: 1.75, key: 'blaze' },
-  { level: 4, multiplier: 2, key: 'perfect' },
-];
+/**
+ * Stufen-BENENNUNG über der echten Kurve. Der Multiplikator selbst kommt
+ * IMMER aus scoring.comboMultiplier — es darf nur eine Wahrheit geben, sonst
+ * zeigt die Anzeige einen anderen Wert als die Punkte, die vergeben werden.
+ * (Genau dieser Fehler war hier drin: eigene Stufenwerte ×1,25/×1,5/×2,0
+ * gegen die tatsächliche Kurve ×1,0 +0,1 je Treffer bis ×3,0.)
+ */
+function tierLevel(streak: number): { level: ComboLevel; key: string } {
+  if (streak >= 12) return { level: 4, key: 'perfect' };
+  if (streak >= 8) return { level: 3, key: 'blaze' };
+  if (streak >= 5) return { level: 2, key: 'hot' };
+  if (streak >= 3) return { level: 1, key: 'warm' };
+  return { level: 0, key: '' };
+}
 
-/** Ab 3 richtigen in Folge eskaliert das Feedback, ab 12 ist Maximum. */
+/** Ab 3 richtigen in Folge eskaliert das Feedback. */
 export function comboTier(streak: number): ComboTier {
-  if (streak >= 12) return TIERS[4] as ComboTier;
-  if (streak >= 8) return TIERS[3] as ComboTier;
-  if (streak >= 5) return TIERS[2] as ComboTier;
-  if (streak >= 3) return TIERS[1] as ComboTier;
-  return TIERS[0] as ComboTier;
+  const { level, key } = tierLevel(streak);
+  return { level, key, multiplier: comboMultiplier(streak) };
 }
 
 /** Score einer Aufgabe inklusive Combo-Bonus (immer ganzzahlig). */
 export function applyCombo(baseScore: number, streak: number): number {
-  return Math.round(baseScore * comboTier(streak).multiplier);
+  return Math.round(baseScore * comboMultiplier(streak));
 }
 
 // ---------------------------------------------------------------------------
