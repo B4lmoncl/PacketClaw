@@ -704,6 +704,8 @@
     "filterAll": "All",
     "filterMissing": "Missing",
     "filterNothing": "Nothing in this selection.",
+    "fromArchive": "From the archive",
+    "hasOneFor": "There are {{count}} field note(s) on this — still in a chest.",
     "card": {
       "policy0": {
         "title": "Policy 0",

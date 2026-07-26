@@ -832,3 +832,19 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 361 gruen, Lint 0 Fehler, Build ok, E2E: Truhe geoeffnet (geschlossener
   Takt + Karte „The outside port", epic), Archiv 4/24 mit Stufen-Zaehlern und
   Missing-Filter, 0 Konsolenfehler.
+- 2026-07-26 (Forts. 37): NOTIZEN ANS SCHEITERN GEKOPPELT (#62). notesForConcept
+  gab es schon, benutzt hat es niemand — eine Sammlung, deren einziger Zweck
+  Vollstaendigkeit ist, ist Deko.
+  NEU ConceptNote: nach einer FALSCHEN Antwort im Review erscheint die
+  Archiv-Karte zum gescheiterten Konzept, direkt unter der Engine-Wahrheit.
+  Nach einer richtigen Antwort nicht — dort waere es Wiederholung, und der
+  Moment nach dem Fehler ist der einzige, in dem eine Erklaerung wirklich
+  gelesen wird. Besitzt man mehrere Karten zum Konzept, kommt die mit dem
+  hoechsten Rang (die traegt die grundlegendste Aussage).
+  Fehlt die Karte noch, wird das GESAGT statt verschwiegen („zu diesem Konzept
+  gibt es N Feldnotizen — noch in einer Truhe"). Ein Hinweis auf etwas zu
+  Holendes ist ein Grund weiterzuspielen; eine leere Stelle ist keiner.
+  Ausserdem: die Schwachstellen-Liste zeigt pro Konzept 📓 x/y — wie viel vom
+  Nachschlagewerk dazu schon da ist.
+  Tests: 361 gruen, Lint 0 Fehler, Build ok, E2E: absichtlich falsch geantwortet,
+  Karte „The object decides" erscheint beim Adress-Konzept, 0 Konsolenfehler.

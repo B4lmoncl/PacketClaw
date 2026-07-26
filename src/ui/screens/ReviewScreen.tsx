@@ -15,6 +15,7 @@ import type { MasteryMap } from '../../game/mastery';
 import { reviewAnswerCorrect, reviewPlan } from '../../game/review';
 import { useGame } from '../../game/store';
 import { ComboMeter } from '../components/ComboMeter';
+import { ConceptNote } from '../components/ConceptNote';
 import { DebugFlowView } from '../components/DebugFlowView';
 import { MasteryDeltaList } from '../components/MasteryDeltaList';
 import { ParticleBurst } from '../components/ParticleBurst';
@@ -220,6 +221,9 @@ export function ReviewScreen() {
           <div className="font-mono text-[11px] leading-relaxed text-dim">
             {t(`review.lesson.${task.concept}`)}
           </div>
+          {/* Nur nach einem Fehler: da wird eine Erklärung tatsächlich gelesen.
+              Nach einer richtigen Antwort wäre es Wiederholung. */}
+          {!lastCorrect && <ConceptNote concept={task.concept} />}
           <DebugFlowView packet={task.packet} verdict={verdict} />
           <button
             onClick={next}

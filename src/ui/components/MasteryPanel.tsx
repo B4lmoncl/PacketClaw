@@ -9,7 +9,9 @@
  * niemals belehren — feststellen).
  */
 import { useTranslation } from 'react-i18next';
-import type { ConceptMastery } from '../../game/mastery';
+import { notesForConcept } from '../../game/fieldNotes';
+import type { Concept, ConceptMastery } from '../../game/mastery';
+import { useGame } from '../../game/store';
 
 interface Props {
   weak: ConceptMastery[];
@@ -27,8 +29,13 @@ function tone(accuracy: number): { bar: string; text: string } {
   return { bar: 'bg-deny', text: 'text-deny' };
 }
 
+const noteCount = (concept: Concept) => notesForConcept(concept).length;
+
 export function MasteryPanel({ weak, untested, overall, canReview, onReview }: Props) {
   const { t } = useTranslation();
+  const owned = useGame((s) => s.fieldNotes);
+  const ownedFor = (concept: Concept) =>
+    notesForConcept(concept).filter((n) => owned.includes(n.id)).length;
 
   // Noch keine Datenbasis: dann lieber gar nichts behaupten
   if (weak.length === 0 && overall === 0) {
@@ -81,8 +88,15 @@ export function MasteryPanel({ weak, untested, overall, canReview, onReview }: P
                       style={{ width: `${Math.round(m.accuracy * 100)}%` }}
                     />
                   </div>
-                  <div className="mt-0.5 font-mono text-[10px] text-dim/70">
-                    {t('mastery.attempts', { correct: m.correct, total: m.attempts })}
+                  <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-dim/70">
+                    <span>{t('mastery.attempts', { correct: m.correct, total: m.attempts })}</span>
+                    {/* Wieviel vom Nachschlagewerk zu diesem Konzept schon da
+                        ist — die Luecke ist selbst ein Hinweis */}
+                    {noteCount(m.concept) > 0 && (
+                      <span className="text-dim/60">
+                        📓 {ownedFor(m.concept)}/{noteCount(m.concept)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </li>

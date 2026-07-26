@@ -704,6 +704,8 @@
     "filterAll": "Alle",
     "filterMissing": "Fehlende",
     "filterNothing": "Nichts in dieser Auswahl.",
+    "fromArchive": "Aus dem Archiv",
+    "hasOneFor": "Zu diesem Konzept gibt es {{count}} Feldnotiz(en) — noch in einer Truhe.",
     "card": {
       "policy0": {
         "title": "Policy 0",
