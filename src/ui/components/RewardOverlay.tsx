@@ -5,9 +5,12 @@
  * Partikeln und Feder-Pop. Das ist bewusst der einzige Ort im Spiel, der den
  * Fluss unterbricht: wenn alles gleich laut ist, ist nichts laut.
  */
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { noteById } from '../../game/fieldNotes';
 import type { ChestRarity } from '../../game/rewards';
+import { FieldNoteCard } from './FieldNoteCard';
 import { ParticleBurst } from './ParticleBurst';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
@@ -23,6 +26,8 @@ export interface RewardPayload {
   xp?: number;
   rarity?: ChestRarity;
   modeKey?: string;
+  /** Truhe: gezogene Feldnotiz (ID) — der eigentliche Inhalt */
+  noteId?: string;
 }
 
 export function RewardOverlay({
@@ -35,6 +40,41 @@ export function RewardOverlay({
   const { t } = useTranslation();
   const reducedMotion = useReducedMotionPref();
   const style = RARITY_STYLE[reward?.rarity ?? 'common'];
+  const note = reward?.noteId ? noteById(reward.noteId) : undefined;
+
+  /**
+   * Ein kurzer Moment Vorfreude, bevor die Karte da ist.
+   *
+   * Ohne diesen Takt steht die Belohnung schon da, während die Truhe noch
+   * wackelt — die Animation kommentiert dann ein Ergebnis, das man längst
+   * gelesen hat. 550 ms ist lang genug, dass der Blick an der Truhe hängt, und
+   * kurz genug, dass es beim fünften Mal nicht nervt. Ohne Animationen gibt es
+   * nichts zu erwarten, also fällt der Takt dort weg.
+   */
+  const [revealed, setRevealed] = useState(false);
+  useEffect(() => {
+    if (!reward || reward.kind !== 'chest' || !note) {
+      setRevealed(true);
+      return;
+    }
+    if (reducedMotion) {
+      setRevealed(true);
+      return;
+    }
+    setRevealed(false);
+    const timer = setTimeout(() => setRevealed(true), 550);
+    return () => clearTimeout(timer);
+  }, [reward, note, reducedMotion]);
+
+  /**
+   * Klick während der Vorfreude überspringt sie, statt zu schließen. Sonst
+   * verwirft ein ungeduldiger Klick genau die Karte, die man nie gesehen hat —
+   * gebucht ist sie zu dem Zeitpunkt längst.
+   */
+  function skipOrClose() {
+    if (revealed) onClose();
+    else setRevealed(true);
+  }
 
   return (
     <AnimatePresence>
@@ -44,7 +84,7 @@ export function RewardOverlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={skipOrClose}
           role="dialog"
           aria-modal="true"
         >
@@ -55,27 +95,66 @@ export function RewardOverlay({
             className={`glass relative flex w-full max-w-sm flex-col items-center gap-3 rounded-panel border-2 px-6 py-8 text-center ${style.ring} ${style.glow}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <ParticleBurst variant="celebration" />
+            {revealed && <ParticleBurst variant="celebration" />}
 
             {reward.kind === 'chest' ? (
               <>
                 <motion.div
                   className="text-6xl"
                   initial={reducedMotion ? false : { rotate: -12, scale: 0.8 }}
-                  animate={{ rotate: [-12, 8, -4, 0], scale: 1 }}
-                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                  animate={
+                    revealed
+                      ? { rotate: [-12, 8, -4, 0], scale: 1 }
+                      : // Zittern, solange sie noch zu ist
+                        { rotate: [-3, 3, -3], scale: 0.95 }
+                  }
+                  transition={
+                    revealed
+                      ? { duration: 0.7, ease: 'easeOut' }
+                      : { duration: 0.22, repeat: Infinity }
+                  }
                 >
-                  🎁
+                  {revealed ? '🎁' : '📦'}
                 </motion.div>
-                <div className={`font-mono text-[10px] uppercase tracking-widest ${style.text}`}>
-                  {t(`reward.rarity.${reward.rarity ?? 'common'}`)}
-                </div>
-                <div className="font-display text-2xl font-bold text-ink">
-                  {t('reward.chestTitle')}
-                </div>
-                <div className={`font-display text-3xl font-bold ${style.text}`}>
-                  +{reward.xp} XP
-                </div>
+
+                {note ? (
+                  // Der Inhalt IST die Karte — die XP-Zeile rutscht darunter
+                  <AnimatePresence>
+                    {revealed && (
+                      <motion.div
+                        key="note"
+                        initial={
+                          reducedMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.94 }
+                        }
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                        className="flex w-full flex-col items-center gap-2"
+                      >
+                        <div className="font-mono text-[10px] uppercase tracking-widest text-warn">
+                          {t('notes.newNote')}
+                        </div>
+                        <FieldNoteCard note={note} owned size="full" />
+                        <div className={`font-display text-xl font-bold ${style.text}`}>
+                          +{reward.xp} XP
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                ) : (
+                  <>
+                    <div
+                      className={`font-mono text-[10px] uppercase tracking-widest ${style.text}`}
+                    >
+                      {t(`reward.rarity.${reward.rarity ?? 'common'}`)}
+                    </div>
+                    <div className="font-display text-2xl font-bold text-ink">
+                      {t('reward.chestTitle')}
+                    </div>
+                    <div className={`font-display text-3xl font-bold ${style.text}`}>
+                      +{reward.xp} XP
+                    </div>
+                  </>
+                )}
               </>
             ) : (
               <>
@@ -99,13 +178,17 @@ export function RewardOverlay({
               </>
             )}
 
-            <button
-              onClick={onClose}
-              className="mt-2 rounded-panel bg-claw px-6 py-2.5 font-display font-bold text-bg hover:brightness-110"
-              autoFocus
-            >
-              {t('reward.nice')}
-            </button>
+            {/* Der Knopf erscheint erst mit der Belohnung — vorher gäbe es
+                nichts zu bestätigen, nur etwas zu verpassen */}
+            {revealed && (
+              <button
+                onClick={onClose}
+                className="mt-2 rounded-panel bg-claw px-6 py-2.5 font-display font-bold text-bg hover:brightness-110"
+                autoFocus
+              >
+                {t('reward.nice')}
+              </button>
+            )}
           </motion.div>
         </motion.div>
       )}

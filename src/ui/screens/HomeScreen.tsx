@@ -4,6 +4,7 @@ import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
 import { nearestAchievements, rankFor } from '../../game/progression';
 import { CHEST_EVERY, chestsEarned, dailyGoal } from '../../game/rewards';
+import { collectionProgress } from '../../game/fieldNotes';
 import {
   ALL_DONE_BONUS_XP,
   allQuestsDone,
@@ -108,6 +109,7 @@ export function HomeScreen() {
   const dailyXp = useGame((s) => s.dailyXp);
   const tasksSolved = useGame((s) => s.tasksSolved);
   const chestsOpened = useGame((s) => s.chestsOpened);
+  const fieldNotes = useGame((s) => s.fieldNotes);
   const seenUnlocks = useGame((s) => s.seenUnlocks);
   const stats = useGame((s) => s.stats);
   const achievements = useGame((s) => s.achievements);
@@ -134,6 +136,7 @@ export function HomeScreen() {
   const today = todayString();
   const goal = dailyGoal(dailyXp.date === today ? dailyXp.xp : 0);
   const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
+  const notes = collectionProgress(fieldNotes);
   const upcoming = nextUnlock(campaign.completed, xp);
   const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
 
@@ -178,7 +181,15 @@ export function HomeScreen() {
 
   function claimChest() {
     const got = openNextChest();
-    if (got) setReward({ kind: 'chest', xp: got.xp, rarity: got.rarity as 'common' });
+    if (!got) return;
+    setReward({
+      kind: 'chest',
+      xp: got.xp,
+      // Bei einer Notiz traegt die Karte die Stufe; das Overlay braucht die
+      // Truhen-Rarity nur noch fuer den XP-Fall
+      rarity: (got.note ? 'epic' : got.rarity) as 'common',
+      noteId: got.note ?? undefined,
+    });
   }
 
   function claimQuestReward(p: (typeof quests)[number]) {
@@ -297,6 +308,27 @@ export function HomeScreen() {
                 </div>
               </div>
             )}
+
+            {/* Das Archiv: die Luecke ist der Grund, die naechste Truhe zu
+                wollen. Steht deshalb direkt neben der Truhe. */}
+            <button
+              onClick={() => navigate({ name: 'notes' })}
+              className="card-mode panel-action group flex items-center gap-3 rounded-panel px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
+            >
+              <span className="text-2xl">📓</span>
+              <div className="min-w-0 flex-1">
+                <div className="font-display text-sm font-bold text-aura">{t('notes.open')}</div>
+                <div className="font-mono text-[11px] text-dim">
+                  {t('notes.progress', { owned: notes.owned, total: notes.total })}
+                </div>
+                <div className="mt-1 h-1 overflow-hidden rounded-full bg-bg/80">
+                  <div
+                    className="h-full rounded-full bg-aura/80 transition-[width] duration-700"
+                    style={{ width: `${Math.round(notes.ratio * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </button>
 
             {fresh.length > 0 ? (
               <button

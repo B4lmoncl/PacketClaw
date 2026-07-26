@@ -683,5 +683,124 @@
       "vip": "DNAT-Verkehr matcht nur über das VIP-Objekt. Weder all noch die interne IP tun es.",
       "snat": "SNAT schreibt die Quelle auf das Egress-Interface um. Ohne das hat die Antwort keinen Weg zurück."
     }
+  },
+  "notes": {
+    "title": "Feldnotizen",
+    "sub": "Gesammeltes Betriebswissen",
+    "open": "Feldnotizen",
+    "progress": "{{owned}} von {{total}}",
+    "locked": "Noch nicht gefunden",
+    "lockedHint": "Steckt in einer Truhe.",
+    "newNote": "Neue Feldnotiz",
+    "dupeFallback": "Das Archiv ist vollständig. Die Truhe enthält stattdessen etwas Handfestes.",
+    "complete": "Archiv vollständig — alle {{total}} Notizen.",
+    "empty": "Noch keine Notizen. Truhen enthalten welche.",
+    "rarity": {
+      "common": "Notiz",
+      "rare": "Selten",
+      "epic": "Kritisch",
+      "legendary": "Grundgesetz"
+    },
+    "filterAll": "Alle",
+    "filterMissing": "Fehlende",
+    "filterNothing": "Nichts in dieser Auswahl.",
+    "card": {
+      "policy0": {
+        "title": "Policy 0",
+        "body": "Sie steht in keiner Liste, hat keine ID, die man anklicken könnte, und entscheidet trotzdem den größten Teil des Verkehrs. Im Log heißt sie „Implicit Deny\". Loggen tut sie standardmäßig nicht — das Häufigste, was eine Firewall tut, ist also auch das, worüber sie am wenigsten redet."
+      },
+      "routeFirst": {
+        "title": "Route vor Policy",
+        "body": "Die Routenauswahl passiert vor der Policy-Prüfung und legt das Ausgangs-Interface fest. Mit einer Default-Route gibt es kein „kein Weg dorthin\"; es gibt nur den falschen Weg. Die Firewall sagt ACCEPT, das Paket geht brav nach draußen, und der Server hat nie davon gehört."
+      },
+      "vipOnly": {
+        "title": "Das VIP oder nichts",
+        "body": "DNAT-Verkehr trifft ausschließlich das VIP-Objekt im Ziel. Nicht „all\", nicht die interne IP — das VIP. „all\" klingt wie alles und bedeutet hier alles außer genau dem, was du gerade brauchst."
+      },
+      "prednatPort": {
+        "title": "Der äußere Port",
+        "body": "Ein Service ist Protokoll UND Zielport, geprüft am Paket, wie es ankommt — also am äußeren Port. Wer 8443 auf 443 umschreibt und den Service auf HTTPS stellt, hat eine Regel gebaut, die nie trifft, und ein Ticket, das niemand lesen kann."
+      },
+      "shadowing": {
+        "title": "Verschattung",
+        "body": "Eine breite Regel oben verdeckt jede engere darunter. Syntaktisch bleibt das Regelwerk einwandfrei; es gibt keine Fehlermeldung für „diese Zeile wird nie erreicht\". Die Firewall führt aus, was dasteht, nicht, was gemeint war."
+      },
+      "sessionTable": {
+        "title": "Die Session erinnert sich",
+        "body": "Eine bestehende Session wird nicht neu bewertet, nur weil du die Policy geändert hast. Man baut die Regel, testet, nichts. Baut sie neu, wieder nichts. Dann räumt man die Session-Tabelle auf und stellt fest, dass die erste Version gereicht hätte."
+      },
+      "firstMatch": {
+        "title": "Erste Übereinstimmung",
+        "body": "Von oben nach unten, die erste passende Regel gewinnt. Die Regel weiter unten ist nicht „spezifischer\", sie ist zu spät. Es gibt Administratoren, die drei Tage nach einem Fehler suchen und ihn dann in Zeile zwei finden."
+      },
+      "objectNotName": {
+        "title": "Das Objekt entscheidet",
+        "body": "Nicht der Name. „SRV_WEB01\" kann auf ein /24 zeigen, auf den falschen Host oder auf gar nichts, und die Firewall beschwert sich in keinem der drei Fälle. Wer Namen liest statt Inhalte, troubleshootet seine eigenen Annahmen."
+      },
+      "noNatNoReturn": {
+        "title": "Hinweg ohne Rückweg",
+        "body": "Ohne NAT verlässt das Paket die Firewall mit seiner privaten Quelladresse. Es kommt sogar an. Zurück findet es nicht, und das erkennt man erst an den Zeitstempeln: Anfragen ohne Antworten, sauber untereinander."
+      },
+      "debugFlow": {
+        "title": "Der Flow-Trace",
+        "body": "Es gibt genau ein Werkzeug, das nicht rät: der Trace zeigt, welche Regel gegriffen hat und warum. Er ist gleichzeitig die schnellste Methode, sich selbst zu widerlegen, weshalb er seltener benutzt wird, als er sollte."
+      },
+      "intrazone": {
+        "title": "Innerhalb der Zone",
+        "body": "Verkehr zwischen Interfaces derselben Zone wird standardmäßig verworfen. Zwei Ports, eine Zone, dasselbe gemütliche Gefühl von Zusammengehörigkeit — und kein Durchkommen, bis intra-zone ausdrücklich erlaubt ist. Gesucht wird der Fehler dann beim Switch."
+      },
+      "anyAnyAll": {
+        "title": "any / all / ALL",
+        "body": "„any\" bei den Interfaces, „all\" bei den Adressen, „ALL\" beim Service: eine Regel, die alles erlaubt und dabei aussieht wie eine Regel. Sie steht in mehr Produktivsystemen, als jemand zugeben würde, und immer nur zum Testen."
+      },
+      "fqdnMoves": {
+        "title": "FQDN",
+        "body": "Ein FQDN-Objekt enthält, was DNS gerade sagt. Ändert sich der Eintrag, ändert sich die Regel, ohne dass jemand sie angefasst hat. Das ist ein Feature. In einem Audit ist es eine Erklärung."
+      },
+      "midnightSchedule": {
+        "title": "Über Mitternacht",
+        "body": "Ein Zeitfenster, das über Mitternacht läuft, braucht zwei Einträge. Das wird genau ein Mal vergessen, und zwar nachts, wenn niemand da ist, der es nachschlagen könnte."
+      },
+      "interfaceAny": {
+        "title": "srcintf: any",
+        "body": "Ein Interface-Paar sortiert Regeln in Gruppen, die ein Mensch im Kopf behalten kann. Steht srcintf auf „any\", fällt diese Ordnung zusammen und alles steht wieder in einer langen Reihe. Kurzfristig praktisch. Der Kollege, der das Regelwerk in zwei Jahren erbt, wird eigene Worte dafür finden."
+      },
+      "zoneTradeoff": {
+        "title": "Zonen",
+        "body": "Fasst man Interfaces in einer Zone zusammen, verschwinden sie als Einzelziel — Regeln sprechen nur noch die Zone an. Der Aufräum-Gewinn ist echt. Die Rechnung kommt an dem Tag, an dem genau ein Interface eine Ausnahme braucht."
+      },
+      "hitCountZero": {
+        "title": "Trefferzahl null",
+        "body": "Eine Regel mit null Treffern tut nichts. Sie kann verschattet sein, deaktiviert, oder für Verkehr geschrieben, den es nie gab. Alle drei sehen in der Tabelle gleich aus und werden gleich behandelt: gar nicht."
+      },
+      "policyIdNotOrder": {
+        "title": "ID ist keine Position",
+        "body": "Verschiebt man eine Regel, bleibt ihre ID. Sortiert man nach ID, sieht man eine Reihenfolge, die die Firewall nicht benutzt. Zwei Zahlen, die aussehen wie eine."
+      },
+      "disabledRule": {
+        "title": "Deaktiviert",
+        "body": "Eine deaktivierte Regel bleibt in der Tabelle stehen und wird beim Matching übersprungen. Sie sieht aus wie Dokumentation und wirkt wie Dekoration. Im dritten Jahr weiß niemand mehr, ob sie noch deaktiviert ist oder schon."
+      },
+      "addressGroup": {
+        "title": "Adressgruppen",
+        "body": "Eine Gruppe ist ein Objekt, das andere Objekte enthält, und sie wird beim Matching aufgelöst. Sehr bequem — bis jemand ein Mitglied ändert und damit vierzehn Regeln gleichzeitig, von denen er zwölf nie gesehen hat."
+      },
+      "denyNoLog": {
+        "title": "Deny ohne Log",
+        "body": "Ein Deny ohne Logging ist ein Nein, das niemand hört. Es funktioniert einwandfrei und erklärt nichts. Wenn drei Wochen später gefragt wird, warum die Anwendung nicht läuft, steht die Antwort im Regelwerk und nicht in den Logs."
+      },
+      "serviceAll": {
+        "title": "Service ALL",
+        "body": "„ALL\" heißt jedes Protokoll und jeder Port, nicht „alle üblichen\". Es ist die schnellste Möglichkeit, eine Regel zum Laufen zu bringen, und der häufigste Grund, warum sie hinterher zu gut läuft."
+      },
+      "policyLookup": {
+        "title": "Policy Lookup",
+        "body": "Der Lookup fragt die Firewall, welche Regel ein gedachtes Paket treffen würde. Er beantwortet in vier Sekunden, was in Besprechungen zwanzig Minuten dauert."
+      },
+      "scheduleLooksOn": {
+        "title": "Zeitplan",
+        "body": "Ein Zeitplan schaltet eine Regel außerhalb ihres Fensters ab. Die Regel sieht dabei die ganze Zeit aktiviert aus. Sie ist es auch — nur nicht jetzt."
+      }
+    }
   }
 }

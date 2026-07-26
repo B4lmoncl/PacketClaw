@@ -683,5 +683,124 @@
       "vip": "DNAT traffic only matches the VIP object. Neither all nor the internal IP will do it.",
       "snat": "SNAT rewrites the source to the egress interface. Without it the reply has nowhere to come back to."
     }
+  },
+  "notes": {
+    "title": "Field notes",
+    "sub": "Collected operational knowledge",
+    "open": "Field notes",
+    "progress": "{{owned}} of {{total}}",
+    "locked": "Not found yet",
+    "lockedHint": "Sits in a chest.",
+    "newNote": "New field note",
+    "dupeFallback": "The archive is complete. The chest holds something more tangible instead.",
+    "complete": "Archive complete — all {{total}} notes.",
+    "empty": "No notes yet. Chests contain them.",
+    "rarity": {
+      "common": "Note",
+      "rare": "Rare",
+      "epic": "Critical",
+      "legendary": "Ground rule"
+    },
+    "filterAll": "All",
+    "filterMissing": "Missing",
+    "filterNothing": "Nothing in this selection.",
+    "card": {
+      "policy0": {
+        "title": "Policy 0",
+        "body": "It appears in no list, has no ID you could click, and still decides most of the traffic. The log calls it “Implicit Deny”. It does not log by default — so the most common thing a firewall does is also the thing it talks about least."
+      },
+      "routeFirst": {
+        "title": "Route before policy",
+        "body": "Route lookup happens before the policy check and fixes the outgoing interface. With a default route there is no “no way there”; there is only the wrong way. The firewall says ACCEPT, the packet leaves obediently, and the server never hears about it."
+      },
+      "vipOnly": {
+        "title": "The VIP or nothing",
+        "body": "DNAT traffic matches the VIP object in the destination and nothing else. Not “all”, not the internal IP — the VIP. “all” sounds like everything and here it means everything except the one thing you need."
+      },
+      "prednatPort": {
+        "title": "The outside port",
+        "body": "A service is protocol AND destination port, checked against the packet as it arrives — so the outside port. Map 8443 to 443, set the service to HTTPS, and you have built a rule that never matches and a ticket nobody can read."
+      },
+      "shadowing": {
+        "title": "Shadowing",
+        "body": "A broad rule on top covers every narrower rule below it. Syntactically the ruleset stays flawless; there is no error message for “this line is never reached”. The firewall executes what is written, not what was meant."
+      },
+      "sessionTable": {
+        "title": "The session remembers",
+        "body": "An established session is not re-evaluated because you changed the policy. You build the rule, test, nothing. Build it again, nothing again. Then you clear the session table and discover the first version was fine."
+      },
+      "firstMatch": {
+        "title": "First match",
+        "body": "Top to bottom, the first matching rule wins. The rule further down is not “more specific”, it is late. There are administrators who hunt a fault for three days and then find it in row two."
+      },
+      "objectNotName": {
+        "title": "The object decides",
+        "body": "Not the name. “SRV_WEB01” may point at a /24, at the wrong host, or at nothing at all, and the firewall will not complain in any of the three cases. Read names instead of contents and you are troubleshooting your own assumptions."
+      },
+      "noNatNoReturn": {
+        "title": "Out but not back",
+        "body": "Without NAT the packet leaves carrying its private source address. It even arrives. It does not find its way back, and you only notice by the timestamps: requests without replies, neatly stacked."
+      },
+      "debugFlow": {
+        "title": "The flow trace",
+        "body": "There is exactly one tool that does not guess: the trace shows which rule matched and why. It is also the fastest way to be proven wrong about your own configuration, which is why it gets used less than it should."
+      },
+      "intrazone": {
+        "title": "Inside the zone",
+        "body": "Traffic between interfaces of the same zone is dropped by default. Two ports, one zone, the same cosy sense of belonging — and nothing gets through until intra-zone is explicitly allowed. The fault then gets looked for in the switch."
+      },
+      "anyAnyAll": {
+        "title": "any / all / ALL",
+        "body": "“any” on the interfaces, “all” on the addresses, “ALL” on the service: a rule that permits everything while looking like a rule. It sits in more production systems than anyone would admit, and always just for testing."
+      },
+      "fqdnMoves": {
+        "title": "FQDN",
+        "body": "An FQDN object contains whatever DNS currently says. Change the record and the rule changes with nobody touching it. That is a feature. In an audit it is an explanation."
+      },
+      "midnightSchedule": {
+        "title": "Across midnight",
+        "body": "A window that runs across midnight needs two entries. This gets forgotten exactly once, at night, when nobody is around who could look it up."
+      },
+      "interfaceAny": {
+        "title": "srcintf: any",
+        "body": "An interface pair sorts rules into groups a person can hold in their head. Set srcintf to “any” and that order collapses; everything stands in one long line again. Convenient in the short term. The colleague who inherits the ruleset in two years will have their own words for it."
+      },
+      "zoneTradeoff": {
+        "title": "Zones",
+        "body": "Group interfaces into a zone and they vanish as individual targets — rules address the zone only. The tidiness is real. The bill arrives on the day exactly one interface needs an exception."
+      },
+      "hitCountZero": {
+        "title": "Hit count zero",
+        "body": "A rule with no hits does nothing. It may be shadowed, disabled, or written for traffic that never existed. All three look the same in the table and get treated the same: not at all."
+      },
+      "policyIdNotOrder": {
+        "title": "An ID is not a position",
+        "body": "Move a rule and its ID stays. Sort by ID and you see an order the firewall does not use. Two numbers that look like one."
+      },
+      "disabledRule": {
+        "title": "Disabled",
+        "body": "A disabled rule stays in the table and gets skipped during matching. It looks like documentation and works as decoration. By year three nobody remembers whether it is still disabled or already."
+      },
+      "addressGroup": {
+        "title": "Address groups",
+        "body": "A group is an object containing other objects, resolved at match time. Very convenient — until someone edits one member and thereby fourteen rules at once, twelve of which they have never seen."
+      },
+      "denyNoLog": {
+        "title": "Deny without log",
+        "body": "A deny without logging is a no that nobody hears. It works perfectly and explains nothing. When someone asks three weeks later why the application is down, the answer sits in the ruleset and not in the logs."
+      },
+      "serviceAll": {
+        "title": "Service ALL",
+        "body": "“ALL” means every protocol and every port, not “all the usual ones”. It is the fastest way to make a rule work and the most common reason it later works too well."
+      },
+      "policyLookup": {
+        "title": "Policy Lookup",
+        "body": "The lookup asks the firewall which rule a hypothetical packet would hit. It answers in four seconds what takes twenty minutes in a meeting."
+      },
+      "scheduleLooksOn": {
+        "title": "Schedule",
+        "body": "A schedule switches a rule off outside its window. The rule looks enabled the whole time. It is, too — just not now."
+      }
+    }
   }
 }

@@ -496,6 +496,12 @@ body {
   --rarity-glow: 22px;
 }
 
+/* Text in der Farbe der aktuellen Rarity-Stufe. Spart pro Verwendungsstelle
+   eine Farbtabelle, die sonst neben den .rarity-*-Klassen veralten wuerde. */
+.text-rarity {
+  color: var(--rarity);
+}
+
 /* Medaillon fuer Abzeichen: runde Plakette mit Rarity-Ring statt Emoji-Zeile */
 .medallion {
   position: relative;

@@ -11,6 +11,7 @@ import { pickQuests } from './dailyQuests';
 import type { Concept, MasteryMap } from './mastery';
 import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
+import { drawNote, noteById, RARITY_XP } from './fieldNotes';
 import { getLevel, levelsForChapter } from './levels';
 import {
   advanceStreak,
@@ -44,6 +45,7 @@ export type Screen =
   | { name: 'design' }
   | { name: 'routing' }
   | { name: 'review' }
+  | { name: 'notes' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -84,6 +86,8 @@ interface GameState {
   tasksSolved: number;
   /** Bereits geoeffnete Truhen */
   chestsOpened: number;
+  /** Gesammelte Feldnotizen (IDs) — der Inhalt der Truhen */
+  fieldNotes: string[];
   /** Freischaltungen, die der Spieler schon gefeiert bekommen hat */
   seenUnlocks: string[];
   /**
@@ -128,7 +132,11 @@ interface GameState {
   recordReview(score: number): void;
   /** Eine Einzelaufgabe geloest: zaehlt fuer Truhen und Tagesziel */
   addTaskXp(score: number, date: string): void;
-  openNextChest(): { xp: number; rarity: string } | null;
+  /**
+   * Truhe oeffnen. Enthaelt eine noch fehlende Feldnotiz; ist die Sammlung
+   * vollstaendig, gibt es stattdessen XP (note === null).
+   */
+  openNextChest(): { xp: number; note: string | null; rarity: string } | null;
   markUnlocksSeen(keys: string[]): void;
   /** Legt die Auftraege des Tages an bzw. rollt auf einen neuen Tag um */
   ensureQuestDay(date: string, unlockedModes: string[]): void;
@@ -244,6 +252,7 @@ export const useGame = create<GameState>()(
       dailyXp: { date: '', xp: 0 },
       tasksSolved: 0,
       chestsOpened: 0,
+      fieldNotes: [],
       seenUnlocks: [],
       questDay: { date: '', ids: [], snapshot: EMPTY_QUEST_COUNTERS, claimed: [] },
       mastery: {},
@@ -390,9 +399,18 @@ export const useGame = create<GameState>()(
         const state = get();
         const available = chestsEarned(state.tasksSolved) - state.chestsOpened;
         if (available <= 0) return null;
-        const reward = openChest(state.chestsOpened + 1);
-        set({ chestsOpened: state.chestsOpened + 1, xp: state.xp + reward.xp });
-        return reward;
+        const chestNo = state.chestsOpened + 1;
+        // Der Inhalt ist die Karte; das XP ist die Beilage. Ist die Sammlung
+        // vollstaendig, faellt es auf den reinen XP-Wurf zurueck — eine leere
+        // Truhe waere schlimmer als eine langweilige.
+        const note = drawNote(state.fieldNotes, `${chestNo}`);
+        const xp = note ? RARITY_XP[note.rarity] : openChest(chestNo).xp;
+        set({
+          chestsOpened: chestNo,
+          xp: state.xp + xp,
+          fieldNotes: note ? [...state.fieldNotes, note.id] : state.fieldNotes,
+        });
+        return { xp, note: note?.id ?? null, rarity: note?.rarity ?? openChest(chestNo).rarity };
       },
 
       markUnlocksSeen: (keys) =>
@@ -494,6 +512,7 @@ export const useGame = create<GameState>()(
           dailyXp,
           tasksSolved,
           chestsOpened,
+          fieldNotes,
           seenUnlocks,
           questDay,
           mastery,
@@ -521,6 +540,7 @@ export const useGame = create<GameState>()(
             dailyXp,
             tasksSolved,
             chestsOpened,
+            fieldNotes,
             seenUnlocks,
             questDay,
             mastery,
@@ -573,6 +593,7 @@ export const useGame = create<GameState>()(
         dailyXp: state.dailyXp,
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
+        fieldNotes: state.fieldNotes,
         seenUnlocks: state.seenUnlocks,
         questDay: state.questDay,
         mastery: state.mastery,
@@ -611,6 +632,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   dailyXp: { date: string; xp: number };
   tasksSolved: number;
   chestsOpened: number;
+  fieldNotes: string[];
   seenUnlocks: string[];
   questDay: { date: string; ids: string[]; snapshot: QuestCounters; claimed: string[] };
   mastery: MasteryMap;
@@ -642,6 +664,10 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     dailyXp: { date: '', xp: 0, ...((save.dailyXp as { date: string; xp: number } | null) ?? {}) },
     tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
     chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,
+    // Unbekannte IDs aussortieren: der Katalog aendert sich, der Save nicht
+    fieldNotes: Array.isArray(save.fieldNotes)
+      ? (save.fieldNotes as string[]).filter((id) => noteById(id) !== undefined)
+      : [],
     seenUnlocks: Array.isArray(save.seenUnlocks) ? (save.seenUnlocks as string[]) : [],
     questDay: {
       date: '',

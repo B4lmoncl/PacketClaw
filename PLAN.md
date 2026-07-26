@@ -786,15 +786,49 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Ende immer null. Konzepte ohne neue Versuche kommen nicht vor (eine
   +-0-Zeile ist Fuellmaterial).
   Zwei Entscheidungen, die bewusst so sind:
-  * RUECKSCHRITTE WERDEN NICHT VERSCHWIEGEN. Wer vorher richtig geraten hat,
+  - RUECKSCHRITTE WERDEN NICHT VERSCHWIEGEN. Wer vorher richtig geraten hat,
     sieht die Zahl fallen. Eine Messung, die nur gute Nachrichten zeigt, ist
     keine Messung. Im Smoke sichtbar: Routing 80 % → 67 %, rot.
-  * BEI GLEICHEM BETRAG steht der Fortschritt oben — der Abschnitt ist die
+  - BEI GLEICHEM BETRAG steht der Fortschritt oben — der Abschnitt ist die
     Belohnung der Sitzung, nicht ihr Zeugnis. Ohne diese Regel entschiede die
     Reihenfolge von CONCEPTS, also der Zufall. Eigener Test.
-  Optik: zwei Balken uebereinander, der alte Stand bleibt als Schatten stehen,
-  damit der Zuwachs raeumlich sichtbar ist; gestaffelter Einlauf (60 ms),
-  groesste Bewegung zuerst. Nebenbei: der Knopf hiess „Back to level select",
-  was im Review falsch ist — jetzt review.toMenu.
-  Tests: 347 gruen, Lint 0 Fehler, Build ok, E2E: Sitzung durchgespielt, drei
-  Delta-Zeilen inkl. ehrlichem Rueckschritt, 0 Konsolenfehler.
+    Optik: zwei Balken uebereinander, der alte Stand bleibt als Schatten stehen,
+    damit der Zuwachs raeumlich sichtbar ist; gestaffelter Einlauf (60 ms),
+    groesste Bewegung zuerst. Nebenbei: der Knopf hiess „Back to level select",
+    was im Review falsch ist — jetzt review.toMenu.
+    Tests: 347 gruen, Lint 0 Fehler, Build ok, E2E: Sitzung durchgespielt, drei
+    Delta-Zeilen inkl. ehrlichem Rueckschritt, 0 Konsolenfehler.
+- 2026-07-26 (Forts. 36): FELDNOTIZEN — die Truhen haben jetzt einen Inhalt.
+  DAS PROBLEM: Eine Truhe gab XP. XP gibt es aber fuer alles, also war die
+  Truhe nur eine lautere Version von dem, was ohnehin passiert. Fuer eine
+  variable Belohnung muss der INHALT variieren, nicht der Betrag.
+  NEU src/game/fieldNotes.ts (pure, 14 Tests) + FieldNoteCard + NotesScreen
+  („Archiv", eigener Screen, Eintrag in der Belohnungs-Leiste).
+  24 Sammelkarten, jede mit GENAU EINER echten FortiOS-Wahrheit: Policy 0,
+  Route-vor-Policy, VIP-oder-nichts, Pre-DNAT-Port, Verschattung, die
+  Session-Tabelle, Intra-Zone-Deny, Trefferzahl null, ID-ist-keine-Position,
+  Service ALL, FQDN, any/all/ALL usw. Damit zieht das Feature in beide
+  Richtungen: Sammlung (Retention) UND Nachschlagewerk (Oberste Direktive).
+  Die Karten sind in der Lyra-Stimme geschrieben (Skulduggery-trocken, jede
+  mit Landung, keine Motivationssprache) — Text in beiden i18n-Dateien, ein
+  Test prueft fuer alle 24 Karten Titel + Text in de UND en samt Mindestlaenge,
+  damit eine leere Belohnung nicht erst im GUI auffaellt.
+  Entscheidungen: KEINE DUBLETTEN (gezogen wird nur aus dem offenen Rest — eine
+  Truhe, die etwas ausspuckt, das man schon hat, ist eine Enttaeuschung mit
+  Animation); vollstaendige Sammlung faellt auf den XP-Wurf zurueck statt leer
+  zu sein; Seltenheit folgt der LERNRELEVANZ (die beiden „Grundgesetze" sind
+  Policy 0 und Route-vor-Policy); Gewichte so, dass legendary etwas bedeutet,
+  aber erreichbar bleibt (Test prueft beides).
+  VORFREUDE-TAKT im Truhen-Overlay: 550 ms geschlossene, zitternde Kiste,
+  dann Feder-Pop mit der Karte. Ohne den Takt kommentiert die Animation ein
+  Ergebnis, das man schon gelesen hat. Zwei Fehler dabei gefunden und behoben:
+  der Bestaetigungsknopf und der Backdrop-Klick waren waehrend des Taktes aktiv
+  — ein ungeduldiger Klick hat also genau die Karte verworfen, die man nie
+  gesehen hat (gebucht war sie zu dem Zeitpunkt schon). Jetzt ueberspringt ein
+  Klick die Vorfreude, statt zu schliessen, und der Knopf erscheint erst mit
+  der Belohnung.
+  Save: fieldNotes: string[], migrateSave sortiert unbekannte IDs aus (der
+  Katalog aendert sich, der Save nicht).
+  Tests: 361 gruen, Lint 0 Fehler, Build ok, E2E: Truhe geoeffnet (geschlossener
+  Takt + Karte „The outside port", epic), Archiv 4/24 mit Stufen-Zaehlern und
+  Missing-Filter, 0 Konsolenfehler.
