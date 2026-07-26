@@ -595,5 +595,9 @@
     "freshTitle": "Something opened up",
     "allOpen": "Everything unlocked",
     "allOpenSub": "The whole toolbox is yours."
+  },
+  "badges": {
+    "nextTitle": "Almost there",
+    "toGo": "{{count}} to go"
   }
 }

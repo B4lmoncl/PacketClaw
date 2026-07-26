@@ -145,6 +145,12 @@ export interface Achievement {
   title: { de: string; en: string };
   description: { de: string; en: string };
   earned: (ctx: AchievementContext) => boolean;
+  /**
+   * Fortschritt fuer zaehlbare Ziele („noch 2 bis zum Abzeichen"). Nur
+   * gesetzt, wo es eine sinnvolle Zahl gibt — Kapitel-Achievements etwa
+   * haben keine.
+   */
+  progress?: (ctx: AchievementContext) => { have: number; need: number };
 }
 
 function chapterDone(stars: Record<string, number>, chapter: number): boolean {
@@ -164,6 +170,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Schichtbeginn', en: 'Shift Start' },
     description: { de: 'Erstes Level gelöst.', en: 'Solved your first level.' },
     earned: (c) => c.stats.levelsSolved >= 1,
+    progress: (c) => ({ have: c.stats.levelsSolved, need: 1 }),
   },
   {
     id: 'first-blood-policy0',
@@ -174,6 +181,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Correctly identified your first implicit deny.',
     },
     earned: (c) => c.stats.implicitDenyCorrect >= 1,
+    progress: (c) => ({ have: c.stats.implicitDenyCorrect, need: 1 }),
   },
   {
     id: 'implicit-deny-50',
@@ -184,6 +192,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Spotted implicit deny 50 times.',
     },
     earned: (c) => c.stats.implicitDenyCorrect >= 50,
+    progress: (c) => ({ have: c.stats.implicitDenyCorrect, need: 50 }),
   },
   {
     id: 'combo-x2',
@@ -194,6 +203,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Reached a ×2.0 multiplier (11 streak).',
     },
     earned: (c) => c.stats.maxComboStreak >= 11,
+    progress: (c) => ({ have: c.stats.maxComboStreak, need: 11 }),
   },
   {
     id: 'combo-x3',
@@ -204,6 +214,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Hit the ×3.0 cap (21 streak).',
     },
     earned: (c) => c.stats.maxComboStreak >= 21,
+    progress: (c) => ({ have: c.stats.maxComboStreak, need: 21 }),
   },
   {
     id: 'speedreader',
@@ -214,6 +225,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Correct verdict in under 5 seconds.',
     },
     earned: (c) => c.stats.fastCorrect >= 1,
+    progress: (c) => ({ have: c.stats.fastCorrect, need: 1 }),
   },
   {
     id: 'shadow-first',
@@ -221,6 +233,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Schattenseher', en: 'Shadow Seer' },
     description: { de: 'Erste shadowed Rule gefunden.', en: 'Found your first shadowed rule.' },
     earned: (c) => c.stats.shadowedFound >= 1,
+    progress: (c) => ({ have: c.stats.shadowedFound, need: 1 }),
   },
   {
     id: 'shadow-hunter',
@@ -228,6 +241,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Shadow Hunter', en: 'Shadow Hunter' },
     description: { de: '10 shadowed Rules gefunden.', en: 'Found 10 shadowed rules.' },
     earned: (c) => c.stats.shadowedFound >= 10,
+    progress: (c) => ({ have: c.stats.shadowedFound, need: 10 }),
   },
   {
     id: 'least-privilege',
@@ -238,6 +252,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Hardened an any-any without breaking the suite.',
     },
     earned: (c) => c.stats.anyHardened >= 1,
+    progress: (c) => ({ have: c.stats.anyHardened, need: 1 }),
   },
   {
     id: 'aufraeumer',
@@ -245,6 +260,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Aufräumer', en: 'Declutterer' },
     description: { de: '5 redundante Regeln gelöscht.', en: 'Deleted 5 redundant rules.' },
     earned: (c) => c.stats.redundantDeleted >= 5,
+    progress: (c) => ({ have: c.stats.redundantDeleted, need: 5 }),
   },
   {
     id: 'kein-all-heute',
@@ -255,6 +271,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Solved 3 architect levels without all/ALL/any.',
     },
     earned: (c) => c.stats.architectNoBroad >= 3,
+    progress: (c) => ({ have: c.stats.architectNoBroad, need: 3 }),
   },
   {
     id: 'hairpin',
@@ -272,6 +289,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Feuerwehr', en: 'Firefighter' },
     description: { de: 'Ersten Incident gelöst.', en: 'Solved your first incident.' },
     earned: (c) => c.stats.incidentsSolved >= 1,
+    progress: (c) => ({ have: c.stats.incidentsSolved, need: 1 }),
   },
   {
     id: 'all-modes',
@@ -296,6 +314,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Solved 10 levels without a failed attempt.',
     },
     earned: (c) => c.stats.noMistakeLevels >= 10,
+    progress: (c) => ({ have: c.stats.noMistakeLevels, need: 10 }),
   },
   {
     id: 'nachtschicht',
@@ -306,6 +325,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Solved a level between midnight and 5 am.',
     },
     earned: (c) => c.stats.nightSolves >= 1,
+    progress: (c) => ({ have: c.stats.nightSolves, need: 1 }),
   },
   {
     id: 'daily-first',
@@ -313,6 +333,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Tagesgeschäft', en: 'Daily Business' },
     description: { de: 'Ersten Daily Run gespielt.', en: 'Played your first daily run.' },
     earned: (c) => c.stats.dailiesPlayed >= 1,
+    progress: (c) => ({ have: c.stats.dailiesPlayed, need: 1 }),
   },
   {
     id: 'daily-perfect',
@@ -320,6 +341,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Zehn von Zehn', en: 'Ten Out of Ten' },
     description: { de: 'Einen Daily Run perfekt gespielt.', en: 'Played a perfect daily run.' },
     earned: (c) => c.stats.dailiesPerfect >= 1,
+    progress: (c) => ({ have: c.stats.dailiesPerfect, need: 1 }),
   },
   {
     id: 'streak-7',
@@ -327,6 +349,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: '7-Tage-Daily-Streak', en: '7-Day Daily Streak' },
     description: { de: 'Sieben Tage Daily in Folge.', en: 'Seven daily runs in a row.' },
     earned: (c) => c.streak.best >= 7,
+    progress: (c) => ({ have: c.streak.best, need: 7 }),
   },
   {
     id: 'streak-30',
@@ -334,6 +357,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Monatswache', en: 'Month Watch' },
     description: { de: '30 Tage Daily-Streak.', en: '30-day daily streak.' },
     earned: (c) => c.streak.best >= 30,
+    progress: (c) => ({ have: c.streak.best, need: 30 }),
   },
   {
     id: 'sandbox-fired',
@@ -341,6 +365,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: { de: 'Testfeuer', en: 'Test Fire' },
     description: { de: 'Erstes Sandbox-Paket abgefeuert.', en: 'Fired your first sandbox packet.' },
     earned: (c) => c.stats.sandboxFired >= 1,
+    progress: (c) => ({ have: c.stats.sandboxFired, need: 1 }),
   },
   {
     id: 'stars-50',
@@ -379,6 +404,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Reached NAT Navigator (5000 XP).',
     },
     earned: (c) => c.xp >= 5000,
+    progress: (c) => ({ have: c.xp, need: 5000 }),
   },
   {
     id: 'rank-commander',
@@ -389,6 +415,7 @@ export const ACHIEVEMENTS: Achievement[] = [
       en: 'Reached the highest rank (30000 XP).',
     },
     earned: (c) => c.xp >= 30000,
+    progress: (c) => ({ have: c.xp, need: 30000 }),
   },
 ];
 
@@ -399,4 +426,35 @@ export function evaluateAchievements(
 ): string[] {
   const have = new Set(unlocked);
   return ACHIEVEMENTS.filter((a) => !have.has(a.id) && a.earned(ctx)).map((a) => a.id);
+}
+
+/** Ein noch offenes Abzeichen mit Fortschritt — Basis fuer „noch N bis …". */
+export interface AchievementProgress {
+  achievement: Achievement;
+  have: number;
+  need: number;
+  /** 0..1 */
+  ratio: number;
+}
+
+/**
+ * Die Abzeichen, denen der Spieler am naechsten ist. Genau das erzeugt die
+ * Vorfreude, die vorher fehlte: 39 Achievements existierten, aber niemand
+ * wusste, welches gerade zum Greifen nah ist.
+ */
+export function nearestAchievements(
+  ctx: AchievementContext,
+  earnedIds: readonly string[],
+  limit = 3,
+): AchievementProgress[] {
+  return (
+    ACHIEVEMENTS.filter((a) => !earnedIds.includes(a.id) && a.progress && !a.earned(ctx))
+      .map((a) => {
+        const { have, need } = a.progress!(ctx);
+        return { achievement: a, have, need, ratio: need > 0 ? Math.min(1, have / need) : 0 };
+      })
+      // Fast fertige zuerst; bei Gleichstand das mit dem kleineren Rest
+      .sort((a, b) => b.ratio - a.ratio || a.need - a.have - (b.need - b.have))
+      .slice(0, limit)
+  );
 }

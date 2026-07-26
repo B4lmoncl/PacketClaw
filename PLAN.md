@@ -590,3 +590,12 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Save) — ein E2E-Test kann ihn nicht ueber localStorage setzen, man muss
   ihn erspielen oder die Komponente direkt testen.
   Tests: 285 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-25 (Forts. 26): GAMIFICATION-DURCHLAUF 3 — die 39 Achievements
+  sichtbar gemacht. Achievement bekommt ein optionales progress()-Feld
+  (have/need); per Skript fuer alle 21 zaehlbaren Praedikate ergaenzt
+  (stats.X >= N, streak.best >= N, xp >= N). nearestAchievements() sortiert
+  die offenen nach Fortschritt und liefert die naechstliegenden.
+  NextBadges-Panel auf Home: „Kurz davor" mit Fortschrittsbalken und
+  „noch N" — aus einem Ueberraschungs-Popup wird ein Ziel.
+  6 neue Unit-Tests, 291 gruen. Merknotiz: Panel-Ueberschriften sind per
+  CSS uppercase, E2E-Regexe muessen case-insensitive pruefen.

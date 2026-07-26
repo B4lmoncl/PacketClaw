@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
-import { rankFor } from '../../game/progression';
+import { nearestAchievements, rankFor } from '../../game/progression';
 import { CHEST_EVERY, chestsEarned, dailyGoal } from '../../game/rewards';
 import { freshUnlocks, isUnlocked, nextUnlock, unlockStateFor } from '../../game/unlocks';
 import { useGame } from '../../game/store';
 import type { Screen } from '../../game/store';
 import { DailyGoalRing } from '../components/DailyGoalRing';
 import { Mascot } from '../components/Mascot';
+import { NextBadges } from '../components/NextBadges';
 import { RewardOverlay } from '../components/RewardOverlay';
 import type { RewardPayload } from '../components/RewardOverlay';
 
@@ -97,6 +98,8 @@ export function HomeScreen() {
   const tasksSolved = useGame((s) => s.tasksSolved);
   const chestsOpened = useGame((s) => s.chestsOpened);
   const seenUnlocks = useGame((s) => s.seenUnlocks);
+  const stats = useGame((s) => s.stats);
+  const achievements = useGame((s) => s.achievements);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
 
@@ -112,6 +115,7 @@ export function HomeScreen() {
   const goal = dailyGoal(dailyXp.date === today ? dailyXp.xp : 0);
   const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
   const upcoming = nextUnlock(campaign.completed, xp);
+  const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
   // Frisch freigeschaltete Modi feiern, sobald der Spieler wieder hier landet
   const fresh = freshUnlocks(campaign.completed, xp, seenUnlocks);
 
@@ -416,6 +420,10 @@ export function HomeScreen() {
           </section>
         ))}
       </nav>
+
+      <div className="w-full">
+        <NextBadges items={nearBadges} />
+      </div>
 
       <RewardOverlay reward={reward} onClose={() => setReward(null)} />
     </div>

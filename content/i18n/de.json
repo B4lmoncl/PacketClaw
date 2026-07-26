@@ -595,5 +595,9 @@
     "freshTitle": "Da hat sich was geöffnet",
     "allOpen": "Alles freigeschaltet",
     "allOpenSub": "Der ganze Werkzeugkasten gehört dir."
+  },
+  "badges": {
+    "nextTitle": "Kurz davor",
+    "toGo": "noch {{count}}"
   }
 }
