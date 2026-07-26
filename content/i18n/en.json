@@ -35,7 +35,9 @@
     "design": "Change Request",
     "designSub": "Build a ruleset from written requirements",
     "routing": "Routing Lab",
-    "routingSub": "The ruleset is fine. The routing table is not."
+    "routingSub": "The ruleset is fine. The routing table is not.",
+    "review": "Review",
+    "reviewSub": "Five tasks aimed at your weak spots"
   },
   "level": {
     "boss": "Boss",
@@ -645,6 +647,34 @@
       "routing": "Routing → dstintf",
       "vip": "VIP / DNAT",
       "snat": "SNAT"
+    }
+  },
+  "review": {
+    "title": "Review",
+    "start": "Start review",
+    "focus": "Focus",
+    "intro": "Five short tasks, aimed at whatever you keep getting wrong. Accept or deny, then the engine shows you what it did and why.",
+    "noWeakness": "Nothing measures as weak yet, so this round covers ground you have barely touched.",
+    "right": "Right",
+    "wrong": "Not quite",
+    "truth": "The engine says {{action}} via policy {{policy}}.",
+    "next": "Next",
+    "finish": "Finish",
+    "done": "Review complete",
+    "again": "Another round",
+    "summary": "{{correct}} of {{total}} right",
+    "perfect": "All five. Whatever was weak has stopped being weak, at least for today.",
+    "keepGoing": "Noted. The weak spots update themselves, so this list will look different tomorrow.",
+    "lesson": {
+      "implicitDeny": "No rule matched, so policy 0 decided. It is in no list and always has the last word.",
+      "firstMatch": "The first matching rule wins. Specificity does not enter into it.",
+      "interface": "Interfaces are matched before addresses. A rule on the wrong pair never gets that far.",
+      "address": "The address object decides, not the IP you had in mind. Check what the object actually contains.",
+      "service": "The service must match protocol AND port. Close is not a port range.",
+      "schedule": "A schedule turns a rule off outside its window. It looks enabled and is not, at this hour.",
+      "routing": "Routing happens before the policy check and picks the outgoing interface. No route means the policy is never consulted.",
+      "vip": "DNAT traffic only matches the VIP object. Neither all nor the internal IP will do it.",
+      "snat": "SNAT rewrites the source to the egress interface. Without it the reply has nowhere to come back to."
     }
   }
 }

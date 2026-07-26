@@ -732,3 +732,29 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Konzepten generiert — die Datenbasis dafuer steht jetzt.
   Tests: 330 gruen, Lint 0 Fehler, Build ok, E2E: schwaechstes Konzept steht
   oben (Services 25 %), Freeze-Token und Serie-Bezug sichtbar.
+- 2026-07-25 (Forts. 33): REVIEW-MODUS (#49, Teil 2 — damit ist der Posten
+  abgeschlossen). Mastery war eine Diagnose ohne Behandlung; jetzt schliesst
+  sich der Kreis: Mastery zeigt die Luecke, Review fuellt sie, Mastery misst
+  nach.
+  NEU src/game/review.ts (pure, 9 Tests). Der harte Teil ist nicht die
+  Aufgabe, sondern die GARANTIE: eine Uebung zum Konzept „Service" muss auch
+  wirklich am Service haengen, sonst uebt der Spieler etwas anderes als
+  angekuendigt UND die Mastery-Messung wird Unsinn. Deshalb baut jeder
+  Generator sein Netz so, dass conceptOfVerdict() genau sein Zielkonzept
+  liefert — und der zentrale Test prueft das fuer ALLE 9 Konzepte ueber
+  mehrere Seeds durch. Bei den Feld-Konzepten ist der Trick eine Beinah-Regel
+  davor, die nur an diesem EINEN Feld scheitert.
+  Ein Test hat dabei eine echte Schwaeche aufgedeckt: fuenf Aufgaben einer
+  Sitzung waren identisch. Jetzt variiert die Quell-IP — aber ausschliesslich
+  innerhalb von LAN_NET, damit die Ziel-Regel weiter trifft und das Konzept
+  nicht kippt; ein eigener Test sichert genau das ab (8 Seeds x 9 Konzepte).
+  reviewPlan(): schwache Konzepte zuerst, sonst ungeprueftes, letzte
+  Rueckfallebene alle — es gibt nie eine leere Sitzung.
+  ReviewScreen: fuenf kurze ACCEPT/DENY-Aufgaben, pro Aufgabe steht das
+  trainierte Konzept im Kopf, danach die Engine-Wahrheit plus eine
+  Konzept-Lektion und der debug-flow-Trace. Die Antwort wird auf genau das
+  Konzept gebucht, das die Aufgabe trainiert. Freigeschaltet ab 14 Leveln —
+  vorher gibt es keine belastbare Datenbasis. Store: reviewsDone +
+  recordReview; Home-Kachel 🧠 vorne in der WERKSTATT.
+  Tests: 339 gruen, Lint 0 Fehler, Build ok, E2E: volle Sitzung mit fuenf
+  Runden durchgespielt, Schwerpunkt zeigt die schwachen Konzepte.

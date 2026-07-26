@@ -43,6 +43,7 @@ export type Screen =
   | { name: 'dnat' }
   | { name: 'design' }
   | { name: 'routing' }
+  | { name: 'review' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -75,6 +76,8 @@ interface GameState {
   designSolved: number;
   /** Reparierte Routing-Faelle */
   routingSolved: number;
+  /** Abgeschlossene Review-Sitzungen */
+  reviewsDone: number;
   /** XP von heute (fuer das Tagesziel) — Datum + Betrag */
   dailyXp: { date: string; xp: number };
   /** Insgesamt geloeste Einzelaufgaben (Truhen-Zaehler) */
@@ -122,6 +125,7 @@ interface GameState {
   recordDnat(score: number): void;
   recordDesign(score: number): void;
   recordRouting(score: number): void;
+  recordReview(score: number): void;
   /** Eine Einzelaufgabe geloest: zaehlt fuer Truhen und Tagesziel */
   addTaskXp(score: number, date: string): void;
   openNextChest(): { xp: number; rarity: string } | null;
@@ -233,6 +237,7 @@ export const useGame = create<GameState>()(
       dnatSolved: 0,
       designSolved: 0,
       routingSolved: 0,
+      reviewsDone: 0,
       dailyXp: { date: '', xp: 0 },
       tasksSolved: 0,
       chestsOpened: 0,
@@ -352,6 +357,12 @@ export const useGame = create<GameState>()(
         set((state) => ({
           ...rewardPatch(state, score),
           routingSolved: state.routingSolved + 1,
+        })),
+
+      recordReview: (score) =>
+        set((state) => ({
+          ...rewardPatch(state, score),
+          reviewsDone: state.reviewsDone + 1,
         })),
 
       addTaskXp: (score, date) =>
@@ -476,6 +487,7 @@ export const useGame = create<GameState>()(
           dnatSolved,
           designSolved,
           routingSolved,
+          reviewsDone,
           dailyXp,
           tasksSolved,
           chestsOpened,
@@ -502,6 +514,7 @@ export const useGame = create<GameState>()(
             dnatSolved,
             designSolved,
             routingSolved,
+            reviewsDone,
             dailyXp,
             tasksSolved,
             chestsOpened,
@@ -553,6 +566,7 @@ export const useGame = create<GameState>()(
         dnatSolved: state.dnatSolved,
         designSolved: state.designSolved,
         routingSolved: state.routingSolved,
+        reviewsDone: state.reviewsDone,
         dailyXp: state.dailyXp,
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
@@ -590,6 +604,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   dnatSolved: number;
   designSolved: number;
   routingSolved: number;
+  reviewsDone: number;
   dailyXp: { date: string; xp: number };
   tasksSolved: number;
   chestsOpened: number;
@@ -620,6 +635,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     dnatSolved: typeof save.dnatSolved === 'number' ? save.dnatSolved : 0,
     designSolved: typeof save.designSolved === 'number' ? save.designSolved : 0,
     routingSolved: typeof save.routingSolved === 'number' ? save.routingSolved : 0,
+    reviewsDone: typeof save.reviewsDone === 'number' ? save.reviewsDone : 0,
     dailyXp: { date: '', xp: 0, ...((save.dailyXp as { date: string; xp: number } | null) ?? {}) },
     tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
     chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,

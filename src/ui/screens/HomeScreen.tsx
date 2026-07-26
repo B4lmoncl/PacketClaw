@@ -76,6 +76,7 @@ const GROUPS: { key: string; modes: Mode[] }[] = [
   {
     key: 'labs',
     modes: [
+      { screen: { name: 'review' }, key: 'review', icon: '🧠', accent: 'aura' },
       { screen: { name: 'doctor' }, key: 'doctor', icon: '🩺', accent: 'deny' },
       { screen: { name: 'design' }, key: 'design', icon: '📋', accent: 'warn' },
       { screen: { name: 'routing' }, key: 'routing', icon: '🧭', accent: 'trace' },

@@ -35,7 +35,9 @@
     "design": "Change Request",
     "designSub": "Regelwerk nach Vorgaben bauen",
     "routing": "Routing-Werkstatt",
-    "routingSub": "Das Regelwerk stimmt. Die Routing-Tabelle nicht."
+    "routingSub": "Das Regelwerk stimmt. Die Routing-Tabelle nicht.",
+    "review": "Review",
+    "reviewSub": "Fünf Aufgaben auf deine Schwachstellen"
   },
   "level": {
     "boss": "Boss",
@@ -645,6 +647,34 @@
       "routing": "Routing → dstintf",
       "vip": "VIP / DNAT",
       "snat": "SNAT"
+    }
+  },
+  "review": {
+    "title": "Review",
+    "start": "Review starten",
+    "focus": "Schwerpunkt",
+    "intro": "Fünf kurze Aufgaben, gezielt auf das, was dir immer wieder durchgeht. Accept oder Deny, danach zeigt die Engine, was sie getan hat und warum.",
+    "noWeakness": "Noch misst sich nichts als Schwäche, also nimmt diese Runde Stoff, den du kaum berührt hast.",
+    "right": "Richtig",
+    "wrong": "Knapp daneben",
+    "truth": "Die Engine sagt {{action}} über Policy {{policy}}.",
+    "next": "Weiter",
+    "finish": "Abschließen",
+    "done": "Review abgeschlossen",
+    "again": "Noch eine Runde",
+    "summary": "{{correct}} von {{total}} richtig",
+    "perfect": "Alle fünf. Was schwach war, ist es gerade nicht mehr — jedenfalls heute.",
+    "keepGoing": "Vermerkt. Die Schwachstellen rechnen sich selbst neu, morgen sieht die Liste anders aus.",
+    "lesson": {
+      "implicitDeny": "Keine Regel passte, also hat Policy 0 entschieden. Sie steht in keiner Liste und hat immer das letzte Wort.",
+      "firstMatch": "Die erste passende Regel gewinnt. Spezifität spielt dabei keine Rolle.",
+      "interface": "Interfaces werden vor den Adressen geprüft. Eine Regel am falschen Paar kommt gar nicht so weit.",
+      "address": "Das Adressobjekt entscheidet, nicht die IP, die du im Kopf hattest. Sieh nach, was das Objekt wirklich enthält.",
+      "service": "Der Service muss Protokoll UND Port treffen. Knapp daneben ist keine Portrange.",
+      "schedule": "Ein Zeitplan schaltet die Regel außerhalb ihres Fensters ab. Sie sieht aktiv aus und ist es zu dieser Stunde nicht.",
+      "routing": "Das Routing läuft vor der Policy-Prüfung und wählt das Ausgangs-Interface. Ohne Route wird die Policy nie befragt.",
+      "vip": "DNAT-Verkehr matcht nur über das VIP-Objekt. Weder all noch die interne IP tun es.",
+      "snat": "SNAT schreibt die Quelle auf das Egress-Interface um. Ohne das hat die Antwort keinen Weg zurück."
     }
   }
 }

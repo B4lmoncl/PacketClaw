@@ -32,6 +32,8 @@ export const UNLOCKS: UnlockRule[] = [
   { key: 'blitz', levels: 3, xp: 400 },
   { key: 'matchcheck', levels: 6, xp: 800 },
   { key: 'endless', levels: 10, xp: 1400, chapter: 1 },
+  // Erst ab hier gibt es genug Antworten, damit Mastery etwas aussagt
+  { key: 'review', levels: 14, xp: 1800 },
   { key: 'doctor', levels: 20, xp: 2600, chapter: 2 },
   { key: 'challenge', levels: 30, xp: 4200, chapter: 3 },
   { key: 'routing', levels: 40, xp: 6000, chapter: 4 },
