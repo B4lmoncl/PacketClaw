@@ -574,7 +574,10 @@
     "title": "Tagesziel",
     "done": "Tagesziel geschafft",
     "remaining": "noch {{xp}} XP",
-    "earnedToday": "{{xp}} XP heute"
+    "earnedToday": "{{xp}} XP heute",
+    "keepStreak": "Serie halten",
+    "streakSafe": "Serie gehalten · Tag {{days}}",
+    "freezeHint": "Ein Freeze deckt einen verpassten Tag ab."
   },
   "reward": {
     "ready": "Depot bereit",

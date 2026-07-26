@@ -574,7 +574,10 @@
     "title": "Daily goal",
     "done": "Daily goal met",
     "remaining": "{{xp}} XP to go",
-    "earnedToday": "{{xp}} XP today"
+    "earnedToday": "{{xp}} XP today",
+    "keepStreak": "Keep the streak",
+    "streakSafe": "Streak held · day {{days}}",
+    "freezeHint": "A freeze covers one missed day."
   },
   "reward": {
     "ready": "Cache ready",

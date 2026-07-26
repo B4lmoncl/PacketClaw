@@ -14,7 +14,15 @@ const STROKE = 4;
 const R = (SIZE - STROKE) / 2;
 const CIRC = 2 * Math.PI * R;
 
-export function DailyGoalRing({ goal }: { goal: DailyGoal }) {
+interface Props {
+  goal: DailyGoal;
+  /** Laufende Serie in Tagen — das Tagesziel haelt sie */
+  streak: number;
+  /** Vorhandene Freeze-Token (entschaerfen einen verpassten Tag) */
+  freezeTokens?: number;
+}
+
+export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotionPref();
 
@@ -49,13 +57,27 @@ export function DailyGoalRing({ goal }: { goal: DailyGoal }) {
         </span>
       </div>
       <div className="min-w-0">
+        {/* Das Tagesziel HAELT die Serie — wer das nicht sieht, versteht nicht,
+            warum die 300 XP zaehlen. Formuliert als Feststellung, nicht als
+            Drohung: kein Verlust-Druck, nur der Zusammenhang. */}
         <div className="font-display text-sm font-bold text-ink">
-          {goal.done ? t('goal.done') : t('goal.title')}
+          {goal.done
+            ? streak > 0
+              ? t('goal.streakSafe', { days: streak })
+              : t('goal.done')
+            : streak > 0
+              ? t('goal.keepStreak')
+              : t('goal.title')}
         </div>
         <div className="font-mono text-[11px] text-dim">
           {goal.done
             ? t('goal.earnedToday', { xp: goal.earned })
             : t('goal.remaining', { xp: goal.remaining })}
+          {freezeTokens > 0 && (
+            <span className="ml-1.5 text-aura" title={t('goal.freezeHint')}>
+              ❄{freezeTokens}
+            </span>
+          )}
         </div>
       </div>
     </div>

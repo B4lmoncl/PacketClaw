@@ -6,6 +6,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { todayString } from './daily';
+import { DEFAULT_DAILY_GOAL } from './rewards';
 import { pickQuests } from './dailyQuests';
 import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
@@ -171,17 +172,38 @@ export function readQuestCounters(state: {
   };
 }
 
+/**
+ * Streak-Regel: die Serie zaehlt, sobald das TAGESZIEL erreicht ist — egal in
+ * welchem Modus. Vorher haing sie allein am Daily Run, wer also fuenf
+ * Doctor-Faelle loeste und den Daily uebersprang, verlor die Serie. Das
+ * bestrafte das Falsche. advanceStreak ist fuer denselben Tag idempotent,
+ * mehrfaches Ausloesen am Tag ist also unschaedlich.
+ */
+function streakForGoal(
+  streak: StreakState,
+  date: string,
+  xpBefore: number,
+  xpAfter: number,
+): StreakState {
+  const crossed = xpBefore < DEFAULT_DAILY_GOAL && xpAfter >= DEFAULT_DAILY_GOAL;
+  return crossed ? advanceStreak(streak, date) : streak;
+}
+
 function rewardPatch(state: GameState, score: number, date = todayString()) {
   const xp = state.xp + score;
   const sameDay = state.dailyXp.date === date;
+  const xpBefore = sameDay ? state.dailyXp.xp : 0;
+  const xpToday = xpBefore + score;
+  const streak = streakForGoal(state.streak, date, xpBefore, xpToday);
   const unlocked = evaluateAchievements(
-    { stats: state.stats, xp, stars: state.stars, streak: state.streak },
+    { stats: state.stats, xp, stars: state.stars, streak },
     state.achievements,
   );
   return {
     xp,
+    streak,
     tasksSolved: state.tasksSolved + 1,
-    dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
+    dailyXp: { date, xp: xpToday },
     achievements: [...state.achievements, ...unlocked],
     lastUnlocked: unlocked.length > 0 ? unlocked : state.lastUnlocked,
   };
@@ -231,11 +253,14 @@ export const useGame = create<GameState>()(
           );
           const date = todayString();
           const sameDay = state.dailyXp.date === date;
+          const xpBefore = sameDay ? state.dailyXp.xp : 0;
+          const xpToday = xpBefore + score;
           return {
             xp,
             stars: nextStars,
+            streak: streakForGoal(state.streak, date, xpBefore, xpToday),
             tasksSolved: state.tasksSolved + 1,
-            dailyXp: { date, xp: (sameDay ? state.dailyXp.xp : 0) + score },
+            dailyXp: { date, xp: xpToday },
             bestScores: {
               ...state.bestScores,
               [levelId]: Math.max(state.bestScores[levelId] ?? 0, score),

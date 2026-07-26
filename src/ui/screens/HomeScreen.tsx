@@ -253,7 +253,11 @@ export function HomeScreen() {
           Das ist die Vorfreude-Ebene — sie beantwortet „warum noch eine Runde?" */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
             <div className="panel-inset flex items-center rounded-panel px-4 py-3">
-              <DailyGoalRing goal={goal} />
+              <DailyGoalRing
+                goal={goal}
+                streak={streak.current}
+                freezeTokens={streak.freezeTokens}
+              />
             </div>
 
             {chestsReady > 0 ? (
