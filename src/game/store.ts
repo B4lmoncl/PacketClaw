@@ -11,6 +11,7 @@ import { pickQuests, weekMilestone } from './dailyQuests';
 import type { Concept, MasteryMap } from './mastery';
 import type { QuestCounters } from './dailyQuests';
 import { chestsEarned, openChest } from './rewards';
+import { alreadyUnlocked } from './unlocks';
 import { drawNote, noteById, RARITY_XP } from './fieldNotes';
 import { getLevel, levelsForChapter } from './levels';
 import {
@@ -94,6 +95,15 @@ interface GameState {
   /** Freischaltungen, die der Spieler schon gefeiert bekommen hat */
   seenUnlocks: string[];
   /**
+   * Wurde seenUnlocks schon einmal mit dem Ist-Stand befuellt?
+   *
+   * „Noch nicht gesehen" und „gerade eben aufgegangen" sind nicht dasselbe: ein
+   * Save, der aelter ist als das Freischalt-System, hat ein leeres seenUnlocks
+   * und wuerde jeden laengst offenen Modus als neu feiern. Ein falsches „neu!"
+   * macht alle kuenftigen echten wertlos.
+   */
+  unlocksInitialised: boolean;
+  /**
    * Tagesauftraege. Einmal pro Tag gezogen und dann STABIL — sonst wuerden
    * sie sich mitten am Tag aendern, wenn ein Modus freigeschaltet wird.
    * snapshot = Zaehlerstand bei Tagesbeginn, alles darueber ist von heute.
@@ -142,6 +152,8 @@ interface GameState {
    */
   openNextChest(): { xp: number; note: string | null; rarity: string } | null;
   markUnlocksSeen(keys: string[]): void;
+  /** Einmalige Erstbefuellung von seenUnlocks mit dem Ist-Stand */
+  initialiseUnlocks(levelsDone: number, xp: number): void;
   /** Legt die Auftraege des Tages an bzw. rollt auf einen neuen Tag um */
   ensureQuestDay(date: string, unlockedModes: string[]): void;
   /** Erfuellten Auftrag einloesen; gibt die XP zurueck oder null */
@@ -299,6 +311,7 @@ export const useGame = create<GameState>()(
       chestsOpened: 0,
       fieldNotes: [],
       seenUnlocks: [],
+      unlocksInitialised: false,
       questDay: { date: '', ids: [], snapshot: EMPTY_QUEST_COUNTERS, claimed: [] },
       mastery: {},
       stats: { ...EMPTY_STATS },
@@ -431,6 +444,20 @@ export const useGame = create<GameState>()(
         return { xp, note: note?.id ?? null, rarity: note?.rarity ?? openChest(chestNo).rarity };
       },
 
+      /**
+       * Einmalig: alles, was jetzt schon offen ist, gilt als gesehen. Bei einem
+       * frischen Spielstand ist das nichts — jede echte Freischaltung danach
+       * wird gefeiert.
+       */
+      initialiseUnlocks: (levelsDone, xp) =>
+        set((state) => {
+          if (state.unlocksInitialised) return state;
+          return {
+            unlocksInitialised: true,
+            seenUnlocks: [...new Set([...state.seenUnlocks, ...alreadyUnlocked(levelsDone, xp)])],
+          };
+        }),
+
       markUnlocksSeen: (keys) =>
         set((state) => ({
           seenUnlocks: [...new Set([...state.seenUnlocks, ...keys])],
@@ -533,6 +560,7 @@ export const useGame = create<GameState>()(
           chestsOpened,
           fieldNotes,
           seenUnlocks,
+          unlocksInitialised,
           questDay,
           mastery,
           stats,
@@ -562,6 +590,7 @@ export const useGame = create<GameState>()(
             chestsOpened,
             fieldNotes,
             seenUnlocks,
+            unlocksInitialised,
             questDay,
             mastery,
             stats,
@@ -616,6 +645,7 @@ export const useGame = create<GameState>()(
         chestsOpened: state.chestsOpened,
         fieldNotes: state.fieldNotes,
         seenUnlocks: state.seenUnlocks,
+        unlocksInitialised: state.unlocksInitialised,
         questDay: state.questDay,
         mastery: state.mastery,
         stats: state.stats,
@@ -656,6 +686,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   chestsOpened: number;
   fieldNotes: string[];
   seenUnlocks: string[];
+  unlocksInitialised: boolean;
   questDay: { date: string; ids: string[]; snapshot: QuestCounters; claimed: string[] };
   mastery: MasteryMap;
   stats: Stats;
@@ -692,6 +723,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
       ? (save.fieldNotes as string[]).filter((id) => noteById(id) !== undefined)
       : [],
     seenUnlocks: Array.isArray(save.seenUnlocks) ? (save.seenUnlocks as string[]) : [],
+    unlocksInitialised: save.unlocksInitialised === true,
     questDay: {
       date: '',
       ids: [],

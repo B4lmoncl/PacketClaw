@@ -101,3 +101,21 @@ export function freshUnlocks(levelsDone: number, xp: number, seen: readonly stri
     .filter((u) => u.unlocked && !seen.includes(u.key))
     .map((u) => u.key);
 }
+
+/**
+ * Alle bereits offenen Modi — für die Erstbefüllung von `seenUnlocks`.
+ *
+ * WARUM DAS NÖTIG IST. „noch nicht gesehen" und „gerade eben aufgegangen" sind
+ * nicht dasselbe. Ein Spieler mit 9000 XP, dessen Save älter als das
+ * Freischalt-System ist, bekam „Etwas hat sich geöffnet: Blitz" angezeigt —
+ * über einen Modus, den er seit Wochen spielt. Ein falsches „neu!" erzieht dazu,
+ * das Abzeichen zu ignorieren, und macht damit alle künftigen echten wertlos.
+ *
+ * Bei einem frischen Spielstand ist noch nichts offen, die Liste also leer —
+ * jede echte Freischaltung wird danach gefeiert.
+ */
+export function alreadyUnlocked(levelsDone: number, xp: number): string[] {
+  return unlockStates(levelsDone, xp)
+    .filter((u) => u.unlocked)
+    .map((u) => u.key);
+}

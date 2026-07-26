@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  alreadyUnlocked,
   ALWAYS_OPEN,
   freshUnlocks,
   isUnlocked,
@@ -70,6 +71,42 @@ describe('Freischaltungen', () => {
   it('jeder freischaltbare Modus ist mit der vollen Kampagne erreichbar', () => {
     for (const rule of UNLOCKS) {
       expect(isUnlocked(rule.key, 80, 0), rule.key).toBe(true);
+    }
+  });
+});
+
+describe('Erstbefuellung: „nicht gesehen" ist nicht „gerade aufgegangen"', () => {
+  it('frischer Spielstand hat noch nichts offen', () => {
+    expect(alreadyUnlocked(0, 0)).toEqual([]);
+  });
+
+  /**
+   * Der eigentliche Fehler: ein Save mit 9000 XP und leerem seenUnlocks hat
+   * „Etwas hat sich geoeffnet: Blitz" gemeldet — ueber einen Modus, der seit
+   * Wochen gespielt wird. Nach der Erstbefuellung ist da nichts mehr frisch.
+   */
+  it('nach der Erstbefuellung meldet freshUnlocks nichts mehr', () => {
+    const seen = alreadyUnlocked(30, 9000);
+    expect(seen.length).toBeGreaterThan(0);
+    expect(freshUnlocks(30, 9000, seen)).toEqual([]);
+  });
+
+  it('eine ECHTE Freischaltung danach wird weiterhin gemeldet', () => {
+    const seen = alreadyUnlocked(0, 0); // frischer Spieler: nichts gesehen
+    const fresh = freshUnlocks(3, 0, seen); // Blitz geht bei 3 Leveln auf
+    expect(fresh).toContain('blitz');
+  });
+
+  it('alreadyUnlocked und freshUnlocks widersprechen sich nie', () => {
+    for (const [levels, xp] of [
+      [0, 0],
+      [5, 500],
+      [20, 3000],
+      [48, 7500],
+      [80, 40000],
+    ] as const) {
+      const seen = alreadyUnlocked(levels, xp);
+      expect(freshUnlocks(levels, xp, seen), `${levels}/${xp}`).toEqual([]);
     }
   });
 });

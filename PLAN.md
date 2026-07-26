@@ -1007,3 +1007,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Gemessen: 1920 px 1,48 → 1,31 Bildschirmhoehen, 1440 px 1,77 → 1,58, mobil
   3,54 unveraendert, kein waagerechter Ueberlauf, 0 Konsolenfehler.
   Tests: 426 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-26 (Forts. 45): FALSCHES „NEU!" ABGESTELLT. Im Layout-Audit ist es
+  aufgefallen: ein Spielstand mit 9000 XP meldete „Etwas hat sich geoeffnet:
+  Blitz" — ueber einen Modus, der seit Wochen gespielt wird. Ursache: „noch
+  nicht gesehen" und „gerade eben aufgegangen" waren dasselbe. Jeder Save, der
+  aelter ist als das Freischalt-System, hat ein leeres seenUnlocks.
+  Ein falsches „neu!" erzieht dazu, das Abzeichen zu ignorieren — und macht
+  damit alle KUENFTIGEN echten Meldungen wertlos. Deshalb kein Kosmetikfehler.
+  NEU alreadyUnlocked() + einmalige Erstbefuellung (initialiseUnlocks, Flag
+  unlocksInitialised im Save): beim ersten Aufruf gilt alles, was jetzt schon
+  offen ist, als gesehen. Ein frischer Spielstand hat noch nichts offen, dort
+  wird also weiterhin JEDE echte Freischaltung gefeiert — eigener Test dafuer,
+  plus einer, der fuer fuenf Spielstaende prueft, dass sich alreadyUnlocked und
+  freshUnlocks nie widersprechen.
+  Tests: 430 gruen, Lint 0 Fehler, Build ok, E2E: die alte Falschmeldung ist weg,
+  stattdessen steht dort die naechste echte Freischaltung.

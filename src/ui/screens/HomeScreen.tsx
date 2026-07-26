@@ -126,6 +126,7 @@ export function HomeScreen() {
   const mgmtSolvedCount = useGame((s) => s.mgmtSolvedCount);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
+  const initialiseUnlocks = useGame((s) => s.initialiseUnlocks);
 
   const [reward, setReward] = useState<RewardPayload | null>(null);
 
@@ -147,6 +148,13 @@ export function HomeScreen() {
   const unlockedModes = UNLOCKS.filter((u) => isUnlocked(u.key, campaign.completed, xp)).map(
     (u) => u.key,
   );
+  // Erst den Ist-Stand als gesehen verbuchen, sonst feiert ein alter Save
+  // Modi, die er seit Wochen spielt
+  useEffect(() => {
+    initialiseUnlocks(campaign.completed, xp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     ensureQuestDay(today, unlockedModes);
     // eslint-disable-next-line react-hooks/exhaustive-deps
