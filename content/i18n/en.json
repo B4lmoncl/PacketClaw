@@ -37,7 +37,9 @@
     "routing": "Routing Lab",
     "routingSub": "The ruleset is fine. The routing table is not.",
     "review": "Review",
-    "reviewSub": "Five tasks aimed at your weak spots"
+    "reviewSub": "Five tasks aimed at your weak spots",
+    "mgmt": "Access to the Watch",
+    "mgmtSub": "Open management access without locking yourself out"
   },
   "level": {
     "boss": "Boss",
@@ -804,6 +806,52 @@
         "title": "Schedule",
         "body": "A schedule switches a rule off outside its window. The rule looks enabled the whole time. It is, too — just not now."
       }
+    }
+  },
+  "mgmt": {
+    "title": "Access to the Watch",
+    "allowaccess": "Open services on the interface (allowaccess)",
+    "trusthost": "Trusted hosts for {{admin}}",
+    "facingInternet": "faces the internet",
+    "facingOffice": "faces the office",
+    "forwardTable": "Ruleset (read-only)",
+    "forwardHint": "decides nothing here",
+    "checks": "Verification",
+    "checkButton": "Check access",
+    "solved": "Access stands",
+    "another": "Next case",
+    "lockedOut": "Locked out. The access you were going to fix this with is the one you just closed. From here on only the console on site will do.",
+    "tooOpen": "Nobody is locked out. There is simply more coming in than intended.",
+    "gateHint": "Look at the {{gate}}.",
+    "host": {
+      "anywhere": "from anywhere",
+      "mgmt": "10.0.1.0/28 (management)",
+      "lan": "10.0.1.0/24 (the whole LAN)",
+      "foreign": "192.168.99.0/24"
+    },
+    "gate": {
+      "allowaccess": "interface allowaccess",
+      "local-in-policy": "local-in policy",
+      "trusthost": "the account's trusthost",
+      "open": "open",
+      "not-local": "not local-in traffic"
+    },
+    "check": {
+      "adminHttps": "An admin from the management net reaches the GUI (HTTPS)",
+      "adminSsh": "An admin from the management net reaches the CLI (SSH)",
+      "internetHttps": "The internet does NOT reach the GUI",
+      "internetSsh": "The internet does NOT reach SSH",
+      "otherLan": "A LAN host outside the management net does NOT get in"
+    },
+    "ticket": {
+      "closed": "The colleague in the office cannot reach the interface. “Timeout”, she says. The ruleset has not changed in weeks and looks entirely fine. It is also not the ruleset.",
+      "wide-open": "The auditor called. He was friendly. That was the unpleasant part: the management interface answers from the internet, and the account accepts logins from every address in the world.",
+      "wrong-trusthost": "After the renumbering nobody reaches the GUI. The services are open, no rule is in the way, and still nothing happens. Somewhere the firewall is waiting for visitors from a network that no longer exists."
+    },
+    "lesson": {
+      "closed": "The service was never open on the interface. That appears in no policy table, which is why one can search there for a long time.",
+      "wide-open": "Closing it is not a setting you forget — it is one you make. Outward stays shut, the office gets in.",
+      "wrong-trusthost": "trusthost is a second, independent gate. It does not care that the service is open, and it does not apologise either."
     }
   }
 }

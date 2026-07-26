@@ -23,6 +23,7 @@ import { DesignScreen } from './ui/screens/DesignScreen';
 import { RoutingScreen } from './ui/screens/RoutingScreen';
 import { ReviewScreen } from './ui/screens/ReviewScreen';
 import { NotesScreen } from './ui/screens/NotesScreen';
+import { MgmtScreen } from './ui/screens/MgmtScreen';
 import { ChallengeScreen } from './ui/screens/ChallengeScreen';
 import { ProfileScreen } from './ui/screens/ProfileScreen';
 import { SettingsScreen } from './ui/screens/SettingsScreen';
@@ -113,6 +114,10 @@ export default function App() {
       break;
     case 'review':
       content = <ReviewScreen />;
+      onBack = () => navigate({ name: 'home' });
+      break;
+    case 'mgmt':
+      content = <MgmtScreen />;
       onBack = () => navigate({ name: 'home' });
       break;
     case 'notes':

@@ -37,7 +37,9 @@
     "routing": "Routing-Werkstatt",
     "routingSub": "Das Regelwerk stimmt. Die Routing-Tabelle nicht.",
     "review": "Review",
-    "reviewSub": "Fünf Aufgaben auf deine Schwachstellen"
+    "reviewSub": "Fünf Aufgaben auf deine Schwachstellen",
+    "mgmt": "Zugang zur Wache",
+    "mgmtSub": "Management-Zugriff öffnen, ohne sich auszusperren"
   },
   "level": {
     "boss": "Boss",
@@ -804,6 +806,52 @@
         "title": "Zeitplan",
         "body": "Ein Zeitplan schaltet eine Regel außerhalb ihres Fensters ab. Die Regel sieht dabei die ganze Zeit aktiviert aus. Sie ist es auch — nur nicht jetzt."
       }
+    }
+  },
+  "mgmt": {
+    "title": "Zugang zur Wache",
+    "allowaccess": "Offene Dienste am Interface (allowaccess)",
+    "trusthost": "Trusted Hosts für {{admin}}",
+    "facingInternet": "zeigt ins Internet",
+    "facingOffice": "zeigt ins Büro",
+    "forwardTable": "Regelwerk (read-only)",
+    "forwardHint": "entscheidet hier nichts",
+    "checks": "Prüfung",
+    "checkButton": "Zugriff prüfen",
+    "solved": "Zugang steht",
+    "another": "Nächster Fall",
+    "lockedOut": "Ausgesperrt. Der Zugang, mit dem du das reparieren wolltest, ist genau der, den du gerade zugemacht hast. Ab hier hilft nur die Konsole vor Ort.",
+    "tooOpen": "Niemand ist ausgesperrt. Es kommt nur mehr rein als vorgesehen.",
+    "gateHint": "Sieh am {{gate}} nach.",
+    "host": {
+      "anywhere": "von überall",
+      "mgmt": "10.0.1.0/28 (Management)",
+      "lan": "10.0.1.0/24 (ganzes LAN)",
+      "foreign": "192.168.99.0/24"
+    },
+    "gate": {
+      "allowaccess": "allowaccess am Interface",
+      "local-in-policy": "Local-In-Policy",
+      "trusthost": "trusthost des Kontos",
+      "open": "offen",
+      "not-local": "kein Local-In-Verkehr"
+    },
+    "check": {
+      "adminHttps": "Admin aus dem Management-Netz erreicht die GUI (HTTPS)",
+      "adminSsh": "Admin aus dem Management-Netz erreicht die CLI (SSH)",
+      "internetHttps": "Das Internet erreicht die GUI NICHT",
+      "internetSsh": "Das Internet erreicht SSH NICHT",
+      "otherLan": "Ein Rechner im LAN außerhalb des Management-Netzes kommt NICHT rein"
+    },
+    "ticket": {
+      "closed": "Die Kollegin im Büro kommt nicht auf die Oberfläche. „Timeout“, sagt sie. Das Regelwerk hat sich seit Wochen nicht geändert und sieht völlig in Ordnung aus. Es ist auch nicht das Regelwerk.",
+      "wide-open": "Der Auditor hat angerufen. Er war freundlich. Das war das Unangenehme daran: die Management-Oberfläche antwortet aus dem Internet, und das Konto nimmt Anmeldungen von jeder Adresse der Welt.",
+      "wrong-trusthost": "Nach der Netzumstellung kommt niemand mehr auf die GUI. Die Dienste sind offen, es steht keine Regel im Weg, und trotzdem passiert nichts. Irgendwo wartet die Firewall auf Besuch aus einem Netz, das es nicht mehr gibt."
+    },
+    "lesson": {
+      "closed": "Der Dienst war am Interface nie offen. Das steht in keiner Policy-Tabelle, weshalb man dort auch lange suchen kann.",
+      "wide-open": "Zumachen ist keine Einstellung, die man vergisst — es ist eine, die man trifft. Nach draußen bleibt zu, ins Büro geht auf.",
+      "wrong-trusthost": "trusthost ist ein zweites, unabhängiges Tor. Es interessiert sich nicht dafür, dass der Dienst offen ist, und es entschuldigt sich auch nicht."
     }
   }
 }

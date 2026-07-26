@@ -46,6 +46,7 @@ export type Screen =
   | { name: 'routing' }
   | { name: 'review' }
   | { name: 'notes' }
+  | { name: 'mgmt' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -80,6 +81,8 @@ interface GameState {
   routingSolved: number;
   /** Abgeschlossene Review-Sitzungen */
   reviewsDone: number;
+  /** Geloeste Management-Zugriff-Faelle */
+  mgmtSolvedCount: number;
   /** XP von heute (fuer das Tagesziel) — Datum + Betrag */
   dailyXp: { date: string; xp: number };
   /** Insgesamt geloeste Einzelaufgaben (Truhen-Zaehler) */
@@ -130,6 +133,7 @@ interface GameState {
   recordDesign(score: number): void;
   recordRouting(score: number): void;
   recordReview(score: number): void;
+  recordMgmt(score: number): void;
   /** Eine Einzelaufgabe geloest: zaehlt fuer Truhen und Tagesziel */
   addTaskXp(score: number, date: string): void;
   /**
@@ -286,6 +290,7 @@ export const useGame = create<GameState>()(
       designSolved: 0,
       routingSolved: 0,
       reviewsDone: 0,
+      mgmtSolvedCount: 0,
       dailyXp: { date: '', xp: 0 },
       tasksSolved: 0,
       chestsOpened: 0,
@@ -373,6 +378,12 @@ export const useGame = create<GameState>()(
         set((state) => ({
           ...rewardPatch(state, score),
           routingSolved: state.routingSolved + 1,
+        })),
+
+      recordMgmt: (score) =>
+        set((state) => ({
+          ...rewardPatch(state, score),
+          mgmtSolvedCount: state.mgmtSolvedCount + 1,
         })),
 
       recordReview: (score) =>
@@ -513,6 +524,7 @@ export const useGame = create<GameState>()(
           designSolved,
           routingSolved,
           reviewsDone,
+          mgmtSolvedCount,
           dailyXp,
           tasksSolved,
           chestsOpened,
@@ -541,6 +553,7 @@ export const useGame = create<GameState>()(
             designSolved,
             routingSolved,
             reviewsDone,
+            mgmtSolvedCount,
             dailyXp,
             tasksSolved,
             chestsOpened,
@@ -594,6 +607,7 @@ export const useGame = create<GameState>()(
         designSolved: state.designSolved,
         routingSolved: state.routingSolved,
         reviewsDone: state.reviewsDone,
+        mgmtSolvedCount: state.mgmtSolvedCount,
         dailyXp: state.dailyXp,
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
@@ -633,6 +647,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   designSolved: number;
   routingSolved: number;
   reviewsDone: number;
+  mgmtSolvedCount: number;
   dailyXp: { date: string; xp: number };
   tasksSolved: number;
   chestsOpened: number;
@@ -665,6 +680,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     designSolved: typeof save.designSolved === 'number' ? save.designSolved : 0,
     routingSolved: typeof save.routingSolved === 'number' ? save.routingSolved : 0,
     reviewsDone: typeof save.reviewsDone === 'number' ? save.reviewsDone : 0,
+    mgmtSolvedCount: typeof save.mgmtSolvedCount === 'number' ? save.mgmtSolvedCount : 0,
     dailyXp: { date: '', xp: 0, ...((save.dailyXp as { date: string; xp: number } | null) ?? {}) },
     tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
     chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,

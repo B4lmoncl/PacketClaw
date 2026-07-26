@@ -37,6 +37,9 @@ export const UNLOCKS: UnlockRule[] = [
   { key: 'doctor', levels: 20, xp: 2600, chapter: 2 },
   { key: 'challenge', levels: 30, xp: 4200, chapter: 3 },
   { key: 'routing', levels: 40, xp: 6000, chapter: 4 },
+  // Local-In gehoert nach den Interfaces/Zonen, aber vor das Regelwerk-Bauen:
+  // man muss verstanden haben, dass es Verkehr AN die Firewall gibt
+  { key: 'mgmt', levels: 48, xp: 7500, chapter: 5 },
   { key: 'design', levels: 55, xp: 9000, chapter: 6 },
   { key: 'dnat', levels: 65, xp: 12000, chapter: 7 },
 ];

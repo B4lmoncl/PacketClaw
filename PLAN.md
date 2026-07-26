@@ -950,3 +950,35 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
      OFFEN (Teil 2): Workshop-Modus „Management-Zugriff" — Zugriff fuers Buero
      freischalten, ohne sich selbst auszusperren.
      Tests: 408 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-26 (Forts. 42): WORKSHOP „ZUGANG ZUR WACHE" (#50 abgeschlossen).
+  Die Engine konnte Local-In, aber niemand kam dran. Jetzt gibt es den Modus.
+  NEU src/game/mgmt.ts (pure, 17 Tests) + MgmtScreen. Drei Fallarten, jede haengt
+  an einem anderen Tor: closed (allowaccess zu), wide-open (Management aus dem
+  Internet erreichbar, trusthost von ueberall), wrong-trusthost (alles offen,
+  trusthost zeigt nach der Netzumstellung ins Leere).
+  DREI REGLER: allowaccess pro Interface (port1/wan1), trusthost des Kontos aus
+  vier Vorgaben. Bewusst keine frei tippbare CIDR — der Lerninhalt ist die
+  ENTSCHEIDUNG, nicht das Eintippen.
+  DIE POLICY-TABELLE STEHT MIT IM BILD und ist read-only, beschriftet mit
+  „entscheidet hier nichts". Sie ist eine Attrappe: wer den Reflex „ich schreibe
+  eine Regel" bringt, soll SEHEN, dass es hier nicht hilft, statt es gesagt zu
+  bekommen.
+  DIE PRUEFUNG GEHT IN BEIDE RICHTUNGEN — Buero muss rein, Internet muss
+  draussen bleiben, und ein LAN-Rechner ausserhalb des Management-Netzes auch
+  nicht. Alles zumachen ist deshalb genauso falsch wie alles aufmachen, nur
+  teurer. Der Aussperr-Zustand bekommt eine eigene laute Darstellung
+  (panel-reward rarity-legendary), weil er auf einer echten FortiGate etwas
+  anderes bedeutet als „ein Pruefpunkt ist rot": ab da hilft nur die Konsole.
+  Der wichtigste Test ist derselbe wie bei der DNAT-Werkstatt: JEDER Fall muss
+  mit den vorhandenen Reglern loesbar sein. Dazu Tests fuer beide Halbwege
+  („nur allowaccess auf" / „nur trusthost richtig") — die scheitern korrekt.
+  Nebenbei in eigener Sache: zwei Tests hatten ein stilles `return`, wenn eine
+  Fallart nicht gezogen wurde. Das haette die Zusicherungen lautlos abgeschaltet;
+  jetzt scheitert stattdessen der Test.
+  Der Hinweis auf das richtige Tor erscheint erst nach ZWEI Fehlversuchen —
+  vorher waere er die Antwort, und die Uebung ist, herauszufinden WO man sucht.
+  Freischaltung bei 48 Leveln / 7500 XP (Kapitel 5): nach Interfaces und Zonen,
+  vor dem Regelwerk-Bauen.
+  Tests: 425 gruen, Lint 0 Fehler, Build ok, 80 Level valide, E2E: alles
+  zumachen meldet korrekt „ausgesperrt", die richtige Loesung loest, 0
+  Konsolenfehler.
