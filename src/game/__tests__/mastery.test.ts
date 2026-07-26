@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   conceptMastery,
   conceptOfVerdict,
+  masteryDeltas,
   MIN_ATTEMPTS,
   overallMastery,
   untestedConcepts,
@@ -245,5 +246,91 @@ describe('Mastery-Stand', () => {
       vip: { correct: 0, wrong: 1 }, // unbelegt, zaehlt nicht mit
     };
     expect(overallMastery(mastery)).toBeCloseTo(0.75);
+  });
+});
+
+describe('masteryDeltas — die Bewegung ist der Lohn', () => {
+  it('nennt nur Konzepte, an denen tatsaechlich geuebt wurde', () => {
+    const before: MasteryMap = { service: { correct: 1, wrong: 3 }, vip: { correct: 4, wrong: 0 } };
+    const after: MasteryMap = { service: { correct: 3, wrong: 3 }, vip: { correct: 4, wrong: 0 } };
+    const deltas = masteryDeltas(before, after);
+    // vip stand still, also keine Zeile — eine +-0-Zeile waere nur Fuellmaterial
+    expect(deltas.map((d) => d.concept)).toEqual(['service']);
+    expect(deltas[0]).toMatchObject({ attemptsAdded: 2 });
+    expect(deltas[0]?.before).toBeCloseTo(0.25);
+    expect(deltas[0]?.after).toBeCloseTo(0.5);
+    expect(deltas[0]?.change).toBeCloseTo(0.25);
+  });
+
+  /**
+   * Wichtig fuers Vertrauen: eine Messung, die nur gute Nachrichten zeigt,
+   * ist keine Messung. Wer vorher geraten hat, soll die Zahl fallen sehen.
+   */
+  it('verschweigt Rueckschritte nicht', () => {
+    const before: MasteryMap = { address: { correct: 4, wrong: 0 } };
+    const after: MasteryMap = { address: { correct: 4, wrong: 4 } };
+    const [d] = masteryDeltas(before, after);
+    expect(d?.change).toBeCloseTo(-0.5);
+    expect(d?.after).toBeCloseTo(0.5);
+  });
+
+  it('markiert den ersten belastbaren Messwert als neu belegt', () => {
+    const before: MasteryMap = { routing: { correct: 1, wrong: 0 } };
+    const after: MasteryMap = { routing: { correct: 4, wrong: 0 } };
+    const [d] = masteryDeltas(before, after);
+    expect(d?.newlyProven).toBe(true);
+    // war es vorher schon belegt, ist daran nichts neu
+    const [d2] = masteryDeltas(
+      { routing: { correct: 4, wrong: 0 } },
+      { routing: { correct: 5, wrong: 0 } },
+    );
+    expect(d2?.newlyProven).toBe(false);
+  });
+
+  it('groesste Bewegung zuerst — das ist die Zeile, die man lesen soll', () => {
+    const before: MasteryMap = {
+      address: { correct: 2, wrong: 2 }, // 50 %
+      service: { correct: 2, wrong: 2 }, // 50 %
+      vip: { correct: 2, wrong: 2 }, // 50 %
+    };
+    const after: MasteryMap = {
+      address: { correct: 2, wrong: 3 }, // 40 % → −10
+      service: { correct: 4, wrong: 2 }, // 67 % → +17
+      vip: { correct: 6, wrong: 2 }, // 75 % → +25
+    };
+    expect(masteryDeltas(before, after).map((d) => d.concept)).toEqual([
+      'vip',
+      'service',
+      'address',
+    ]);
+  });
+
+  /**
+   * Gleicher Betrag, verschiedene Richtung: der Abschnitt ist die Belohnung
+   * der Sitzung, nicht ihr Zeugnis — also steht der Fortschritt oben. Ohne
+   * diese Regel entschiede die Reihenfolge von CONCEPTS, also der Zufall.
+   */
+  it('bei gleichem Betrag steht der Fortschritt vor dem Rueckschritt', () => {
+    const before: MasteryMap = {
+      address: { correct: 2, wrong: 2 },
+      service: { correct: 2, wrong: 2 },
+    };
+    const after: MasteryMap = {
+      address: { correct: 2, wrong: 3 }, // −10
+      service: { correct: 3, wrong: 2 }, // +10
+    };
+    expect(masteryDeltas(before, after).map((d) => d.concept)).toEqual(['service', 'address']);
+  });
+
+  it('erste Sitzung ueberhaupt: leerer Vorstand ergibt trotzdem Zeilen', () => {
+    const deltas = masteryDeltas({}, { service: { correct: 3, wrong: 2 } });
+    expect(deltas).toHaveLength(1);
+    expect(deltas[0]).toMatchObject({ before: 0, attemptsAdded: 5, newlyProven: true });
+  });
+
+  it('nichts passiert ⇒ keine Zeilen, der Abschnitt bleibt weg', () => {
+    const same: MasteryMap = { service: { correct: 2, wrong: 1 } };
+    expect(masteryDeltas(same, same)).toEqual([]);
+    expect(masteryDeltas({}, {})).toEqual([]);
   });
 });

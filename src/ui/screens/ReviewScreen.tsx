@@ -10,11 +10,13 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { playAccept, playWrong } from '../../game/sound';
-import { untestedConcepts, weakestConcepts } from '../../game/mastery';
+import { masteryDeltas, untestedConcepts, weakestConcepts } from '../../game/mastery';
+import type { MasteryMap } from '../../game/mastery';
 import { reviewAnswerCorrect, reviewPlan } from '../../game/review';
 import { useGame } from '../../game/store';
 import { ComboMeter } from '../components/ComboMeter';
 import { DebugFlowView } from '../components/DebugFlowView';
+import { MasteryDeltaList } from '../components/MasteryDeltaList';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { PacketCard } from '../components/PacketCard';
 import { PolicyTable } from '../components/PolicyTable';
@@ -39,6 +41,12 @@ export function ReviewScreen() {
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [lastCorrect, setLastCorrect] = useState(false);
+  /**
+   * Der Stand VOR der Sitzung. Muss beim Start eingefroren werden, sonst
+   * wandert der Vergleichspunkt mit jeder Antwort mit und das Delta wäre am
+   * Ende immer null.
+   */
+  const [before, setBefore] = useState<MasteryMap>({});
 
   const weak = useMemo(() => weakestConcepts(mastery, 3).map((m) => m.concept), [mastery]);
   const untested = useMemo(() => untestedConcepts(mastery).map((m) => m.concept), [mastery]);
@@ -48,6 +56,7 @@ export function ReviewScreen() {
 
   const task = plan[index];
   const verdict = useMemo(() => (task ? evaluate(task.packet, task.network) : null), [task]);
+  const deltas = useMemo(() => masteryDeltas(before, mastery), [before, mastery]);
 
   function answer(action: 'accept' | 'deny') {
     if (!task) return;
@@ -73,6 +82,11 @@ export function ReviewScreen() {
       return;
     }
     setIndex((i) => i + 1);
+    setPhase('play');
+  }
+
+  function begin() {
+    setBefore(mastery);
     setPhase('play');
   }
 
@@ -110,7 +124,7 @@ export function ReviewScreen() {
           )}
         </div>
         <button
-          onClick={() => setPhase('play')}
+          onClick={begin}
           className="rounded-panel bg-aura px-6 py-3 font-display text-lg font-bold text-bg hover:brightness-110"
         >
           {t('review.start')} →
@@ -132,6 +146,10 @@ export function ReviewScreen() {
             {correctCount === plan.length ? t('review.perfect') : t('review.keepGoing')}
           </div>
           <XpGain gained={40 + correctCount * 30} />
+
+          {/* Der eigentliche Lohn: nicht die Punkte, sondern die Bewegung */}
+          <MasteryDeltaList deltas={deltas} />
+
           <div className="flex gap-2">
             <button
               onClick={reset}
@@ -143,7 +161,7 @@ export function ReviewScreen() {
               onClick={() => navigate({ name: 'home' })}
               className="rounded-panel border border-line px-5 py-2.5 font-display font-bold text-dim hover:text-ink"
             >
-              {t('score.toChapter')}
+              {t('review.toMenu')}
             </button>
           </div>
         </section>

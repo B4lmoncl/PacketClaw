@@ -650,7 +650,10 @@
       "snat": "SNAT"
     },
     "trainWeak": "Genau das üben",
-    "trainAny": "Review starten"
+    "trainAny": "Review starten",
+    "moved": "Was sich bewegt hat",
+    "plusAttempts": "{{count}} Antwort(en) mehr",
+    "nowProven": "jetzt messbar"
   },
   "review": {
     "title": "Review",
@@ -665,6 +668,7 @@
     "finish": "Abschließen",
     "done": "Review abgeschlossen",
     "again": "Noch eine Runde",
+    "toMenu": "Zurück ins Menü",
     "summary": "{{correct}} von {{total}} richtig",
     "perfect": "Alle fünf. Was schwach war, ist es gerade nicht mehr — jedenfalls heute.",
     "keepGoing": "Vermerkt. Die Schwachstellen rechnen sich selbst neu, morgen sieht die Liste anders aus.",

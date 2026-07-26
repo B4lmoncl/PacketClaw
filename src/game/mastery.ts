@@ -139,6 +139,57 @@ export function untestedConcepts(mastery: MasteryMap): ConceptMastery[] {
   return allMastery(mastery).filter((m) => m.unproven);
 }
 
+// ---------------------------------------------------------------------------
+// Bewegung
+// ---------------------------------------------------------------------------
+
+export interface MasteryDelta {
+  concept: Concept;
+  before: number;
+  after: number;
+  /** after - before; kann negativ sein, das wird ehrlich angezeigt */
+  change: number;
+  attemptsAdded: number;
+  /** vorher noch ohne Datenbasis, jetzt belegt — der erste echte Messwert */
+  newlyProven: boolean;
+}
+
+/**
+ * Was sich zwischen zwei Ständen bewegt hat.
+ *
+ * Der eigentliche Lohn einer Übungssitzung ist nicht „4 von 5 richtig",
+ * sondern „Adressobjekte 33 % → 50 %". Punkte verpuffen, eine Zahl, die sich
+ * bewegt, bleibt. Konzepte ohne neue Versuche kommen nicht vor — eine Zeile
+ * mit ±0 wäre nur Füllmaterial.
+ *
+ * Ein Rückschritt wird NICHT unterdrückt: wer vorher zufällig richtig geraten
+ * hat, soll sehen, dass die Zahl wieder sinkt. Sonst wäre die Messung eine
+ * Schmeichelei.
+ */
+export function masteryDeltas(before: MasteryMap, after: MasteryMap): MasteryDelta[] {
+  const deltas: MasteryDelta[] = [];
+  for (const concept of CONCEPTS) {
+    const a = conceptMastery(before, concept);
+    const b = conceptMastery(after, concept);
+    const attemptsAdded = b.attempts - a.attempts;
+    if (attemptsAdded <= 0) continue;
+    deltas.push({
+      concept,
+      before: a.accuracy,
+      after: b.accuracy,
+      change: b.accuracy - a.accuracy,
+      attemptsAdded,
+      newlyProven: a.unproven && !b.unproven,
+    });
+  }
+  // Größte Bewegung zuerst — das ist die Zeile, die man lesen soll. Bei
+  // gleichem Betrag steht der Fortschritt vor dem Rückschritt: der Abschnitt
+  // ist die Belohnung der Sitzung, nicht ihr Zeugnis.
+  return deltas.sort(
+    (x, y) => Math.abs(y.change) - Math.abs(x.change) || Math.sign(y.change) - Math.sign(x.change),
+  );
+}
+
 /** Gesamt-Mastery über alle belegten Konzepte, 0..1. */
 export function overallMastery(mastery: MasteryMap): number {
   const proven = allMastery(mastery).filter((m) => !m.unproven);

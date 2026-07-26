@@ -650,7 +650,10 @@
       "snat": "SNAT"
     },
     "trainWeak": "Train these",
-    "trainAny": "Run a review"
+    "trainAny": "Run a review",
+    "moved": "What moved",
+    "plusAttempts": "{{count}} more answer(s)",
+    "nowProven": "measurable now"
   },
   "review": {
     "title": "Review",
@@ -665,6 +668,7 @@
     "finish": "Finish",
     "done": "Review complete",
     "again": "Another round",
+    "toMenu": "Back to the menu",
     "summary": "{{correct}} of {{total}} right",
     "perfect": "All five. Whatever was weak has stopped being weak, at least for today.",
     "keepGoing": "Noted. The weak spots update themselves, so this list will look different tomorrow.",

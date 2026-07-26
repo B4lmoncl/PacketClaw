@@ -776,3 +776,25 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   erhalten, statt alles zu verwerfen. Eigener Test mit vier Sorten Muell.
   Tests: 340 gruen, Lint 0 Fehler, Build ok, E2E: Mastery-Knopf sichtbar,
   fuehrt in Review, volle Sitzung durchgespielt, 0 Konsolenfehler.
+- 2026-07-26 (Forts. 35): MASTERY-DELTA — der eigentliche Lohn einer
+  Uebungssitzung. Der Abschlussschirm sagte „4 von 5 richtig" und +XP; beides
+  verpufft. Was bleibt, ist eine Zahl, die sich bewegt: „Adressobjekte
+  33 % → 50 %".
+  NEU masteryDeltas(before, after) in src/game/mastery.ts + Komponente
+  MasteryDeltaList. Der ReviewScreen friert den Stand beim START ein — sonst
+  wandert der Vergleichspunkt mit jeder Antwort mit und das Delta waere am
+  Ende immer null. Konzepte ohne neue Versuche kommen nicht vor (eine
+  +-0-Zeile ist Fuellmaterial).
+  Zwei Entscheidungen, die bewusst so sind:
+  * RUECKSCHRITTE WERDEN NICHT VERSCHWIEGEN. Wer vorher richtig geraten hat,
+    sieht die Zahl fallen. Eine Messung, die nur gute Nachrichten zeigt, ist
+    keine Messung. Im Smoke sichtbar: Routing 80 % → 67 %, rot.
+  * BEI GLEICHEM BETRAG steht der Fortschritt oben — der Abschnitt ist die
+    Belohnung der Sitzung, nicht ihr Zeugnis. Ohne diese Regel entschiede die
+    Reihenfolge von CONCEPTS, also der Zufall. Eigener Test.
+  Optik: zwei Balken uebereinander, der alte Stand bleibt als Schatten stehen,
+  damit der Zuwachs raeumlich sichtbar ist; gestaffelter Einlauf (60 ms),
+  groesste Bewegung zuerst. Nebenbei: der Knopf hiess „Back to level select",
+  was im Review falsch ist — jetzt review.toMenu.
+  Tests: 347 gruen, Lint 0 Fehler, Build ok, E2E: Sitzung durchgespielt, drei
+  Delta-Zeilen inkl. ehrlichem Rueckschritt, 0 Konsolenfehler.
