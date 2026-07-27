@@ -176,6 +176,29 @@ Aufwand sortiert — jeder ist ein eigener Schritt, keiner blockiert v1:
 Reihenfolge-Empfehlung: Routing zuerst (billig, sofort spielbar), dann
 FQDN-Objekte, dann DHCP, HA zuletzt.
 
+### Stand 2026-07-27
+
+1. **Routing — ERLEDIGT.** Routing-Werkstatt (`src/game/routing.ts`), drei
+   Fallarten, prueft ausdruecklich das Egress-Interface und nicht nur die
+   Aktion.
+2. **FQDN — ERLEDIGT.** Adressobjekt-Typ `fqdn` mit `resolvedIps` in der
+   Engine, Anzeige und ein Doctor-Fall.
+3. **DHCP und DNS — als WISSEN abgedeckt, nicht als Simulation.** Sie
+   entscheiden kein Paket; ihnen ein Verhalten in der Engine anzudichten waere
+   eine Behauptung, die sie nicht einloest (die Engine ist die Wahrheit ueber
+   Paketfluss). Stattdessen sechs Feldnotizen im Themenbereich „Betrieb":
+   Lease, Relay, Reservierung, Resolver-vs-Proxy, TTL, Split-DNS. Eine echte
+   Simulation braucht ein Client-/Lease-Modell und bleibt offen.
+4. **HA — als WISSEN abgedeckt, Simulation offen.** Drei Feldnotizen
+   (Config-Sync synchronisiert nicht alles, override, Heartbeat). Der grosse
+   Sprung (Cluster-Zustand, Session-Pickup, Failover-Uebung) braucht ein
+   Cluster-Konzept in der Engine und steht weiterhin hier.
+
+Ausserdem seither entstanden und NICHT mehr Roadmap, sondern gebaut:
+Local-In-Policy inkl. Workshop „Zugang zur Wache" (allowaccess, Local-In-Regeln,
+trusthost), Modus „Tote Regel", Review/Konzept-Mastery, Change Request,
+DNAT-Werkstatt, Feldnotiz-Sammlung mit Satz-Belohnungen.
+
 ## Prinzip
 
 Neue Ideen: erst hierher, dann priorisieren. Nichts davon blockiert v1.

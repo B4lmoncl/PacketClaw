@@ -1184,3 +1184,16 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Sockel ist jetzt ueberall derselbe.
   Tests: 487 gruen, Lint 0 Fehler, Build ok, Regressions-Durchlauf ueber alle
   14 Screens sauber.
+- 2026-07-27 (Forts. 55): FOLGEN DER BALANCE-AENDERUNG NACHGERECHNET statt
+  angenommen. Die Auszahlungen sind teils um das Vierfache gestiegen (Doctor
+  80 → 340), das verschiebt Freischaltungen und Raenge ueber den XP-Weg.
+  Bei drei sauberen Durchgaengen am Tag (1020 XP): Freischaltungen verteilen
+  sich ueber ~12 Tage (blitz 0,4 / hunt 1,1 / doctor 2,5 / routing 5,9 /
+  mgmt 7,4 / dnat 11,8), Raenge ueber ~30 Tage bis claw-commander. Beides ist
+  eine gesunde Kurve fuer ein Taeglich-Spiel — frueher Nachschub, dann
+  ruhiger — und die Level-Schwellen gaten Kampagnen-Spieler ohnehin separat.
+  Vorher war es sogar schlechter: wer die schwereren Werkstaetten spielte, kam
+  VIERMAL langsamer voran als jemand, der Blitz klickte.
+  ROADMAP.md auf den Stand gebracht: Routing und FQDN erledigt; DHCP, DNS und
+  HA sind als WISSEN abgedeckt (Feldnotizen) und als Simulation weiterhin
+  offen — mit Begruendung, warum das die ehrliche Grenze ist.
