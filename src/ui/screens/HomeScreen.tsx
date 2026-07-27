@@ -585,7 +585,10 @@ export function HomeScreen() {
           werden soll. Hier gehört es auch inhaltlich hin: erst die Auswahl
           („was mache ich jetzt?"), dann der Befund („woran hakt es?").
         */}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-start-1 lg:row-start-2 lg:mt-4">
+        {/* items-start: der leere Schwachstellen-Zustand ist EINE Zeile Text und
+            wuerde sich sonst auf die Hoehe der Abzeichen-Spalte strecken — ein
+            300 px hoher leerer Kasten sieht wie ein Fehler aus. */}
+        <div className="mt-6 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:col-start-1 lg:row-start-2 lg:mt-4">
           <MasteryPanel
             weak={weakConcepts}
             untested={untestedCount}

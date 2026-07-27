@@ -1065,3 +1065,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   naheliegendere Frage als „wie selten ist das?").
   Tests: 442 gruen, Lint 0 Fehler, Build ok, E2E: Ops-Filter zeigt die neuen
   Karten mit korrekter Kopfzeile.
+- 2026-07-27 (Forts. 48): ERSTKONTAKT GEPRUEFT. Bisher habe ich fast nur mit
+  gesetzten Mittelspiel-Spielstaenden getestet; ein echter Neuling war nie dran.
+  Ergebnis: das Tutorial ist gut — gefuehrt, mit echten Antworten statt
+  Weiter-Klicken, Zeile fuer Zeile aufgebaut („Tippe ACCEPT" → „und WELCHE Regel
+  matcht?" → Replay, in dem das Paket durch die Tabelle laeuft). Kein Fehler.
+  Die Startseite eines Neulings ist ebenfalls in Ordnung: Hero sagt „START
+  HERE", alle 11 gesperrten Kacheln nennen ihre Bedingung, drei Auftraege aus
+  dem modus-freien Pool, Truhe „5 Aufgaben entfernt", Notizen 0/36, kein
+  falsches „neu!" (der Fix von vorhin greift also auch beim frischen Save),
+  1,30 Bildschirmhoehen, 0 Konsolenfehler.
+  EIN FEHLER GEFUNDEN: das leere Schwachstellen-Panel streckte sich im Raster
+  auf die Hoehe der Abzeichen-Spalte — ein 290 px hoher Kasten mit EINER Zeile
+  Text darin, was schlicht wie ein Defekt aussieht. `items-start` am Raster:
+  290 px → 68 px.
+  Tests: 442 gruen, Lint 0 Fehler, Build ok.
