@@ -72,6 +72,7 @@ const GROUPS: { key: string; modes: Mode[] }[] = [
     modes: [
       { screen: { name: 'blitz' }, key: 'blitz', icon: '⚡', accent: 'aura' },
       { screen: { name: 'matchcheck' }, key: 'matchcheck', icon: '🎯', accent: 'trace' },
+      { screen: { name: 'hunt' }, key: 'hunt', icon: '🔍', accent: 'warn' },
     ],
   },
   {
@@ -124,6 +125,7 @@ export function HomeScreen() {
   const dnatSolved = useGame((s) => s.dnatSolved);
   const reviewsDone = useGame((s) => s.reviewsDone);
   const mgmtSolvedCount = useGame((s) => s.mgmtSolvedCount);
+  const huntsDone = useGame((s) => s.huntsDone);
   const openNextChest = useGame((s) => s.openNextChest);
   const markUnlocksSeen = useGame((s) => s.markUnlocksSeen);
   const initialiseUnlocks = useGame((s) => s.initialiseUnlocks);
@@ -178,6 +180,7 @@ export function HomeScreen() {
             dnatSolved,
             reviewsDone,
             mgmtSolvedCount,
+            huntsDone,
           }),
           questDay.claimed,
         )

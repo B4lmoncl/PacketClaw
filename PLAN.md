@@ -1080,3 +1080,27 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Text darin, was schlicht wie ein Defekt aussieht. `items-start` am Raster:
   290 px → 68 px.
   Tests: 442 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-27 (Forts. 49): MODUS „TOTE REGEL" (#43 abgeschlossen). Der Spieler
+  sieht das, womit man auf einer echten FortiGate anfaengt: eine Policy-Tabelle
+  mit Trefferzahlen, in der genau eine Null steht. Die Null zu FINDEN ist
+  leicht — die Aufgabe ist zu wissen, WARUM sie dasteht.
+  NEU src/game/hitHunter.ts (pure, 15 Tests) + HitHunterScreen. Drei Ursachen,
+  alle drei sehen in der Tabelle gleich aus: verschattet, abgeschaltet, oder ein
+  Interface-Paar, zu dem keine Route fuehrt. Freischaltung bei 8 Leveln /
+  1100 XP — der Modus gehoert zu den KURZEN RUNDEN und balanciert die Gruppe
+  (bisher 2 Modi gegen 7 in der Werkstatt).
+  DIE ENGINE IST HIER DIE PRUEFINSTANZ: der Generator behauptet nicht, eine
+  Regel sei tot, sondern laesst es sich von findShadowedPolicies bestaetigen und
+  VERWIRFT den Fall sonst. Damit kann keine Runde eine fachlich falsche Antwort
+  verlangen.
+  ZWEI ECHTE FEHLER, beide von den eigenen Zusicherungen gefunden:
+  (a) Der Grund „shadowed" kam NIE vor. Die breite Regel verdeckte auch die
+  lebenden Regeln, es gab also drei tote statt einer, und die Engine-Pruefung
+  verwarf den Fall jedes Mal — korrekt, aber lautlos. Drei Tests liefen dadurch
+  leer. Jetzt sind HTTPS/HTTP fuer das Regelpaar reserviert, und ein eigener
+  Test scheitert, wenn eine Fallart ueber die Seeds NICHT vorkommt.
+  (b) Die Implicit-Deny-Zeile zeigte ebenfalls 0 Treffer — es gab also ZWEI
+  Nullen und die Praemisse des Modus war falsch. Policy 0 bekommt jetzt eine
+  echte Zahl; auf einer FortiGate ist sie ohnehin die mit den meisten Treffern.
+  Tests: 457 gruen, Lint 0 Fehler, Build ok, 80 Level valide, E2E: Runde
+  gespielt, richtige Zeile erkannt, Debrief nennt den Grund, 0 Konsolenfehler.

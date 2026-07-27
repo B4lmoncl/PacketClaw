@@ -39,7 +39,9 @@
     "review": "Review",
     "reviewSub": "Five tasks aimed at your weak spots",
     "mgmt": "Access to the Watch",
-    "mgmtSub": "Open management access without locking yourself out"
+    "mgmtSub": "Open management access without locking yourself out",
+    "hunt": "Dead rule",
+    "huntSub": "Exactly one rule never fires — find it"
   },
   "level": {
     "boss": "Boss",
@@ -636,7 +638,8 @@
       "design1": "Get one change request approved",
       "dnat1": "Publish one server",
       "review1": "Run one review session",
-      "mgmt1": "Secure one management access"
+      "mgmt1": "Secure one management access",
+      "hunt1": "Find one dead rule"
     }
   },
   "mastery": {
@@ -909,6 +912,23 @@
       "closed": "The service was never open on the interface. That appears in no policy table, which is why one can search there for a long time.",
       "wide-open": "Closing it is not a setting you forget — it is one you make. Outward stays shut, the office gets in.",
       "wrong-trusthost": "trusthost is a second, independent gate. It does not care that the service is open, and it does not apologise either."
+    }
+  },
+  "hunt": {
+    "title": "Dead rule",
+    "prompt": "Exactly one rule has never fired. Tap its row.",
+    "right": "Found it",
+    "wrong": "Not that one",
+    "answer": "The dead one is rule {{id}}.",
+    "done": "Round over",
+    "again": "Another round",
+    "summary": "{{correct}} of {{total}} found",
+    "perfect": "All five. At that rate you will also find the one nobody has noticed in years.",
+    "keepGoing": "The zero is easy to spot. The question is always which of three causes put it there.",
+    "why": {
+      "shadowed": "Shadowed: rule {{by}} sits above it and already covers the same traffic. The narrower rule below is never reached — first match shows no mercy.",
+      "disabled": "Disabled. It sits in the table but gets skipped during matching. Looks like documentation, works as decoration.",
+      "wrongPair": "That interface pair does not exist here: no route leads to this destination interface, so no traffic arrives there. The rule is waiting for packets that never come."
     }
   }
 }

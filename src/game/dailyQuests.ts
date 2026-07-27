@@ -32,6 +32,7 @@ export interface QuestCounters {
   designSolved: number;
   dnatSolved: number;
   mgmtSolvedCount: number;
+  huntsDone: number;
   dailiesPlayed: number;
 }
 
@@ -63,6 +64,7 @@ export const QUEST_POOL: QuestTemplate[] = [
   { id: 'design1', metric: 'designSolved', target: 1, xp: 240, requiresMode: 'design' },
   { id: 'dnat1', metric: 'dnatSolved', target: 1, xp: 240, requiresMode: 'dnat' },
   { id: 'mgmt1', metric: 'mgmtSolvedCount', target: 1, xp: 240, requiresMode: 'mgmt' },
+  { id: 'hunt1', metric: 'huntsDone', target: 1, xp: 170, requiresMode: 'hunt' },
   // Der lernwirksamste Auftrag: gezielt an den eigenen Schwaechen ueben
   { id: 'review1', metric: 'reviewsDone', target: 1, xp: 220, requiresMode: 'review' },
 ];

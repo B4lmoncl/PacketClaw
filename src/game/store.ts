@@ -48,6 +48,7 @@ export type Screen =
   | { name: 'review' }
   | { name: 'notes' }
   | { name: 'mgmt' }
+  | { name: 'hunt' }
   | { name: 'challenge' }
   | { name: 'sandbox' }
   | { name: 'profile' }
@@ -84,6 +85,8 @@ interface GameState {
   reviewsDone: number;
   /** Geloeste Management-Zugriff-Faelle */
   mgmtSolvedCount: number;
+  /** Abgeschlossene Hit-Hunter-Sitzungen */
+  huntsDone: number;
   /** XP von heute (fuer das Tagesziel) — Datum + Betrag */
   dailyXp: { date: string; xp: number };
   /** Insgesamt geloeste Einzelaufgaben (Truhen-Zaehler) */
@@ -144,6 +147,7 @@ interface GameState {
   recordRouting(score: number): void;
   recordReview(score: number): void;
   recordMgmt(score: number): void;
+  recordHunt(score: number): void;
   /** Eine Einzelaufgabe geloest: zaehlt fuer Truhen und Tagesziel */
   addTaskXp(score: number, date: string): void;
   /**
@@ -186,6 +190,7 @@ const EMPTY_QUEST_COUNTERS: QuestCounters = {
   designSolved: 0,
   dnatSolved: 0,
   mgmtSolvedCount: 0,
+  huntsDone: 0,
   dailiesPlayed: 0,
 };
 
@@ -200,6 +205,7 @@ export function readQuestCounters(state: {
   dnatSolved: number;
   reviewsDone: number;
   mgmtSolvedCount: number;
+  huntsDone: number;
 }): QuestCounters {
   return {
     tasksSolved: state.tasksSolved,
@@ -211,6 +217,7 @@ export function readQuestCounters(state: {
     designSolved: state.designSolved,
     dnatSolved: state.dnatSolved,
     mgmtSolvedCount: state.mgmtSolvedCount,
+    huntsDone: state.huntsDone,
     dailiesPlayed: state.stats.dailiesPlayed,
   };
 }
@@ -306,6 +313,7 @@ export const useGame = create<GameState>()(
       routingSolved: 0,
       reviewsDone: 0,
       mgmtSolvedCount: 0,
+      huntsDone: 0,
       dailyXp: { date: '', xp: 0 },
       tasksSolved: 0,
       chestsOpened: 0,
@@ -394,6 +402,12 @@ export const useGame = create<GameState>()(
         set((state) => ({
           ...rewardPatch(state, score),
           routingSolved: state.routingSolved + 1,
+        })),
+
+      recordHunt: (score) =>
+        set((state) => ({
+          ...rewardPatch(state, score),
+          huntsDone: state.huntsDone + 1,
         })),
 
       recordMgmt: (score) =>
@@ -555,6 +569,7 @@ export const useGame = create<GameState>()(
           routingSolved,
           reviewsDone,
           mgmtSolvedCount,
+          huntsDone,
           dailyXp,
           tasksSolved,
           chestsOpened,
@@ -585,6 +600,7 @@ export const useGame = create<GameState>()(
             routingSolved,
             reviewsDone,
             mgmtSolvedCount,
+            huntsDone,
             dailyXp,
             tasksSolved,
             chestsOpened,
@@ -640,6 +656,7 @@ export const useGame = create<GameState>()(
         routingSolved: state.routingSolved,
         reviewsDone: state.reviewsDone,
         mgmtSolvedCount: state.mgmtSolvedCount,
+        huntsDone: state.huntsDone,
         dailyXp: state.dailyXp,
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
@@ -681,6 +698,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   routingSolved: number;
   reviewsDone: number;
   mgmtSolvedCount: number;
+  huntsDone: number;
   dailyXp: { date: string; xp: number };
   tasksSolved: number;
   chestsOpened: number;
@@ -715,6 +733,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     routingSolved: typeof save.routingSolved === 'number' ? save.routingSolved : 0,
     reviewsDone: typeof save.reviewsDone === 'number' ? save.reviewsDone : 0,
     mgmtSolvedCount: typeof save.mgmtSolvedCount === 'number' ? save.mgmtSolvedCount : 0,
+    huntsDone: typeof save.huntsDone === 'number' ? save.huntsDone : 0,
     dailyXp: { date: '', xp: 0, ...((save.dailyXp as { date: string; xp: number } | null) ?? {}) },
     tasksSolved: typeof save.tasksSolved === 'number' ? save.tasksSolved : 0,
     chestsOpened: typeof save.chestsOpened === 'number' ? save.chestsOpened : 0,

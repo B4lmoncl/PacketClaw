@@ -39,7 +39,9 @@
     "review": "Review",
     "reviewSub": "Fünf Aufgaben auf deine Schwachstellen",
     "mgmt": "Zugang zur Wache",
-    "mgmtSub": "Management-Zugriff öffnen, ohne sich auszusperren"
+    "mgmtSub": "Management-Zugriff öffnen, ohne sich auszusperren",
+    "hunt": "Tote Regel",
+    "huntSub": "Genau eine Regel feuert nie — finde sie"
   },
   "level": {
     "boss": "Boss",
@@ -636,7 +638,8 @@
       "design1": "Bring einen Change Request durch",
       "dnat1": "Veröffentliche einen Server",
       "review1": "Mach eine Review-Sitzung",
-      "mgmt1": "Sichere einen Management-Zugang"
+      "mgmt1": "Sichere einen Management-Zugang",
+      "hunt1": "Finde eine tote Regel"
     }
   },
   "mastery": {
@@ -909,6 +912,23 @@
       "closed": "Der Dienst war am Interface nie offen. Das steht in keiner Policy-Tabelle, weshalb man dort auch lange suchen kann.",
       "wide-open": "Zumachen ist keine Einstellung, die man vergisst — es ist eine, die man trifft. Nach draußen bleibt zu, ins Büro geht auf.",
       "wrong-trusthost": "trusthost ist ein zweites, unabhängiges Tor. Es interessiert sich nicht dafür, dass der Dienst offen ist, und es entschuldigt sich auch nicht."
+    }
+  },
+  "hunt": {
+    "title": "Tote Regel",
+    "prompt": "Genau eine Regel hat noch nie gefeuert. Tippe ihre Zeile an.",
+    "right": "Gefunden",
+    "wrong": "Nicht die",
+    "answer": "Tot ist Regel {{id}}.",
+    "done": "Runde durch",
+    "again": "Noch eine Runde",
+    "summary": "{{correct}} von {{total}} gefunden",
+    "perfect": "Alle fünf. Bei diesem Tempo findest du auch die, die seit Jahren niemandem aufgefallen ist.",
+    "keepGoing": "Die Null steht schnell da. Die Frage ist immer, welche von drei Ursachen dahintersteckt.",
+    "why": {
+      "shadowed": "Verschattet: Regel {{by}} steht darüber und deckt denselben Verkehr bereits ab. Die engere Regel darunter wird nie erreicht — First Match kennt keine Nachsicht.",
+      "disabled": "Abgeschaltet. Sie steht in der Tabelle, wird beim Matching aber übersprungen. Sieht aus wie Dokumentation, wirkt wie Dekoration.",
+      "wrongPair": "Das Interface-Paar gibt es so nicht: zu diesem Ziel-Interface führt keine Route, also landet dort auch kein Verkehr. Die Regel wartet auf Pakete, die nie kommen."
     }
   }
 }

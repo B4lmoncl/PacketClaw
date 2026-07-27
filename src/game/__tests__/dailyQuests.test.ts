@@ -23,6 +23,7 @@ const ZERO: QuestCounters = {
   designSolved: 0,
   dnatSolved: 0,
   mgmtSolvedCount: 0,
+  huntsDone: 0,
   dailiesPlayed: 0,
 };
 

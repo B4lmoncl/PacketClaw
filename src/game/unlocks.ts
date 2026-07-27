@@ -31,6 +31,8 @@ export interface UnlockRule {
 export const UNLOCKS: UnlockRule[] = [
   { key: 'blitz', levels: 3, xp: 400 },
   { key: 'matchcheck', levels: 6, xp: 800 },
+  // Tote Regeln erkennt man erst, wenn man Regeln ueberhaupt lesen kann
+  { key: 'hunt', levels: 8, xp: 1100 },
   { key: 'endless', levels: 10, xp: 1400, chapter: 1 },
   // Erst ab hier gibt es genug Antworten, damit Mastery etwas aussagt
   { key: 'review', levels: 14, xp: 1800 },
