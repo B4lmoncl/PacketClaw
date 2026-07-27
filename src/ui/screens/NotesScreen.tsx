@@ -16,18 +16,26 @@ import {
   NOTE_RARITIES,
   NOTE_TOPICS,
   sortedCollection,
+  topicProgress,
   type NoteRarity,
   type NoteTopic,
 } from '../../game/fieldNotes';
 import { useGame } from '../../game/store';
 import { FieldNoteCard } from '../components/FieldNoteCard';
+import { RewardOverlay } from '../components/RewardOverlay';
+import type { RewardPayload } from '../components/RewardOverlay';
 
 type Filter = 'all' | NoteRarity | NoteTopic | 'missing';
 
 export function NotesScreen() {
   const { t } = useTranslation();
   const owned = useGame((s) => s.fieldNotes);
+  const claimedSets = useGame((s) => s.claimedNoteSets);
+  const claimNoteSet = useGame((s) => s.claimNoteSet);
   const [filter, setFilter] = useState<Filter>('all');
+  const [reward, setReward] = useState<RewardPayload | null>(null);
+
+  const sets = useMemo(() => topicProgress(owned, claimedSets), [owned, claimedSets]);
 
   const progress = useMemo(() => collectionProgress(owned), [owned]);
   const cards = useMemo(() => {
@@ -85,6 +93,55 @@ export function NotesScreen() {
             </p>
           )}
         </div>
+
+        {/* Drei Saetze statt einer fernen Ziellinie: der kleinste ist frueh
+            drin und beweist, dass es die Belohnung wirklich gibt. */}
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {sets.map((set) => (
+            <li
+              key={set.topic}
+              className={`flex items-center gap-3 rounded-panel px-3 py-2.5 ${
+                set.complete && !set.claimed
+                  ? 'panel-reward rarity-legendary animate-pulse-soft'
+                  : 'panel-inset'
+              }`}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate font-display text-xs font-bold text-ink">
+                    {t(`notes.topic.${set.topic}`)}
+                  </span>
+                  <span className="shrink-0 font-mono text-[10px] tabular-nums text-dim">
+                    {set.owned}/{set.total}
+                  </span>
+                </div>
+                <div className="mt-1 h-1 overflow-hidden rounded-full bg-bg/80">
+                  <div
+                    className={`h-full rounded-full transition-[width] duration-700 ${
+                      set.complete ? 'bg-trace' : 'bg-aura/70'
+                    }`}
+                    style={{ width: `${Math.round((set.owned / Math.max(1, set.total)) * 100)}%` }}
+                  />
+                </div>
+              </div>
+              {set.complete && !set.claimed ? (
+                <button
+                  onClick={() => {
+                    const got = claimNoteSet(set.topic, set.bonus);
+                    if (got !== null) setReward({ kind: 'chest', xp: got, rarity: 'epic' });
+                  }}
+                  className="shrink-0 rounded-row bg-warn px-2.5 py-1 font-display text-[11px] font-bold text-bg hover:brightness-110"
+                >
+                  +{set.bonus}
+                </button>
+              ) : set.claimed ? (
+                <span className="shrink-0 font-mono text-[10px] text-trace">✓</span>
+              ) : (
+                <span className="shrink-0 font-mono text-[10px] text-dim/60">+{set.bonus}</span>
+              )}
+            </li>
+          ))}
+        </ul>
       </header>
 
       <div className="flex flex-wrap gap-1.5">
@@ -122,6 +179,8 @@ export function NotesScreen() {
           ))}
         </ul>
       )}
+
+      <RewardOverlay reward={reward} onClose={() => setReward(null)} />
     </div>
   );
 }

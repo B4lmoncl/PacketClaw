@@ -198,3 +198,61 @@ export function notesForConcept(concept: Concept): FieldNote[] {
 export function notesForTopic(topic: NoteTopic): FieldNote[] {
   return FIELD_NOTES.filter((n) => n.topic === topic);
 }
+
+// ---------------------------------------------------------------------------
+// Satz-Belohnungen
+// ---------------------------------------------------------------------------
+
+/**
+ * Ein voller Themensatz zahlt aus.
+ *
+ * WARUM. 36 Karten bei einer Truhe alle fünf Aufgaben sind 180 gelöste
+ * Aufgaben bis zur Vollständigkeit — eine einzige Ziellinie, und die liegt weit
+ * weg. Drei Sätze machen daraus drei erreichbare Ziele; der kleinste (Local-In,
+ * vier Karten) ist schon früh drin und zeigt, dass es die Belohnung wirklich
+ * gibt.
+ *
+ * Die Beträge folgen der Satzgröße, nicht dem Gefühl: ein Satz soll sich lohnen,
+ * aber keine Abkürzung um das eigentliche Spiel herum sein.
+ */
+export const TOPIC_BONUS: Record<NoteTopic, number> = {
+  localIn: 400,
+  ops: 700,
+  forward: 1500,
+};
+
+export interface TopicProgress {
+  topic: NoteTopic;
+  owned: number;
+  total: number;
+  complete: boolean;
+  bonus: number;
+  /** Belohnung schon abgeholt? */
+  claimed: boolean;
+}
+
+export function topicProgress(
+  owned: readonly string[],
+  claimedTopics: readonly string[] = [],
+): TopicProgress[] {
+  return NOTE_TOPICS.map((topic) => {
+    const cards = notesForTopic(topic);
+    const have = cards.filter((n) => owned.includes(n.id)).length;
+    return {
+      topic,
+      owned: have,
+      total: cards.length,
+      complete: cards.length > 0 && have === cards.length,
+      bonus: TOPIC_BONUS[topic],
+      claimed: claimedTopics.includes(topic),
+    };
+  });
+}
+
+/** Vollständige Sätze, deren Belohnung noch aussteht. */
+export function claimableTopics(
+  owned: readonly string[],
+  claimedTopics: readonly string[] = [],
+): TopicProgress[] {
+  return topicProgress(owned, claimedTopics).filter((p) => p.complete && !p.claimed);
+}

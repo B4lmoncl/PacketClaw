@@ -95,6 +95,8 @@ interface GameState {
   chestsOpened: number;
   /** Gesammelte Feldnotizen (IDs) — der Inhalt der Truhen */
   fieldNotes: string[];
+  /** Themensaetze, deren Komplett-Belohnung schon abgeholt wurde */
+  claimedNoteSets: string[];
   /** Freischaltungen, die der Spieler schon gefeiert bekommen hat */
   seenUnlocks: string[];
   /**
@@ -155,6 +157,8 @@ interface GameState {
    * vollstaendig, gibt es stattdessen XP (note === null).
    */
   openNextChest(): { xp: number; note: string | null; rarity: string } | null;
+  /** Belohnung fuer einen vollstaendigen Themensatz; null wenn schon geholt */
+  claimNoteSet(topic: string, xp: number): number | null;
   markUnlocksSeen(keys: string[]): void;
   /** Einmalige Erstbefuellung von seenUnlocks mit dem Ist-Stand */
   initialiseUnlocks(levelsDone: number, xp: number): void;
@@ -318,6 +322,7 @@ export const useGame = create<GameState>()(
       tasksSolved: 0,
       chestsOpened: 0,
       fieldNotes: [],
+      claimedNoteSets: [],
       seenUnlocks: [],
       unlocksInitialised: false,
       questDay: { date: '', ids: [], snapshot: EMPTY_QUEST_COUNTERS, claimed: [] },
@@ -472,6 +477,14 @@ export const useGame = create<GameState>()(
           };
         }),
 
+      claimNoteSet: (topic, xp) => {
+        const state = get();
+        // Einmal pro Satz — sonst waere der Knopf eine XP-Quelle ohne Boden
+        if (state.claimedNoteSets.includes(topic)) return null;
+        set({ xp: state.xp + xp, claimedNoteSets: [...state.claimedNoteSets, topic] });
+        return xp;
+      },
+
       markUnlocksSeen: (keys) =>
         set((state) => ({
           seenUnlocks: [...new Set([...state.seenUnlocks, ...keys])],
@@ -574,6 +587,7 @@ export const useGame = create<GameState>()(
           tasksSolved,
           chestsOpened,
           fieldNotes,
+          claimedNoteSets,
           seenUnlocks,
           unlocksInitialised,
           questDay,
@@ -605,6 +619,7 @@ export const useGame = create<GameState>()(
             tasksSolved,
             chestsOpened,
             fieldNotes,
+            claimedNoteSets,
             seenUnlocks,
             unlocksInitialised,
             questDay,
@@ -661,6 +676,7 @@ export const useGame = create<GameState>()(
         tasksSolved: state.tasksSolved,
         chestsOpened: state.chestsOpened,
         fieldNotes: state.fieldNotes,
+        claimedNoteSets: state.claimedNoteSets,
         seenUnlocks: state.seenUnlocks,
         unlocksInitialised: state.unlocksInitialised,
         questDay: state.questDay,
@@ -703,6 +719,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
   tasksSolved: number;
   chestsOpened: number;
   fieldNotes: string[];
+  claimedNoteSets: string[];
   seenUnlocks: string[];
   unlocksInitialised: boolean;
   questDay: { date: string; ids: string[]; snapshot: QuestCounters; claimed: string[] };
@@ -741,6 +758,7 @@ export function migrateSave(save: { saveVersion: number } & Record<string, unkno
     fieldNotes: Array.isArray(save.fieldNotes)
       ? (save.fieldNotes as string[]).filter((id) => noteById(id) !== undefined)
       : [],
+    claimedNoteSets: Array.isArray(save.claimedNoteSets) ? (save.claimedNoteSets as string[]) : [],
     seenUnlocks: Array.isArray(save.seenUnlocks) ? (save.seenUnlocks as string[]) : [],
     unlocksInitialised: save.unlocksInitialised === true,
     questDay: {

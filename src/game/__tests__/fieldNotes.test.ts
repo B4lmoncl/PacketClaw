@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import i18n from '../../i18n';
 import { CONCEPTS } from '../mastery';
 import {
+  claimableTopics,
   collectionProgress,
   drawNote,
   FIELD_NOTES,
@@ -12,6 +13,8 @@ import {
   notesForTopic,
   RARITY_XP,
   sortedCollection,
+  TOPIC_BONUS,
+  topicProgress,
 } from '../fieldNotes';
 
 describe('Katalog', () => {
@@ -204,5 +207,74 @@ describe('Anzeigereihenfolge', () => {
     for (const concept of CONCEPTS) {
       expect(notesForConcept(concept).length, concept).toBeGreaterThan(0);
     }
+  });
+});
+
+/**
+ * 36 Karten bei einer Truhe alle fuenf Aufgaben sind 180 geloeste Aufgaben bis
+ * zur Vollstaendigkeit — eine einzige, weit entfernte Ziellinie. Drei Saetze
+ * machen daraus drei erreichbare Ziele.
+ */
+describe('Satz-Belohnungen', () => {
+  const ALL = FIELD_NOTES.map((n) => n.id);
+
+  it('jeder Satz hat eine Belohnung, und groessere Saetze zahlen mehr', () => {
+    for (const topic of NOTE_TOPICS) {
+      expect(TOPIC_BONUS[topic], topic).toBeGreaterThan(0);
+    }
+    const bySize = [...NOTE_TOPICS].sort(
+      (a, b) => notesForTopic(a).length - notesForTopic(b).length,
+    );
+    for (let i = 1; i < bySize.length; i++) {
+      const small = bySize[i - 1] as (typeof NOTE_TOPICS)[number];
+      const big = bySize[i] as (typeof NOTE_TOPICS)[number];
+      expect(TOPIC_BONUS[big], `${big} vs ${small}`).toBeGreaterThanOrEqual(TOPIC_BONUS[small]);
+    }
+  });
+
+  it('leere Sammlung: kein Satz vollstaendig, nichts abholbar', () => {
+    const sets = topicProgress([]);
+    expect(sets).toHaveLength(NOTE_TOPICS.length);
+    expect(sets.every((s) => !s.complete)).toBe(true);
+    expect(claimableTopics([])).toEqual([]);
+  });
+
+  it('ein vollstaendiger Satz wird als abholbar gemeldet', () => {
+    const localIn = notesForTopic('localIn').map((n) => n.id);
+    const claim = claimableTopics(localIn);
+    expect(claim.map((c) => c.topic)).toEqual(['localIn']);
+    expect(claim[0]?.bonus).toBe(TOPIC_BONUS.localIn);
+  });
+
+  it('eine fehlende Karte genuegt, damit der Satz NICHT zaehlt', () => {
+    const localIn = notesForTopic('localIn').map((n) => n.id);
+    expect(claimableTopics(localIn.slice(1))).toEqual([]);
+  });
+
+  it('abgeholte Saetze tauchen nicht wieder auf', () => {
+    const localIn = notesForTopic('localIn').map((n) => n.id);
+    expect(claimableTopics(localIn, ['localIn'])).toEqual([]);
+    const sets = topicProgress(localIn, ['localIn']);
+    expect(sets.find((s) => s.topic === 'localIn')).toMatchObject({
+      complete: true,
+      claimed: true,
+    });
+  });
+
+  it('vollstaendige Sammlung ⇒ alle Saetze abholbar', () => {
+    expect(
+      claimableTopics(ALL)
+        .map((c) => c.topic)
+        .sort(),
+    ).toEqual([...NOTE_TOPICS].sort());
+  });
+
+  /**
+   * Der kleinste Satz muss frueh erreichbar sein — er ist der Beweis, dass es
+   * die Belohnung wirklich gibt.
+   */
+  it('der kleinste Satz ist deutlich kleiner als die Sammlung', () => {
+    const smallest = Math.min(...NOTE_TOPICS.map((t) => notesForTopic(t).length));
+    expect(smallest).toBeLessThanOrEqual(FIELD_NOTES.length / 4);
   });
 });

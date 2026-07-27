@@ -721,6 +721,7 @@
       "localIn": "Local-In",
       "ops": "Operations"
     },
+    "setReady": "{{count}} set(s) complete — collect the reward",
     "card": {
       "policy0": {
         "title": "Policy 0",

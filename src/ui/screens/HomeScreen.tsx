@@ -4,7 +4,7 @@ import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
 import { nearestAchievements, rankFor } from '../../game/progression';
 import { CHEST_EVERY, chestsEarned, dailyGoal, stakeLevel } from '../../game/rewards';
-import { collectionProgress } from '../../game/fieldNotes';
+import { claimableTopics, collectionProgress } from '../../game/fieldNotes';
 import {
   ALL_DONE_BONUS_XP,
   allQuestsDone,
@@ -112,6 +112,7 @@ export function HomeScreen() {
   const tasksSolved = useGame((s) => s.tasksSolved);
   const chestsOpened = useGame((s) => s.chestsOpened);
   const fieldNotes = useGame((s) => s.fieldNotes);
+  const claimedNoteSets = useGame((s) => s.claimedNoteSets);
   const seenUnlocks = useGame((s) => s.seenUnlocks);
   const stats = useGame((s) => s.stats);
   const achievements = useGame((s) => s.achievements);
@@ -142,6 +143,8 @@ export function HomeScreen() {
   const goal = dailyGoal(dailyXp.date === today ? dailyXp.xp : 0);
   const chestsReady = chestsEarned(tasksSolved) - chestsOpened;
   const notes = collectionProgress(fieldNotes);
+  // Ein fertiger Satz wartet auf Abholung — das gehoert dorthin, wo man hinsieht
+  const noteSetsReady = claimableTopics(fieldNotes, claimedNoteSets).length;
   const stake = stakeLevel(streak.current, goal.done, streak.freezeTokens);
   const upcoming = nextUnlock(campaign.completed, xp);
   const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
@@ -337,13 +340,17 @@ export function HomeScreen() {
                 wollen. Steht deshalb direkt neben der Truhe. */}
             <button
               onClick={() => navigate({ name: 'notes' })}
-              className="card-mode panel-action group flex items-center gap-3 rounded-panel px-4 py-3 text-left transition-transform hover:-translate-y-0.5"
+              className={`card-mode group flex items-center gap-3 rounded-panel px-4 py-3 text-left transition-transform hover:-translate-y-0.5 ${
+                noteSetsReady > 0 ? 'panel-reward rarity-legendary' : 'panel-action'
+              }`}
             >
               <span className="text-2xl">📓</span>
               <div className="min-w-0 flex-1">
                 <div className="font-display text-sm font-bold text-aura">{t('notes.open')}</div>
                 <div className="font-mono text-[11px] text-dim">
-                  {t('notes.progress', { owned: notes.owned, total: notes.total })}
+                  {noteSetsReady > 0
+                    ? t('notes.setReady', { count: noteSetsReady })
+                    : t('notes.progress', { owned: notes.owned, total: notes.total })}
                 </div>
                 <div className="mt-1 h-1 overflow-hidden rounded-full bg-bg/80">
                   <div

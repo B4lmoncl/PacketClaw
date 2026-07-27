@@ -1118,3 +1118,19 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Tests: 463 gruen (6 neue, inkl. dem urspruenglichen Fehlerfall 9000/30000),
   Lint 0 Fehler, Build ok, E2E: die 21000er- und 26000er-Eintraege sind weg,
   uebrig bleiben nur „1 to go".
+- 2026-07-27 (Forts. 51): SATZ-BELOHNUNGEN FUER DIE SAMMLUNG. 36 Karten bei
+  einer Truhe alle fuenf Aufgaben sind 180 geloeste Aufgaben bis zur
+  Vollstaendigkeit — EINE Ziellinie, und die liegt weit weg. Drei Themensaetze
+  machen daraus drei erreichbare Ziele.
+  NEU topicProgress()/claimableTopics()/TOPIC_BONUS (pure, 7 Tests) +
+  Satz-Zeilen im Archiv mit Abhol-Knopf. Betraege folgen der Satzgroesse:
+  Local-In 400 (drei Karten, frueh drin — der Beweis, dass es die Belohnung
+  wirklich gibt), Betrieb 700, Forward 1500. Ein Test haelt fest, dass groessere
+  Saetze nie weniger zahlen als kleinere.
+  Einmal pro Satz: claimNoteSet() prueft claimedNoteSets, sonst waere der Knopf
+  eine XP-Quelle ohne Boden.
+  Ein fertiger Satz meldet sich DORT, wo man hinsieht: die Feldnotiz-Karte auf
+  der Startseite wechselt auf panel-reward/legendary und schreibt
+  „N Satz/Saetze fertig — Belohnung abholen" statt des Zaehlerstands.
+  Tests: 470 gruen, Lint 0 Fehler, Build ok, E2E: Local-In 3/3 mit leuchtendem
+  +400, Klick zahlt 9000 → 9400, 0 Konsolenfehler.
