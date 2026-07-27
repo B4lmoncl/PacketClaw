@@ -1197,3 +1197,21 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   ROADMAP.md auf den Stand gebracht: Routing und FQDN erledigt; DHCP, DNS und
   HA sind als WISSEN abgedeckt (Feldnotizen) und als Simulation weiterhin
   offen — mit Begruendung, warum das die ehrliche Grenze ist.
+- 2026-07-27 (Forts. 56, SESSIONENDE auf Nutzerwunsch): AUFGERAEUMT UND
+  ABGESCHLOSSEN. Der letzte offene Task #44 (Daily-Blitz mit festem Tages-Seed)
+  ist geschlossen, nicht liegengelassen: Begruendung in REJECTED.md — der Daily
+  Run liefert die Vergleichbarkeit „fuer alle dasselbe" bereits, und seit der
+  Balance-Regel reisst JEDER Modus mit einem sauberen Durchgang das Tagesziel;
+  ein zweiter Tages-Seed-Modus haette eine Bestenlisten-Idee ergaenzt, aber
+  keinen niedrigeren Einstieg und keinen neuen Lerninhalt — dafuer eine Kachel
+  mehr auf der Startseite.
+  ROADMAP.md hat einen Abschnitt „Stand zum Sessionende" bekommen, damit eine
+  Folge-Session den Einstieg ohne Codebase-Lektuere findet: alles Offene steht
+  dort, nach Wert sortiert (HA-Simulation, Security Profiles, Placement,
+  DNAT-Portforward, „Where Used"-Spalte), jeweils mit der Angabe, worauf es
+  blockiert. Bei HA ausdruecklich der Hinweis, dass „keine Session-Tabelle"
+  bisher eine BEWUSSTE Entscheidung ist (REJECTED.md) — wer HA baut, revidiert
+  sie und soll das wissen.
+  Stand: 487 Tests gruen, Lint 0 Fehler (1 vorbestehende Warnung), Build ok,
+  80 Level valide, Regressions-Durchlauf ueber alle 14 Screens sauber.
+  Es ist nichts halb fertig.

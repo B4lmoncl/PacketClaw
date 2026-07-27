@@ -20,6 +20,12 @@ Neue verworfene Ideen werden hier ergänzt (mit Datum und Ein-Satz-Begründung).
 - _2026-07-10:_ **src-Port-Matching in Services** — reale Firewalls matchen praktisch immer auf dst-Port; src-Port-Matching wäre eine Falle ohne Lerneffekt.
 - _2026-07-10:_ **`match-vip`-Sonderfall bei Deny-Policies** — FortiOS-Detailtiefe, die den didaktischen Kern (Policies matchen VIP-Traffic über das VIP-Objekt) verwässert. Als Vereinfachung in docs/ENGINE.md dokumentiert.
 - _2026-07-10:_ **Session-Tabelle/Verbindungs-Simulation** — Stateful-Prinzip wird didaktisch vermittelt (nur Initiator-Pakete werden bewertet), nicht simuliert.
+- _2026-07-27:_ **Daily-Blitz mit festem Tages-Seed (#44)** — der Daily Run
+  liefert die Vergleichbarkeit („für alle dasselbe") bereits, und das Tagesziel
+  ist seit der Balance-Regel in JEDEM Modus mit einem sauberen Durchgang
+  erreichbar; ein zweiter Tages-Seed-Modus fügt eine Bestenlisten-Idee hinzu,
+  aber keinen niedrigeren Einstieg und keinen neuen Lerninhalt. Ein Modus mehr
+  auf der Startseite kostet dagegen Übersicht.
 
 ## Revidiert
 

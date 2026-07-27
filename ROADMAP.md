@@ -199,6 +199,37 @@ Local-In-Policy inkl. Workshop „Zugang zur Wache" (allowaccess, Local-In-Regel
 trusthost), Modus „Tote Regel", Review/Konzept-Mastery, Change Request,
 DNAT-Werkstatt, Feldnotiz-Sammlung mit Satz-Belohnungen.
 
+## Stand zum Sessionende 2026-07-27 (fuer Folge-Sessions)
+
+**Alles Offene steht in diesem Dokument — es gibt keine losen Tasks mehr.**
+487 Tests gruen, Lint 0 Fehler (1 vorbestehende Warnung in `PolicyTable.tsx`),
+Build ok, 80 Level valide, Regressions-Durchlauf ueber alle 14 Screens sauber.
+Arbeitsbaum sauber, beide Remotes synchron.
+
+Der letzte offene Task **#44 (Daily-Blitz mit festem Tages-Seed)** ist mit
+Begruendung in REJECTED.md geschlossen: der Daily Run liefert die
+Vergleichbarkeit schon, und das Tagesziel ist seit der Balance-Regel in jedem
+Modus erreichbar.
+
+Naechste Schritte nach Wert sortiert — jeder ist ein eigener, abgeschlossener
+Schritt:
+
+1. **HA-Simulation (v1.2).** Der groesste Lernwert, den die Engine heute NICHT
+   kann. Blockiert auf einem Cluster-/Session-Konzept: `nodes: [NetworkConfig,
+NetworkConfig]` plus aktiver Node als Zustand, dann Failover-Uebungen
+   (Config-Sync kaputt, Session-Pickup). Nicht anfangen, ohne vorher zu
+   entscheiden, ob die Engine ein Session-Modell bekommt — bisher ist
+   „keine Session-Tabelle" eine bewusste Entscheidung (REJECTED.md).
+2. **Security Profiles (v1.1).** `Policy.profiles` als Flags plus
+   `findUninspectedPolicies()`; didaktisch, keine Traffic-Simulation. Passt gut
+   als Audit-Stoff in Config Doctor und Change Request.
+3. **Placement/Topologie (v1.2).** Zwei verkettete NetworkConfigs — die Engine
+   kann das fast schon (Egress FW1 = Ingress FW2), fehlt vor allem UI.
+4. **Portforward-Variante der DNAT-Werkstatt** (8443→443 mit passendem
+   Service-Objekt) — kleiner Schritt, nutzt die vorhandene Werkstatt.
+5. **„Where Used"/Ref.-Spalte** bei Adress- und Service-Objekten wie in
+   FortiOS — reine GUI-Naehe, billig, direkt an der Direktive.
+
 ## Prinzip
 
 Neue Ideen: erst hierher, dann priorisieren. Nichts davon blockiert v1.
