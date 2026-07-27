@@ -1134,3 +1134,16 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   „N Satz/Saetze fertig — Belohnung abholen" statt des Zaehlerstands.
   Tests: 470 gruen, Lint 0 Fehler, Build ok, E2E: Local-In 3/3 mit leuchtendem
   +400, Klick zahlt 9000 → 9400, 0 Konsolenfehler.
+- 2026-07-27 (Forts. 52): REGRESSIONS-DURCHLAUF ueber ALLE Modi. Nach drei neuen
+  Modi und mehreren Umbauten am Save-Format (fieldNotes, claimedNoteSets,
+  mgmtSolvedCount, huntsDone, unlocksInitialised) war eine Breitenpruefung
+  faellig statt weiterer Punktproben.
+  Vierzehn Screens angesteuert und je auf ein charakteristisches Merkmal
+  geprueft: Blitz, Match-Check, Tote Regel, Review, Config Doctor, Change
+  Request, Routing-Werkstatt, Zugang zur Wache, Server veroeffentlichen,
+  Sandbox, Endlos, Challenge, Archiv, Daily Run. ALLE sauber, 0 Konsolenfehler.
+  (Ein erster Durchlauf meldete Endlos als Fehler — das war die Pruefung, nicht
+  der Modus: die Anzeige nutzt „♥" U+2665, mein Muster suchte „❤" U+2764. Der
+  Screenshot zeigte einen tadellosen Bildschirm. Falschmeldungen im eigenen
+  Pruefwerkzeug sind teuer, deshalb steht es hier.)
+  Stand: 470 Tests gruen, Lint 0 Fehler, Build ok, 80 Level valide.
