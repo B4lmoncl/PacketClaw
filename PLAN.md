@@ -1104,3 +1104,17 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   echte Zahl; auf einer FortiGate ist sie ohnehin die mit den meisten Treffern.
   Tests: 457 gruen, Lint 0 Fehler, Build ok, 80 Level valide, E2E: Runde
   gespielt, richtige Zeile erkannt, Debrief nennt den Grund, 0 Konsolenfehler.
+- 2026-07-27 (Forts. 50): „KURZ DAVOR" MUSS STIMMEN. Im Panel stand
+  „Aether Commander — noch 26000" unter der Ueberschrift KURZ DAVOR, weil
+  nearestAchievements() ohne Schwelle einfach auf drei aufgefuellt hat. Das ist
+  dieselbe Sorte Fehler wie das falsche „neu!": ein Panel, das weit entfernte
+  Ziele als nah verkauft, wird ueberlesen — und nimmt damit auch den ECHTEN
+  Fast-Treffern die Wirkung.
+  NEU isNear(have, need) mit zwei ehrlichen Wegen, und beide braucht es:
+  wenige Stueck uebrig (≤ 5 — „noch 1 Level" ist greifbar, auch bei 0 %
+  Fortschritt) ODER grosser Anteil geschafft (≥ 50 % — 4000 von 5000 XP ist
+  greifbar, auch wenn die Restzahl gross aussieht). Die Liste wird lieber KURZ
+  als aufgefuellt.
+  Tests: 463 gruen (6 neue, inkl. dem urspruenglichen Fehlerfall 9000/30000),
+  Lint 0 Fehler, Build ok, E2E: die 21000er- und 26000er-Eintraege sind weg,
+  uebrig bleiben nur „1 to go".

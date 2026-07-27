@@ -484,6 +484,27 @@ export interface AchievementProgress {
  * Vorfreude, die vorher fehlte: 39 Achievements existierten, aber niemand
  * wusste, welches gerade zum Greifen nah ist.
  */
+/**
+ * Ab wann ist etwas „kurz davor"?
+ *
+ * Zwei ehrliche Wege, und beide braucht es:
+ *  - WENIGE STÜCK ÜBRIG. „noch 1 Level" ist greifbar, auch wenn der
+ *    Fortschritt bei 0 % steht (0 von 1).
+ *  - GROSSER ANTEIL GESCHAFFT. 4000 von 5000 XP ist greifbar, auch wenn die
+ *    Restzahl groß aussieht.
+ *
+ * Ohne diese Schwelle stand im Panel „Aether Commander — noch 26000" unter der
+ * Überschrift KURZ DAVOR. Ein Panel, das solche Ziele als nah verkauft, wird
+ * überlesen — und nimmt damit auch den echten Fast-Treffern die Wirkung.
+ */
+export const NEAR_REMAINDER = 5;
+export const NEAR_RATIO = 0.5;
+
+export function isNear(have: number, need: number): boolean {
+  if (need <= 0) return false;
+  return need - have <= NEAR_REMAINDER || have / need >= NEAR_RATIO;
+}
+
 export function nearestAchievements(
   ctx: AchievementContext,
   earnedIds: readonly string[],
@@ -495,6 +516,8 @@ export function nearestAchievements(
         const { have, need } = a.progress!(ctx);
         return { achievement: a, have, need, ratio: need > 0 ? Math.min(1, have / need) : 0 };
       })
+      // Lieber eine kurze ehrliche Liste als eine aufgefuellte
+      .filter((p) => isNear(p.have, p.need))
       // Fast fertige zuerst; bei Gleichstand das mit dem kleineren Rest
       .sort((a, b) => b.ratio - a.ratio || a.need - a.have - (b.need - b.have))
       .slice(0, limit)
