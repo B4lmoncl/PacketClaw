@@ -1147,3 +1147,18 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Screenshot zeigte einen tadellosen Bildschirm. Falschmeldungen im eigenen
   Pruefwerkzeug sind teuer, deshalb steht es hier.)
   Stand: 470 Tests gruen, Lint 0 Fehler, Build ok, 80 Level valide.
+- 2026-07-27 (Forts. 53): ALTE SPIELSTAENDE ABGESICHERT. Der Nutzer hat eine
+  laufende Instanz mit echtem Fortschritt, und diese Session hat das
+  Save-Format mehrfach erweitert (fieldNotes, claimedNoteSets, mgmtSolvedCount,
+  huntsDone, unlocksInitialised, reviewsDone …). Ein alter Spielstand muss das
+  unbeschadet ueberstehen — sonst ist der Preis fuer die neuen Funktionen der
+  Fortschritt des Nutzers.
+  E2E mit einem Save im Stand VOR allen Umbauten: XP und Sterne erhalten, alle
+  neuen Felder sinnvoll vorbelegt, die einmalige Freischalt-Initialisierung
+  greift (7 Modi als gesehen verbucht ⇒ kein falsches „neu!"), kein NaN im GUI,
+  0 Konsolenfehler.
+  NEU src/game/**tests**/migrateSave.test.ts (5 Tests): alter Save bleibt
+  erhalten, neue Felder bekommen brauchbare Werte, ein LEERER Save ergibt einen
+  vollstaendigen Zustand (kein Feld undefined), falsche Typen fallen auf die
+  Vorgabe zurueck, und unbekannte Notiz-IDs werden aussortiert.
+  Tests: 475 gruen, Lint 0 Fehler, Build ok.
