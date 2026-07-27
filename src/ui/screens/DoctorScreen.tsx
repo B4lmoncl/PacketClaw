@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
 import { BUG_CONCEPT, failingChecks, generateDoctorCase } from '../../game/doctor';
+import { doctorPayout } from '../../game/payouts';
 import { useGame } from '../../game/store';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
@@ -51,7 +52,7 @@ export function DoctorScreen() {
       return;
     }
     // Score: sauber gelöst gibt mehr; jeder Eingriff/Fehlversuch kostet etwas
-    const s = Math.max(20, 80 - Math.max(0, edits - 1) * 10 - tries * 5);
+    const s = doctorPayout(edits, tries);
     setScore(s);
     recordDoctor(s);
     setPhase('done');

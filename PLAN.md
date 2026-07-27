@@ -1162,3 +1162,25 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   vollstaendigen Zustand (kein Feld undefined), falsche Typen fallen auf die
   Vorgabe zurueck, und unbekannte Notiz-IDs werden aussortiert.
   Tests: 475 gruen, Lint 0 Fehler, Build ok.
+- 2026-07-27 (Forts. 54): BALANCE — „ein sauberer Durchgang sichert das
+  Tagesziel". Beim Nachrechnen der Auszahlungen kam heraus, dass die Serie zwar
+  in JEDEM Modus zaehlt, das Versprechen aber nur auf dem Papier stand:
+  perfekter Durchgang Blitz ~340 und Change Request 440, aber Config Doctor 80,
+  DNAT 90, Routing 100, Review 190, Tote Regel 260 — bei einem Tagesziel von 300. Man brauchte VIER Doctor-Faelle fuer einen Tag, waehrend eine Minute
+  Blitz reichte. Die Modi, die am meisten verlangen und am meisten LEHREN,
+  zaehlten am wenigsten. Das ist der Anreiz genau verkehrt herum.
+  NEU src/game/payouts.ts (pure, 12 Tests): eine Regel, eine Stelle. Sauberer
+  Durchgang = CLEAN_RUN_XP (340, knapp ueber dem Ziel), Fehler kosten, aber nie
+  unter FLOOR_XP (120) — wer am Ende loest, hat etwas verstanden, und das soll
+  sich nicht wie eine Strafe anfuehlen. Alle sieben Modi rechnen jetzt darueber
+  statt mit je eigener Inline-Formel; die Duplikate waren genau der Grund, aus
+  dem die Werte auseinandergelaufen sind (dieselbe Lehre wie beim
+  Belohnungs-Loop).
+  Die Zusicherung steht als Test: JEDER Modus reisst mit einem sauberen
+  Durchgang das Tagesziel, und kein Modus zahlt mehr als das Doppelte des
+  schwaechsten — sonst wird einer zur Abkuerzung um alles andere herum.
+  Ein Test hat dabei gleich eine Unstimmigkeit gefunden: eine 0/5-Sitzung zahlte
+  102 und lag damit unter dem Sockel, den alle anderen Modi einhalten. Der
+  Sockel ist jetzt ueberall derselbe.
+  Tests: 487 gruen, Lint 0 Fehler, Build ok, Regressions-Durchlauf ueber alle
+  14 Screens sauber.

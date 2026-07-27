@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy, Vip } from '../../engine';
 import { generateDnatChallenge, verifyDnat } from '../../game/dnat';
+import { dnatPayout } from '../../game/payouts';
 import { useGame } from '../../game/store';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { RulesetWorkbench } from '../components/RulesetWorkbench';
@@ -81,7 +82,7 @@ export function DnatScreen() {
       setFeedback(t('dnat.stillFailing', { count: failing }));
       return;
     }
-    const s = Math.max(30, 90 - tries * 10);
+    const s = dnatPayout(tries);
     setScore(s);
     recordDnat(s);
     setPhase('done');

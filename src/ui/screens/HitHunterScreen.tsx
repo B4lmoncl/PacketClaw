@@ -12,6 +12,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { huntAnswerCorrect, huntHitCounts, huntPlan } from '../../game/hitHunter';
+import { sessionPayout } from '../../game/payouts';
 import { playAccept, playWrong } from '../../game/sound';
 import { useGame } from '../../game/store';
 import { ComboMeter } from '../components/ComboMeter';
@@ -68,7 +69,7 @@ export function HitHunterScreen() {
 
   function next() {
     if (index + 1 >= plan.length) {
-      recordHunt(60 + correctCount * 40);
+      recordHunt(sessionPayout(correctCount, plan.length));
       setPhase('done');
       return;
     }
@@ -101,7 +102,7 @@ export function HitHunterScreen() {
           <p className="max-w-sm font-mono text-xs leading-relaxed text-dim">
             {perfect ? t('hunt.perfect') : t('hunt.keepGoing')}
           </p>
-          <XpGain gained={60 + correctCount * 40} />
+          <XpGain gained={sessionPayout(correctCount, plan.length)} />
           <div className="flex gap-2">
             <button
               onClick={reset}

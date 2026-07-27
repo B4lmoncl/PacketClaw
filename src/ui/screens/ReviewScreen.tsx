@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { playAccept, playWrong } from '../../game/sound';
+import { sessionPayout } from '../../game/payouts';
 import { masteryDeltas, untestedConcepts, weakestConcepts } from '../../game/mastery';
 import type { MasteryMap } from '../../game/mastery';
 import { reviewAnswerCorrect, reviewPlan } from '../../game/review';
@@ -78,7 +79,7 @@ export function ReviewScreen() {
 
   function next() {
     if (index + 1 >= plan.length) {
-      recordReview(40 + correctCount * 30);
+      recordReview(sessionPayout(correctCount, plan.length));
       setPhase('done');
       return;
     }
@@ -146,7 +147,7 @@ export function ReviewScreen() {
           <div className="max-w-sm font-mono text-xs leading-relaxed text-dim">
             {correctCount === plan.length ? t('review.perfect') : t('review.keepGoing')}
           </div>
-          <XpGain gained={40 + correctCount * 30} />
+          <XpGain gained={sessionPayout(correctCount, plan.length)} />
 
           {/* Der eigentliche Lohn: nicht die Punkte, sondern die Bewegung */}
           <MasteryDeltaList deltas={deltas} />

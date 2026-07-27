@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NetworkConfig, Policy } from '../../engine';
 import { generateDesignSpec, reviewDesign } from '../../game/design';
+import { designPayout } from '../../game/payouts';
 import { starsFor } from '../../game/scoring';
 import { useGame } from '../../game/store';
 import { ParticleBurst } from '../components/ParticleBurst';
@@ -60,7 +61,7 @@ export function DesignScreen() {
       wrongAttempts: rejections,
       minimalRuleset: review.clean,
     });
-    const score = 200 + stars * 60 + (review.clean ? 60 : 0);
+    const score = designPayout(stars, review.clean);
     recordDesign(score);
     setResult({ stars, score });
     setPhase('done');

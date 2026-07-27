@@ -14,6 +14,7 @@ import {
   ROUTING_CONCEPT,
 } from '../../game/routing';
 import { useGame } from '../../game/store';
+import { routingPayout } from '../../game/payouts';
 import { DebugFlowView } from '../components/DebugFlowView';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { PolicyTable } from '../components/PolicyTable';
@@ -58,7 +59,7 @@ export function RoutingScreen() {
       setTries((n) => n + 1);
       return;
     }
-    const s = Math.max(40, 100 - tries * 15);
+    const s = routingPayout(tries);
     setScore(s);
     recordRouting(s);
     setPhase('done');

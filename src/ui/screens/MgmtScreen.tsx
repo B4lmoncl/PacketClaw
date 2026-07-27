@@ -27,6 +27,7 @@ import {
   toggleAllowaccess,
 } from '../../game/mgmt';
 import { playAccept, playWrong } from '../../game/sound';
+import { mgmtPayout } from '../../game/payouts';
 import { useGame } from '../../game/store';
 import { ParticleBurst } from '../components/ParticleBurst';
 import { PolicyTable } from '../components/PolicyTable';
@@ -66,7 +67,7 @@ export function MgmtScreen() {
     if (solved) {
       if (sound) playAccept();
       // Weniger Versuche = mehr Punkte, aber nie unter dem Sockel
-      recordMgmt(Math.max(120, 320 - (attempts + 1) * 40));
+      recordMgmt(mgmtPayout(attempts + 1));
       setPhase('done');
     } else if (sound) {
       playWrong();
@@ -94,7 +95,7 @@ export function MgmtScreen() {
           <p className="max-w-md font-mono text-xs leading-relaxed text-dim">
             {t(`mgmt.lesson.${initial.bug}`)}
           </p>
-          <XpGain gained={Math.max(120, 320 - attempts * 40)} />
+          <XpGain gained={mgmtPayout(attempts)} />
           <div className="flex gap-2">
             <button
               onClick={reset}
