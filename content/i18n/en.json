@@ -346,6 +346,30 @@
     "vips": "Virtual IPs",
     "routes": "Routes"
   },
+  "refs": {
+    "short": "Ref.",
+    "tooltip": "{{count}} references — click to see where",
+    "unusedHint": "No references. This object does nothing; it merely exists.",
+    "unusedCount": "{{count}} objects with not a single reference. On a real FortiGate those are the cleanup candidates — you can only delete what nothing else names.",
+    "via": {
+      "policy": "Policy",
+      "localInPolicy": "Local-in policy",
+      "addressGroup": "Address group",
+      "serviceGroup": "Service group",
+      "zone": "Zone",
+      "route": "Route"
+    },
+    "field": {
+      "srcintf": "Src intf",
+      "dstintf": "Dst intf",
+      "srcaddr": "Source",
+      "dstaddr": "Destination",
+      "service": "Service",
+      "intf": "Interface",
+      "member": "Member",
+      "device": "Interface"
+    }
+  },
   "challenge": {
     "title": "Challenge",
     "intro": "A large ruleset that grew over time — legacy, dead and duplicate rules included. Use the column filters and object browser to find the deciding rule.",

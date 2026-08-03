@@ -346,6 +346,30 @@
     "vips": "Virtual IPs",
     "routes": "Routen"
   },
+  "refs": {
+    "short": "Ref.",
+    "tooltip": "{{count}} Verweise — anklicken zeigt, wo",
+    "unusedHint": "Kein Verweis. Dieses Objekt tut nichts, es steht nur da.",
+    "unusedCount": "{{count}} Objekte ohne einen einzigen Verweis. Auf einer echten FortiGate wären das die Kandidaten fürs Aufräumen — löschen lässt sich nur, was niemand mehr nennt.",
+    "via": {
+      "policy": "Policy",
+      "localInPolicy": "Local-In-Policy",
+      "addressGroup": "Adressgruppe",
+      "serviceGroup": "Service-Gruppe",
+      "zone": "Zone",
+      "route": "Route"
+    },
+    "field": {
+      "srcintf": "Src-Intf",
+      "dstintf": "Dst-Intf",
+      "srcaddr": "Source",
+      "dstaddr": "Destination",
+      "service": "Service",
+      "intf": "Interface",
+      "member": "Mitglied",
+      "device": "Interface"
+    }
+  },
   "challenge": {
     "title": "Challenge",
     "intro": "Ein großes, gewachsenes Regelwerk mit Altlasten — tote und doppelte Regeln inklusive. Nutze Spaltenfilter und Objekt-Browser, um die schuldige Regel zu finden.",

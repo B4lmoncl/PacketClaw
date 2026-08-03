@@ -20,6 +20,8 @@ jobs:
       - run: npm run test:coverage
       - run: npm run validate:levels
       - run: npm run build
+      # Muss NACH dem Build laufen: prueft dist/ gegen die CSP des Servers
+      - run: npm run check:assets
 
   docker:
     # Bei Version-Tags: Image bauen und nach ghcr pushen (latest + Tag)

@@ -32,6 +32,24 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    /**
+     * Schriften NIEMALS als data:-URI einbetten.
+     *
+     * Der Server liefert `font-src 'self'` (server/app.mjs) — eine eingebettete
+     * Schrift ist damit blockiert. Vite hat genau das getan: die kleinen
+     * Subsets von JetBrains Mono (cyrillic-ext, vietnamese) lagen unter dem
+     * Inline-Limit, landeten als data:-URI im CSS und wurden vom Browser
+     * abgewiesen. Sichtbar war das kaum (de/en brauchen diese Zeichen nicht),
+     * hörbar dafür umso mehr: sechs CSP-Verstöße pro Seitenaufruf in der
+     * Konsole, in denen echte Fehler untergehen.
+     *
+     * Als Datei statt als data: passen sie zur CSP und werden nebenbei vom
+     * Service Worker mit precacht (globPatterns oben).
+     */
+    assetsInlineLimit: (filePath: string) =>
+      /\.(woff2?|ttf|otf|eot)$/i.test(filePath) ? false : undefined,
+  },
   // Dev-Komfort: API-Aufrufe an den lokal laufenden Server durchreichen
   // (node server/index.mjs — Produktion serviert beides aus einem Prozess)
   server: {

@@ -36,5 +36,15 @@ export {
   type ShadowedPolicy,
   type OverbroadPolicy,
 } from './analysis';
+export {
+  findReferences,
+  referenceCount,
+  canDelete,
+  unusedObjects,
+  type ObjectRef,
+  type RefKind,
+  type RefVia,
+  type UnusedObject,
+} from './references';
 export { makeConfig, makePolicy } from './config';
 export { createRng, mulberry32, type Rng } from './rng';
