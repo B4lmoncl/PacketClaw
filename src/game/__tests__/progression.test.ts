@@ -6,7 +6,9 @@ import {
   EMPTY_STREAK,
   evaluateAchievements,
   RANKS,
+  MAX_FREEZE_TOKENS,
   rankFor,
+  streakOutcome,
   type StreakState,
 } from '../progression';
 
@@ -53,7 +55,7 @@ describe('advanceStreak', () => {
     expect(s.current).toBe(1);
   });
 
-  it('Freeze-Token überbrückt genau einen verpassten Tag', () => {
+  it('ein Freeze-Token überbrückt einen verpassten Tag', () => {
     let s: StreakState = {
       ...EMPTY_STREAK,
       current: 6,
@@ -66,6 +68,43 @@ describe('advanceStreak', () => {
     expect(s.freezeTokens).toBe(1); // 1 verbraucht, 1 neu bei Streak 7
   });
 
+  /**
+   * DER Fall, fuer den man Token ueberhaupt sammelt. Vorher ueberbrueckte ein
+   * Token GENAU einen Tag: wer mit drei Token im Ruecken zwei Tage fehlte,
+   * verlor die Serie und behielt alle drei. Ein Vorrat, der genau dann
+   * versagt, wenn man ihn braucht, ist keine Absicherung.
+   */
+  it('mehrere Token überbrücken mehrere verpasste Tage', () => {
+    const s: StreakState = {
+      current: 20,
+      best: 20,
+      lastDate: '2026-07-01',
+      freezeTokens: 3,
+    };
+    const after = advanceStreak(s, '2026-07-04'); // 02. und 03. verpasst
+    expect(after.current).toBe(21);
+    expect(after.freezeTokens).toBe(2); // 2 verbraucht, 1 neu bei Streak 21
+  });
+
+  it('reicht der Vorrat nicht, bricht die Serie — und die Token bleiben liegen', () => {
+    const s: StreakState = { current: 20, best: 20, lastDate: '2026-07-01', freezeTokens: 1 };
+    const after = advanceStreak(s, '2026-07-05'); // 3 Tage verpasst, 1 Token
+    expect(after.current).toBe(1);
+    expect(after.freezeTokens).toBe(1);
+    expect(after.best).toBe(20); // der Bestwert bleibt
+  });
+
+  /**
+   * Zeitzonenwechsel, uebernommener Spielstand von einem anderen Geraet,
+   * falsch gestellte Uhr: das Datum kann rueckwaerts springen. Dafuer die
+   * Serie zu loeschen waere eine Strafe fuer etwas, das der Spieler nicht
+   * getan hat.
+   */
+  it('ein Datum in der Vergangenheit löscht die Serie NICHT', () => {
+    const s: StreakState = { current: 12, best: 12, lastDate: '2026-07-10', freezeTokens: 0 };
+    expect(advanceStreak(s, '2026-07-08')).toBe(s);
+  });
+
   it('alle 7 Tage gibt es ein Freeze-Token (max 3)', () => {
     let s = { ...EMPTY_STREAK };
     for (let day = 1; day <= 21; day++) {
@@ -73,6 +112,68 @@ describe('advanceStreak', () => {
     }
     expect(s.current).toBe(21);
     expect(s.freezeTokens).toBe(3);
+  });
+});
+
+describe('streakOutcome — was passiert, WENN heute das Ziel faellt', () => {
+  const at = (over: Partial<StreakState>): StreakState => ({ ...EMPTY_STREAK, ...over });
+
+  it('benennt jeden Fall', () => {
+    expect(streakOutcome(at({ lastDate: '2026-07-08' }), '2026-07-08')).toEqual({
+      kind: 'unchanged',
+    });
+    expect(streakOutcome(EMPTY_STREAK, '2026-07-08')).toEqual({ kind: 'started' });
+    expect(streakOutcome(at({ current: 3, lastDate: '2026-07-07' }), '2026-07-08')).toEqual({
+      kind: 'continued',
+    });
+    expect(
+      streakOutcome(at({ current: 9, lastDate: '2026-07-05', freezeTokens: 2 }), '2026-07-08'),
+    ).toEqual({ kind: 'bridged', tokensSpent: 2, daysMissed: 2 });
+    expect(
+      streakOutcome(at({ current: 9, lastDate: '2026-07-01', freezeTokens: 1 }), '2026-07-08'),
+    ).toEqual({ kind: 'broken', lostStreak: 9, daysMissed: 6 });
+  });
+
+  /**
+   * DIE Zusicherung: die Vorhersage und das, was tatsaechlich passiert,
+   * duerfen nie auseinanderlaufen. Genau solche Duplikate haben in diesem
+   * Projekt schon zweimal falsche Zahlen im GUI erzeugt.
+   */
+  it('sagt fuer JEDE Kombination dasselbe voraus, was advanceStreak dann tut', () => {
+    for (let gap = -2; gap <= 6; gap++) {
+      for (let tokens = 0; tokens <= MAX_FREEZE_TOKENS; tokens++) {
+        const last = new Date(Date.UTC(2026, 6, 10) + gap * -86_400_000);
+        const state = at({
+          current: 9,
+          best: 9,
+          lastDate: last.toISOString().slice(0, 10),
+          freezeTokens: tokens,
+        });
+        const today = '2026-07-10';
+        const outcome = streakOutcome(state, today);
+        const after = advanceStreak(state, today);
+        const label = `gap=${gap} tokens=${tokens}`;
+
+        if (outcome.kind === 'unchanged') {
+          expect(after, label).toBe(state);
+          continue;
+        }
+        const expected = outcome.kind === 'broken' ? 1 : state.current + 1;
+        expect(after.current, label).toBe(expected);
+        const spent = outcome.kind === 'bridged' ? outcome.tokensSpent : 0;
+        // Der Meilenstein-Token bei jedem 7. Tag kommt oben drauf
+        const bonus = after.current % 7 === 0 ? 1 : 0;
+        expect(after.freezeTokens, label).toBe(
+          Math.min(MAX_FREEZE_TOKENS, state.freezeTokens - spent + bonus),
+        );
+      }
+    }
+  });
+
+  it('bricht nur, wenn der Vorrat wirklich nicht reicht', () => {
+    const missTwo = at({ current: 9, lastDate: '2026-07-05' });
+    expect(streakOutcome({ ...missTwo, freezeTokens: 2 }, '2026-07-08').kind).toBe('bridged');
+    expect(streakOutcome({ ...missTwo, freezeTokens: 1 }, '2026-07-08').kind).toBe('broken');
   });
 });
 

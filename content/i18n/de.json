@@ -611,7 +611,9 @@
     "keepStreak": "Serie halten",
     "streakSafe": "Serie gehalten · Tag {{days}}",
     "freezeHint": "Ein Freeze deckt einen verpassten Tag ab.",
-    "atStake": "{{days}} Tage. Heute ist noch keiner davon."
+    "atStake": "{{days}} Tage. Heute ist noch keiner davon.",
+    "backBridged": "{{days}} Tage weg. Die Serie von {{streak}} hält — {{tokens}}× ❄ deckt die Lücke, sobald das Ziel heute steht.",
+    "backBroken": "{{days}} Tage Pause, {{lost}} Tage Serie. Ab heute wieder ab eins — der Bestwert bleibt, wo er ist."
   },
   "reward": {
     "ready": "Depot bereit",

@@ -227,8 +227,11 @@ NetworkConfig]` plus aktiver Node als Zustand, dann Failover-Uebungen
    kann das fast schon (Egress FW1 = Ingress FW2), fehlt vor allem UI.
 4. **Portforward-Variante der DNAT-Werkstatt** (8443→443 mit passendem
    Service-Objekt) — kleiner Schritt, nutzt die vorhandene Werkstatt.
-5. **„Where Used"/Ref.-Spalte** bei Adress- und Service-Objekten wie in
-   FortiOS — reine GUI-Naehe, billig, direkt an der Direktive.
+5. ~~**„Where Used"/Ref.-Spalte**~~ — **erledigt am 2026-08-03**
+   (`src/engine/references.ts`, Ref.-Spalte im Objekt-Browser). Offen bliebe
+   nur, daraus eine AUFGABE zu machen: `unusedObjects` und `canDelete` liegen
+   fertig da, und „raeum den Objektbestand auf, aber loeschen kannst du nur,
+   was nichts mehr nennt" ist ein echter FortiGate-Alltag.
 
 ## Prinzip
 

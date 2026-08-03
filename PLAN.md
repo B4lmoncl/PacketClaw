@@ -1215,3 +1215,34 @@ Geprüft via Playwright (1280px + 390px): Home, Kapitelauswahl, Verdict-Frage, P
   Stand: 487 Tests gruen, Lint 0 Fehler (1 vorbestehende Warnung), Build ok,
   80 Level valide, Regressions-Durchlauf ueber alle 14 Screens sauber.
   Es ist nichts halb fertig.
+- 2026-08-03 (Forts. 57): ZWEI ECHTE FEHLER GEFUNDEN, EINER DAVON IM
+  BELOHNUNGS-LOOP.
+  (a) WHERE USED / Ref.-Spalte, NEU src/engine/references.ts (21 Tests,
+  100 % Branch): findReferences, referenceCount, canDelete, unusedObjects.
+  Zwei Entscheidungen folgen FortiOS: nur DIREKTE Verweise zaehlen — steckt
+  ADDR in GRP und GRP in einer Policy, hat ADDR genau EINEN Verweis, und wer
+  aufraeumen will, muss die Kette zuruecklaufen. Und Tokens sind keine
+  Objekte: all/ALL/any sind Platzhalter, sonst haette jedes Netz ein
+  Phantom-Objekt mit der hoechsten Ref.-Zahl. Der Objekt-Browser zeigt die
+  Spalte, Klick klappt die Fundstellen auf.
+  (b) FEHLER: Vite bettete kleine Font-Subsets als data:-URI ein, die CSP des
+  Servers erlaubt nur font-src 'self'. Der Browser wies sie bei JEDEM
+  Seitenaufruf ab — sechs CSP-Verstoesse in der Konsole, in denen echte Fehler
+  untergehen (genau daran haette ich es fast uebersehen). Fix in
+  vite.config.ts, Waechter scripts/check-assets.mjs prueft dist/ gegen die
+  ausgelieferte CSP und laeuft in CI nach dem Build; gegengeprueft, dass er
+  beim urspruenglichen Fehler rot wird.
+  (c) FEHLER im Loop: ein Freeze-Token ueberbrueckte GENAU einen Tag. Wer mit
+  drei Token im Ruecken zwei Tage fehlte, verlor die Serie und behielt alle
+  drei — ein Vorrat, der genau dann versagt, wenn man ihn braucht, und dabei
+  sichtbar als „❄3" im Profil steht. Jetzt: ein Token je verpasstem Tag, drei
+  Token tragen also bis zu drei Tage. Ausserdem loescht ein RUECKWAERTS
+  springendes Datum (Zeitzone, uebernommener Spielstand) die Serie nicht mehr.
+  NEU streakOutcome(): dieselbe Regel, die die Serie fortschreibt, sagt dem
+  Zurueckkehrenden VORHER, woran er ist — mit einem Test, der fuer jede
+  Kombination aus Luecke und Vorrat prueft, dass Vorhersage und Wirkung nicht
+  auseinanderlaufen. Auf der Startseite steht die Nachricht jetzt VOR dem
+  Spielen („2 Tage weg. Die Serie von 14 haelt — 2x ❄ deckt die Luecke"),
+  denn genau da springt man sonst ab.
+  Tests: 515 gruen, Lint 0 Fehler, Build ok, 80 Level valide, Konsole im
+  Smoke-Test komplett leer.

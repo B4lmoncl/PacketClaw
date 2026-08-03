@@ -11,6 +11,7 @@
  */
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import type { StreakOutcome } from '../../game/progression';
 import { stakeLevel, type DailyGoal } from '../../game/rewards';
 import { useReducedMotionPref } from '../hooks/useReducedMotionPref';
 
@@ -25,9 +26,14 @@ interface Props {
   streak: number;
   /** Vorhandene Freeze-Token (entschaerfen einen verpassten Tag) */
   freezeTokens?: number;
+  /**
+   * Was mit der Serie passiert, wenn heute das Ziel faellt. Nur interessant,
+   * wenn jemand WEG war — das ist der Moment, in dem er sonst abspringt.
+   */
+  outcome?: StreakOutcome;
 }
 
-export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
+export function DailyGoalRing({ goal, streak, freezeTokens = 0, outcome }: Props) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotionPref();
   const stake = stakeLevel(streak, goal.done, freezeTokens);
@@ -92,6 +98,26 @@ export function DailyGoalRing({ goal, streak, freezeTokens = 0 }: Props) {
             </span>
           )}
         </div>
+
+        {/* Die Rueckkehr. Wer ein paar Tage weg war, sieht sonst nur eine Serie,
+            die auf 1 steht, und zieht daraus den falschen Schluss („eh vorbei").
+            Dass die Token die Pause tragen, ist die eigentliche Nachricht — und
+            sie muss VOR dem Spielen kommen, nicht danach. */}
+        {outcome?.kind === 'bridged' && (
+          <div className="mt-1 font-mono text-[10px] leading-snug text-aura">
+            ❄{' '}
+            {t('goal.backBridged', {
+              days: outcome.daysMissed,
+              tokens: outcome.tokensSpent,
+              streak,
+            })}
+          </div>
+        )}
+        {outcome?.kind === 'broken' && outcome.lostStreak > 1 && (
+          <div className="mt-1 font-mono text-[10px] leading-snug text-dim">
+            {t('goal.backBroken', { days: outcome.daysMissed, lost: outcome.lostStreak })}
+          </div>
+        )}
       </div>
     </div>
   );

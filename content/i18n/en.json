@@ -611,7 +611,9 @@
     "keepStreak": "Keep the streak",
     "streakSafe": "Streak held · day {{days}}",
     "freezeHint": "A freeze covers one missed day.",
-    "atStake": "{{days}} days. Today is not one of them yet."
+    "atStake": "{{days}} days. Today is not one of them yet.",
+    "backBridged": "{{days}} days away. Your {{streak}}-day run holds — {{tokens}}× ❄ covers the gap the moment today's goal lands.",
+    "backBroken": "{{days}} days off, {{lost}} days of run. It starts at one again — your best still stands where it stood."
   },
   "reward": {
     "ready": "Cache ready",

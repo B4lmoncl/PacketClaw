@@ -58,25 +58,80 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
 }
 
+/** Höchststand an Freeze-Token — und damit die längste überbrückbare Pause. */
+export const MAX_FREEZE_TOKENS = 3;
+
+/**
+ * Was mit der Serie passiert, wenn an `date` das Tagesziel fällt.
+ *
+ * Eigene Funktion, weil die Antwort an ZWEI Stellen gebraucht wird: einmal um
+ * die Serie fortzuschreiben, und einmal um dem Zurückkehrenden VORHER zu sagen,
+ * woran er ist. Zwei Kopien derselben Regel wären genau der Fehler, der hier
+ * schon zweimal wehgetan hat.
+ */
+export type StreakOutcome =
+  /** Heute ist schon verbucht — nichts zu tun. */
+  | { kind: 'unchanged' }
+  /** Erster Tag überhaupt. */
+  | { kind: 'started' }
+  /** Lückenlos weiter. */
+  | { kind: 'continued' }
+  /** Pause, aber die Token decken sie ab. */
+  | { kind: 'bridged'; tokensSpent: number; daysMissed: number }
+  /** Pause zu lang oder zu wenig Token — die Serie fängt von vorn an. */
+  | { kind: 'broken'; lostStreak: number; daysMissed: number };
+
+export function streakOutcome(streak: StreakState, date: string): StreakOutcome {
+  if (streak.lastDate === date) return { kind: 'unchanged' };
+  if (streak.lastDate === null) return { kind: 'started' };
+
+  const gap = daysBetween(streak.lastDate, date);
+  /**
+   * Rückwärts in der Zeit: Zeitzonenwechsel, ein von einem anderen Gerät
+   * übernommener Spielstand, eine falsch gestellte Uhr. Auf keinen Fall die
+   * Serie dafür löschen — der Spieler hat nichts falsch gemacht.
+   */
+  if (gap <= 0) return { kind: 'unchanged' };
+  if (gap === 1) return { kind: 'continued' };
+
+  const daysMissed = gap - 1;
+  /**
+   * Ein Token je verpasstem Tag. Vorher überbrückte ein Token GENAU einen Tag
+   * und mehr ging nicht — wer mit drei Token im Rücken zwei Tage fehlte,
+   * verlor die Serie und behielt alle drei. Ein Vorrat, der im einzigen Fall
+   * versagt, für den man ihn anlegt, ist keine Absicherung, sondern Deko.
+   */
+  if (streak.freezeTokens >= daysMissed) {
+    return { kind: 'bridged', tokensSpent: daysMissed, daysMissed };
+  }
+  return { kind: 'broken', lostStreak: streak.current, daysMissed };
+}
+
 /** Streak nach einem abgeschlossenen Daily fortschreiben (idempotent pro Tag). */
 export function advanceStreak(streak: StreakState, date: string): StreakState {
-  if (streak.lastDate === date) return streak;
-  let { current, freezeTokens } = streak;
-  if (streak.lastDate === null) {
-    current = 1;
-  } else {
-    const gap = daysBetween(streak.lastDate, date);
-    if (gap === 1) {
-      current += 1;
-    } else if (gap === 2 && freezeTokens > 0) {
-      freezeTokens -= 1; // ein verpasster Tag wird eingefroren
-      current += 1;
-    } else {
+  const outcome = streakOutcome(streak, date);
+  if (outcome.kind === 'unchanged') return streak;
+
+  let current: number;
+  let { freezeTokens } = streak;
+  switch (outcome.kind) {
+    case 'started':
+    case 'broken':
       current = 1;
-    }
+      break;
+    case 'continued':
+      current = streak.current + 1;
+      break;
+    case 'bridged':
+      freezeTokens -= outcome.tokensSpent;
+      current = streak.current + 1;
+      break;
   }
+
   // alle 7 Streak-Tage ein Freeze-Token (max. 3 auf Halde)
-  if (current > 0 && current % 7 === 0) freezeTokens = Math.min(3, freezeTokens + 1);
+  if (current > 0 && current % 7 === 0) {
+    freezeTokens = Math.min(MAX_FREEZE_TOKENS, freezeTokens + 1);
+  }
   return {
     current,
     best: Math.max(streak.best, current),

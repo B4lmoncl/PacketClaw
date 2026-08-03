@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { campaignProgress } from '../../game/campaign';
 import { todayString } from '../../game/daily';
-import { nearestAchievements, rankFor } from '../../game/progression';
+import { nearestAchievements, rankFor, streakOutcome } from '../../game/progression';
 import { CHEST_EVERY, chestsEarned, dailyGoal, stakeLevel } from '../../game/rewards';
 import { claimableTopics, collectionProgress } from '../../game/fieldNotes';
 import {
@@ -146,6 +146,8 @@ export function HomeScreen() {
   // Ein fertiger Satz wartet auf Abholung — das gehoert dorthin, wo man hinsieht
   const noteSetsReady = claimableTopics(fieldNotes, claimedNoteSets).length;
   const stake = stakeLevel(streak.current, goal.done, streak.freezeTokens);
+  // Was heute mit der Serie passiert — dieselbe Regel, die sie auch fortschreibt
+  const outcome = streakOutcome(streak, today);
   const upcoming = nextUnlock(campaign.completed, xp);
   const nearBadges = nearestAchievements({ stats, xp, stars, streak }, achievements, 3);
 
@@ -306,6 +308,7 @@ export function HomeScreen() {
                 goal={goal}
                 streak={streak.current}
                 freezeTokens={streak.freezeTokens}
+                outcome={outcome}
               />
             </div>
 
